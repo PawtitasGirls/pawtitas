@@ -101,6 +101,9 @@ export default function PrestadorServicioPerfilForm({ formData, handleInputChang
           error={errors.ubicacion}
           required={true}
         />
+        <Text style={styles.ubicacionHint}>
+          Indicá calle, altura y localidad para que podamos ubicarte mejor en el mapa.
+        </Text>
       </View>
 
       <View style={styles.section}>

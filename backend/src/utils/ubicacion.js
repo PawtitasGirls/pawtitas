@@ -19,12 +19,22 @@ function descomponerUbicacion(ubicacionRaw) {
   let ciudad = ciudadParte || 'Pendiente';
 
   if (calleNumeroParte) {
-    const match = calleNumeroParte.match(/^(.+?)\s+(\d+[A-Za-z0-9\-]*)$/);
+    const snSuffix = /\s+S\/N$/i;
+    const parteSinSN = snSuffix.test(calleNumeroParte)
+      ? calleNumeroParte.replace(snSuffix, '').trim()
+      : calleNumeroParte;
+    const esSoloSN = /^S\/N$/i.test(parteSinSN);
+
+    const match = parteSinSN.match(/^(.+?)\s+(\d+[A-Za-z0-9\-]*)$/);
     if (match) {
       calle = match[1].trim();
       numero = match[2].trim();
+    } else if (esSoloSN) {
+      calle = 'Pendiente';
+      numero = 'S/N';
     } else {
-      calle = calleNumeroParte;
+      calle = parteSinSN;
+      if (snSuffix.test(calleNumeroParte)) numero = 'S/N';
     }
   }
 
