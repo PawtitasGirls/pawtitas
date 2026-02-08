@@ -89,6 +89,7 @@ async function getPerfilController(req, res) {
       const prestador = await prestadorRepo.findByUsuarioId(usuario.id);
       const servicio = prestador?.prestadorservicio?.[0]?.servicio || null;
       
+      if (prestador?.id != null) userData.prestadorId = String(prestador.id);
       if (servicio?.descripcion) userData.descripcion = servicio.descripcion;
       if (prestador?.perfil) userData.perfil = prestador.perfil;
       if (servicio?.tipoMascota) userData.tipoMascota = servicio.tipoMascota;
