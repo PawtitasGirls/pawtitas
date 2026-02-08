@@ -7,8 +7,8 @@ import MenuInferior from '../../components/MenuInferior/MenuInferior';
 import BarraBuscador from '../../components/BarraBuscador/BarraBuscador';
 import Filtros from '../../components/Filtros/Filtros';
 import ResenaFormModal from '../../components/ResenaFormModal/ResenaFormModal';
-import PrestadorServiciosCard from '../../components/PrestadorServiciosCard/PrestadorServiciosCard';
-import PrestadorServiciosDetails from '../../components/PrestadorServiciosDetails/PrestadorServiciosDetails';
+import ConexionCard from '../../components/ConexionCard/ConexionCard';
+import ConexionDetalles from '../../components/ConexionDetalles/ConexionDetalles';
 import ConfirmacionDialogo from '../../components/ConfirmacionDialogo';
 import CalendarioPagoModal from '../../components/CalendarioPagoModal';
 import Paginador from '../../components/Paginador';
@@ -117,7 +117,7 @@ const MisConexiones = () => {
         contentContainerStyle={styles.usersList}
       >
         {providersActuales.map((provider) => (
-          <PrestadorServiciosCard
+          <ConexionCard
             key={provider.id}
             provider={provider}
             providerType={getProviderType(provider.tipo)}
@@ -133,7 +133,7 @@ const MisConexiones = () => {
       </ScrollView>
       )}
       
-      <PrestadorServiciosDetails
+      <ConexionDetalles
         visible={state.showDetalles}
         provider={state.selectedProvider}
         providerType={state.selectedProvider ? getProviderType(state.selectedProvider.tipo) : ''}
