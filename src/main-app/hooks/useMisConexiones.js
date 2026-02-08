@@ -1,18 +1,119 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import { MisConexionesController } from '../controller';
-import { ESTADOS_CONEXION } from '../constants/estadosConexion';
-import { useLocation } from '../contexts';
+import { ESTADOS_CONEXION, mapReservaEstadoToConexion } from '../constants/estadosConexion';
+import { useLocation, useAuth } from '../contexts';
+import { ROLES } from '../constants/roles';
+import { getReservasByDuenio, getReservasByPrestador } from '../services';
 
 export const useMisConexiones = () => {
   const { userLocation, getDistanceFromUser } = useLocation();
+  const { user, role } = useAuth();
   
-  // Estados
   const [state, setState] = useState(() => ({
     ...MisConexionesController.getInitialState(),
     showCalendarioModal: false,
     selectedDates: []
   }));
-  const [providers, setProviders] = useState(() => MisConexionesController.getMockProviders());
+  const [providers, setProviders] = useState([]);
+  const [loadingConexiones, setLoadingConexiones] = useState(true);
+
+  const isPrestadorView = role === ROLES.PRESTADOR;
+  const duenioId = user?.duenioId || (role === ROLES.DUENIO ? user?.id : null);
+  const prestadorId = user?.prestadorId || (role === ROLES.PRESTADOR ? user?.id : null);
+
+  useEffect(() => {
+    if (!user) {
+      setProviders([]);
+      setLoadingConexiones(false);
+      return;
+    }
+    let cancelled = false;
+    setLoadingConexiones(true);
+    const load = async () => {
+      try {
+        if (role === ROLES.DUENIO && duenioId) {
+          const res = await getReservasByDuenio(duenioId);
+          const reservas = res?.reservas || [];
+          const list = reservas.map((r) => {
+            const p = r.prestador || {};
+            const serv = p.servicio || {};
+            const dom = p.domicilio || {};
+            const mascotaRaw = r.mascota;
+            const estadoConexion = mapReservaEstadoToConexion(r.estado);
+            const mascota = mascotaRaw
+              ? { nombre: mascotaRaw.nombre ?? '', tipo: mascotaRaw.tipo ?? '', raza: mascotaRaw.raza ?? '' }
+              : null;
+            return {
+              id: r.id,
+              reservaId: r.id,
+              nombre: p.nombreCompleto || 'Sin nombre',
+              descripcion: serv.descripcion || 'Sin descripción',
+              precio: serv.precio != null ? `$${Number(serv.precio).toLocaleString('es-AR')}` : 'A convenir',
+              ubicacion: dom.ubicacion || 'No especificado',
+              disponibilidad: serv.horarios || 'A convenir',
+              horario: serv.duracion || 'A convenir',
+              latitude: dom.latitude ?? null,
+              longitude: dom.longitude ?? null,
+              tipo: p.perfil || '',
+              estado: estadoConexion,
+              rating: 0,
+              mascota,
+            };
+          });
+          if (!cancelled) setProviders(list);
+        } else if (role === ROLES.PRESTADOR && prestadorId) {
+          const res = await getReservasByPrestador(prestadorId);
+          const reservas = res?.reservas || [];
+          const list = reservas.map((r) => {
+            const d = r.duenio || {};
+            const dom = d.domicilio || {};
+            const mascotaRaw = r.mascota || {};
+            const estadoConexion = mapReservaEstadoToConexion(r.estado);
+            const descripcionDuenio = d.descripcion || d.comentarios || '';
+            const mascota = {
+              nombre: mascotaRaw.nombre || null,
+              tipo: mascotaRaw.tipo || null,
+              edad: mascotaRaw.edad != null ? mascotaRaw.edad : null,
+              edadUnidad: mascotaRaw.edadUnidad || null,
+              raza: mascotaRaw.raza || null,
+              infoAdicional: mascotaRaw.infoAdicional || null,
+              condiciones: mascotaRaw.condiciones || null,
+            };
+            const tieneDatosMascota = Object.values(mascota).some(v => v != null && v !== '');
+            const descripcion = descripcionDuenio
+              ? (tieneDatosMascota ? `${descripcionDuenio.slice(0, 80)}${descripcionDuenio.length > 80 ? '…' : ''} · Mascota: ${mascota.nombre || '—'}` : descripcionDuenio)
+              : (tieneDatosMascota ? `Mascota: ${mascota.nombre || '—'}${mascota.tipo ? ` (${mascota.tipo})` : ''}` : 'Sin descripción');
+            return {
+              id: r.id,
+              reservaId: r.id,
+              nombre: d.nombreCompleto || 'Sin nombre',
+              descripcion,
+              descripcionDuenio: descripcionDuenio || null,
+              mascota: tieneDatosMascota ? mascota : null,
+              precio: '',
+              ubicacion: dom.ubicacion || 'No especificado',
+              disponibilidad: '',
+              horario: '',
+              latitude: dom.latitude ?? null,
+              longitude: dom.longitude ?? null,
+              tipo: 'dueño',
+              estado: estadoConexion,
+              rating: 0,
+            };
+          });
+          if (!cancelled) setProviders(list);
+        } else {
+          if (!cancelled) setProviders([]);
+        }
+      } catch (err) {
+        if (!cancelled) setProviders([]);
+      } finally {
+        if (!cancelled) setLoadingConexiones(false);
+      }
+    };
+    load();
+    return () => { cancelled = true; };
+  }, [user, role, duenioId, prestadorId]);
 
   // Filtrar proveedores y agregar distancias
   const filteredProviders = useMemo(() => {
@@ -200,11 +301,10 @@ export const useMisConexiones = () => {
   }, [handleCloseDetalles]);
 
   return {
-    // Estados
     state,
     providers: filteredProviders,
-    
-    // Búsqueda y filtros
+    loadingConexiones,
+    isPrestadorView,
     handleSearch,
     handleFilterChange,
     handleProviderPress,
@@ -223,12 +323,8 @@ export const useMisConexiones = () => {
     handleResenas,
     handleConectar,
     handleChat,
-    
-    // Tipo de proveedor y configuración de filtros
     getProviderType: MisConexionesController.getProviderType,
     filterOptions: MisConexionesController.getFilterOptions(),
-    
-    // Configuración de mensaje flotante
     mensajeFlotanteConfig: MisConexionesController.getMensajeFlotanteConfig()
   };
 };
