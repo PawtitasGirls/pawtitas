@@ -2,8 +2,7 @@ import { colors } from '../../../shared/styles';
 import { ESTADOS_CONEXION } from '../../constants/estadosConexion';
 
 export class PrestadorServiciosDetailsController {
-  // Configuración de menú
-  static getMenuItems(estado, misConexiones, actionHandlers) {
+  static getMenuItems(estado, misConexiones, actionHandlers, _esVistaPrestador) {
     if (misConexiones && estado === ESTADOS_CONEXION.PENDIENTE_DE_PAGO) {
       return [{
         text: 'Rechazar solicitud',
@@ -16,8 +15,8 @@ export class PrestadorServiciosDetailsController {
     return [];
   }
 
-  // Configuración de botones
-  static getButtonConfig(estado, misConexiones) {
+  // Configuración de botones. esVistaPrestador = true oculta "Realizar Pago".
+  static getButtonConfig(estado, misConexiones, esVistaPrestador = false) {
     if (misConexiones && estado === ESTADOS_CONEXION.PAGO_CONFIRMADO) {
       return {
         primary: { 
@@ -44,6 +43,17 @@ export class PrestadorServiciosDetailsController {
       };
     }
     
+    if (misConexiones && esVistaPrestador) {
+      return {
+        primary: { 
+          label: 'Chat', 
+          action: 'handleChat',
+          variant: 'primary'
+        },
+        secondary: null
+      };
+    }
+    
     return {
       primary: { 
         label: misConexiones ? "Realizar Pago" : "Conectar", 
@@ -58,17 +68,17 @@ export class PrestadorServiciosDetailsController {
     };
   }
 
-  // Texto del tipo de proveedor
+  // Texto del tipo de proveedor, o dueño en vista prestador
   static getProviderTypeText(providerType) {
     switch(providerType) {
       case 'cuidador': return 'cuidador';
       case 'paseador': return 'paseador';
       case 'veterinario': return 'veterinario';
+      case 'dueño': return 'dueño';
       default: return 'prestador de servicio';
     }
   }
 
-  // Configuración de estrellas
   static getRatingStars(rating) {
     const maxStars = 5;
     return Array.from({ length: maxStars }, (_, i) => ({
@@ -77,7 +87,6 @@ export class PrestadorServiciosDetailsController {
     }));
   }
 
-  // Obtener props
   static getModalProps(visible, onClose, scrollViewRef) {
     return {
       isVisible: visible,
@@ -102,7 +111,6 @@ export class PrestadorServiciosDetailsController {
     };
   }
 
-  // Configuración de secciones
   static getSectionConfig(misConexiones) {
     return {
       showSteps: !misConexiones,
@@ -110,15 +118,14 @@ export class PrestadorServiciosDetailsController {
       warningTitle: 'A tener en cuenta:',
       warningIcon: '💬',
       warningItems: [
-        'Tu pago será procesado con Mercado Pago de manera segura.',
-        'Al completar el pago, tu solicitud pasará a estado "Confirmado" y el servicio quedará validado.',
-        'El pago se libera al prestador únicamente cuando ambas partes (vos y el prestador) marquen el servicio como "Finalizado".',
-        'Si tenés dudas o querés coordinar algo, podés comunicarte con el prestador a través del chat cuando el estado esté "Pendiente" o "Confirmado".'
+        'El pago será procesado con Mercado Pago de manera segura.',
+        'Al completar el pago, la solicitud pasará a estado "Confirmado" y el servicio quedará validado.',
+        'El pago se libera al prestador únicamente cuando ambas partes (el cliente y el prestador) marquen el servicio como "Finalizado".',
+        'Si tenés dudas o querés coordinar algo, podés comunicarte con el usuario a través del chat cuando el estado esté "Pendiente" o "Confirmado".'
       ]
     };
   }
 
-  // Pasos a seguir
   static getSteps() {
     return [
       { number: '1', text: 'Enviá tu solicitud de conexión al prestador.' },
@@ -128,12 +135,10 @@ export class PrestadorServiciosDetailsController {
     ];
   }
 
-  // Validar proveedor
   static validateProvider(provider) {
     return provider && provider.id;
   }
 
-  // Obtener información del proveedor
   static getProviderInfo(provider) {
     if (!this.validateProvider(provider)) {
       return null;
@@ -147,6 +152,9 @@ export class PrestadorServiciosDetailsController {
       horario: provider.horario || '',
       disponibilidad: provider.disponibilidad || '',
       descripcion: provider.descripcion || '',
+      descripcionDuenio: provider.descripcionDuenio ?? null,
+      mascota: provider.mascota ?? null,
+      mascotas: Array.isArray(provider.mascotas) && provider.mascotas.length > 0 ? provider.mascotas : null,
       estado: provider.estado || '',
       rating: provider.rating || 0,
       tipo: provider.tipo || '',
