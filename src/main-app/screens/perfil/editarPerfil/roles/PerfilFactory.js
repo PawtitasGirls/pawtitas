@@ -43,6 +43,7 @@ export default class PerfilFactory {
           ubicacion: "",
           precio: "",
           duracion: "",
+          perfilRegistrado: "",
           services: {
             cuidador: false,
             paseador: false,
@@ -119,9 +120,9 @@ export default class PerfilFactory {
             errors.duracion = "La duración es requerida";
           }
 
-          const hasService = Object.values(formData.services || {}).some(value => value === true);
-          if (!hasService) {
-            errors.services = "Debes seleccionar al menos un tipo de servicio";
+          const hasPerfil = formData.perfilRegistrado?.trim();
+          if (!hasPerfil) {
+            errors.services = "No se encontró tu perfil de servicio";
           }
 
           if (formData.serviceActive === true) {

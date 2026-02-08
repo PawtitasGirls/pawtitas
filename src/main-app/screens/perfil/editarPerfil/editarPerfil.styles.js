@@ -154,7 +154,18 @@ export const styles = StyleSheet.create({
     color: colors.error,
     marginTop: 4,
     marginBottom: 8,
-  }
+  },
+  perfilRegistradoLabel: {
+    ...typography.styles.bodyMedium,
+    color: colors.text.primary,
+    marginBottom: 4,
+  },
+  perfilRegistradoHint: {
+    ...typography.styles.caption,
+    color: colors.text.secondary,
+    fontStyle: "italic",
+    marginTop: 4,
+  },
 });
 
 export default styles;
