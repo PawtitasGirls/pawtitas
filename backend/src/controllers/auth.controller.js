@@ -64,6 +64,9 @@ async function loginController(req, res) {
 
     if (usuario.rol === 'DUENIO' && usuario.duenio) {
       userData.duenioId = usuario.duenio.id?.toString?.() || usuario.duenio.id;
+      if (usuario.duenio.comentarios) {
+        userData.descripcion = usuario.duenio.comentarios;
+      }
       
       // Contar las mascotas del dueño
       const mascotas = await mascotaRepo.findByDuenioId(usuario.duenio.id);
