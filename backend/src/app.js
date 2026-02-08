@@ -8,6 +8,7 @@ const contactoRoutes = require('./routes/contacto.routes');
 const overpassRoutes = require('./routes/overpass.routes');
 const healthRoutes = require('./routes/health.routes');
 const mascotaRoutes = require('./routes/mascota.routes');
+const reservaRoutes = require('./routes/reserva.routes');
 
 const app = express();
 
@@ -21,5 +22,6 @@ app.use(contactoRoutes);
 app.use(overpassRoutes);
 app.use(healthRoutes);
 app.use(mascotaRoutes);
+app.use(reservaRoutes);
 
 module.exports = app;
