@@ -8,7 +8,6 @@ const mascotaRepo = require('../repositories/mascota.repo');
 const { splitNombreApellido } = require('../utils/strings');
 const { descomponerUbicacion } = require('../utils/ubicacion');
 const {
-  buildPerfilFromServices,
   buildHorariosFromAvailability,
   buildTipoMascotaFromPetTypes,
 } = require('../utils/mappers');
@@ -258,21 +257,13 @@ async function updatePerfilController(req, res) {
       }
 
       if (normalizedRole === 'prestador') {
-        const perfilValue = buildPerfilFromServices(services);
         const horariosValue = buildHorariosFromAvailability(availability);
         const tipoMascotaValue = buildTipoMascotaFromPetTypes(petTypes, petTypesCustom);
 
         const prestador = await tx.prestador.upsert({
           where: { usuarioId: userId },
           update: {},
-          create: { usuarioId: userId, perfil: perfilValue || 'Pendiente' },
-        });
-
-        await tx.prestador.update({
-          where: { id: prestador.id },
-          data: {
-            perfil: perfilValue || null,
-          },
+          create: { usuarioId: userId, perfil: 'Pendiente' },
         });
 
         const existingLink = await tx.prestadorservicio.findFirst({
