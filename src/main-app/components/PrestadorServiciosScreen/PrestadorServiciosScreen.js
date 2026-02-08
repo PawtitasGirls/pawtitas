@@ -7,8 +7,8 @@ import ScreenHeader from '../ScreenHeader';
 import BarraBuscador from '../BarraBuscador/BarraBuscador';
 import Filtros from '../Filtros/Filtros';
 import MenuInferior from '../MenuInferior/MenuInferior';
-import PrestadorServiciosCard from '../PrestadorServiciosCard';
-import PrestadorServiciosDetails from '../PrestadorServiciosDetails';
+import ConexionCard from '../ConexionCard';
+import ConexionDetalles from '../ConexionDetalles';
 import Paginador from '../Paginador';
 import { useLocation, useAuth } from '../../contexts';
 import { usePaginacion } from '../../hooks/usePaginacion';
@@ -321,7 +321,7 @@ const PrestadorServiciosScreen = ({
         ) : (
           <>
             {itemsActuales.map((provider) => (
-              <PrestadorServiciosCard
+              <ConexionCard
                 key={provider.id}
                 provider={provider}
                 providerType={providerType}
@@ -339,7 +339,7 @@ const PrestadorServiciosScreen = ({
       
       <MenuInferior />
 
-      <PrestadorServiciosDetails
+      <ConexionDetalles
         visible={showDetalles}
         provider={selectedProvider}
         providerType={providerType}

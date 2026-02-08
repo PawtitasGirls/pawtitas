@@ -1,13 +1,13 @@
 import { useRef, useMemo } from 'react';
-import { PrestadorServiciosDetailsController } from '../controller';
+import { ConexionDetallesController } from '../controller';
 
-export const usePrestadorServiciosDetails = (provider, misConexiones, onClose, esVistaPrestador = false) => {
+export const useConexionDetalles = (provider, misConexiones, onClose, esVistaPrestador = false) => {
   const scrollViewRef = useRef(null);
   
-  const isValidProvider = PrestadorServiciosDetailsController.validateProvider(provider);
+  const isValidProvider = ConexionDetallesController.validateProvider(provider);
   
   const providerInfo = useMemo(() => 
-    PrestadorServiciosDetailsController.getProviderInfo(provider),
+    ConexionDetallesController.getProviderInfo(provider),
     [provider]
   );
 
@@ -22,40 +22,40 @@ export const usePrestadorServiciosDetails = (provider, misConexiones, onClose, e
   });
 
   const getMenuItems = (actionHandlers) => 
-    PrestadorServiciosDetailsController.getMenuItems(provider?.estado, misConexiones, actionHandlers);
+    ConexionDetallesController.getMenuItems(provider?.estado, misConexiones, actionHandlers);
 
   const buttonConfig = useMemo(() => 
-    PrestadorServiciosDetailsController.getButtonConfig(provider?.estado, misConexiones, esVistaPrestador),
+    ConexionDetallesController.getButtonConfig(provider?.estado, misConexiones, esVistaPrestador),
     [provider?.estado, misConexiones, esVistaPrestador]
   );
 
   // Configuración de estrellas
   const ratingStars = useMemo(() => 
-    PrestadorServiciosDetailsController.getRatingStars(provider?.rating || 0),
+    ConexionDetallesController.getRatingStars(provider?.rating || 0),
     [provider?.rating]
   );
 
   // Props del modal
   const modalProps = useMemo(() => 
-    PrestadorServiciosDetailsController.getModalProps(true, onClose, scrollViewRef),
+    ConexionDetallesController.getModalProps(true, onClose, scrollViewRef),
     [onClose]
   );
 
   // Texto del tipo de proveedor
   const providerTypeText = useMemo(() => 
-    PrestadorServiciosDetailsController.getProviderTypeText(provider?.tipo),
+    ConexionDetallesController.getProviderTypeText(provider?.tipo),
     [provider?.tipo]
   );
 
   // Configuración de secciones
   const sectionConfig = useMemo(() => 
-    PrestadorServiciosDetailsController.getSectionConfig(misConexiones),
+    ConexionDetallesController.getSectionConfig(misConexiones),
     [misConexiones]
   );
 
   // Pasos a seguir
   const steps = useMemo(() => 
-    PrestadorServiciosDetailsController.getSteps(),
+    ConexionDetallesController.getSteps(),
     []
   );
 

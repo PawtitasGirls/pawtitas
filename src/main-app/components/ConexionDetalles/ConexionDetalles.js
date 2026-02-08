@@ -11,11 +11,11 @@ import { colors } from '../../../shared/styles';
 import GuardarCancelarBtn from '../buttons/GuardarCancelarBtn';
 import EstadosChip from '../EstadosChip';
 import MenuActions from '../MenuActions';
-import { usePrestadorServiciosDetails } from '../../hooks/usePrestadorServiciosDetails';
+import { useConexionDetalles } from '../../hooks/useConexionDetalles';
 import { useLocation } from '../../contexts';
-import { styles } from './PrestadorServiciosDetails.styles';
+import { styles } from './ConexionDetalles.styles';
 
-const PrestadorServiciosDetails = ({ 
+const ConexionDetalles = ({ 
   provider, 
   onClose,
   onResenas,
@@ -43,7 +43,7 @@ const PrestadorServiciosDetails = ({
     steps,
     createActionHandlers,
     getMenuItems
-  } = usePrestadorServiciosDetails(provider, misConexiones, onClose, esVistaPrestador);
+  } = useConexionDetalles(provider, misConexiones, onClose, esVistaPrestador);
 
   const actionHandlers = createActionHandlers({
     onResenas,
@@ -291,4 +291,4 @@ const MascotaBlock = ({ mascota }) => {
   );
 };
 
-export default PrestadorServiciosDetails;
+export default ConexionDetalles;

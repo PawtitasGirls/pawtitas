@@ -1,7 +1,7 @@
 import { colors } from '../../../shared/styles';
 import { ESTADOS_CONEXION } from '../../constants/estadosConexion';
 
-export class PrestadorServiciosDetailsController {
+export class ConexionDetallesController {
   static getMenuItems(estado, misConexiones, actionHandlers, _esVistaPrestador) {
     if (misConexiones && estado === ESTADOS_CONEXION.PENDIENTE_DE_PAGO) {
       return [{

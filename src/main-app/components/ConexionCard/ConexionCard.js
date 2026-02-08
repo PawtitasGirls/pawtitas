@@ -4,10 +4,10 @@ import { Ionicons } from '@expo/vector-icons';
 import { colors } from '../../../shared/styles';
 import EstadosChip from '../EstadosChip';
 import { useLocation } from '../../contexts';
-import { styles } from './PrestadorServiciosCard.styles';
+import { styles } from './ConexionCard.styles';
 
-// Componente reutilizable para mostrar una tarjeta de prestador de servicio (cuidador, paseador o veterinario)
-const PrestadorServiciosCard = ({ provider, onPress, providerType, misConexiones = false }) => {
+// Componente reutilizable para mostrar una tarjeta de prestador de servicio (cuidador, paseador o veterinario) o dueño
+const ConexionCard = ({ provider, onPress, providerType, misConexiones = false }) => {
   const { formatDistance } = useLocation();
   
   const { 
@@ -142,4 +142,4 @@ const PrestadorServiciosCard = ({ provider, onPress, providerType, misConexiones
   );
 };
 
-export default PrestadorServiciosCard;
+export default ConexionCard;
