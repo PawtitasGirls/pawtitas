@@ -1,19 +1,16 @@
 import { useRef, useMemo } from 'react';
 import { PrestadorServiciosDetailsController } from '../controller';
 
-export const usePrestadorServiciosDetails = (provider, misConexiones, onClose) => {
+export const usePrestadorServiciosDetails = (provider, misConexiones, onClose, esVistaPrestador = false) => {
   const scrollViewRef = useRef(null);
   
-  // Validar proveedor
   const isValidProvider = PrestadorServiciosDetailsController.validateProvider(provider);
   
-  // Información del proveedor
   const providerInfo = useMemo(() => 
     PrestadorServiciosDetailsController.getProviderInfo(provider),
     [provider]
   );
 
-  // Acciones
   const createActionHandlers = (handlers) => ({
     handleResenas: () => handlers.onResenas?.(provider),
     handleConectar: () => handlers.onConectar?.(provider),
@@ -24,14 +21,12 @@ export const usePrestadorServiciosDetails = (provider, misConexiones, onClose) =
     handleRechazar: () => handlers.onRechazar?.(provider),
   });
 
-  // Configuración del menú
   const getMenuItems = (actionHandlers) => 
     PrestadorServiciosDetailsController.getMenuItems(provider?.estado, misConexiones, actionHandlers);
 
-  // Configuración de botones
   const buttonConfig = useMemo(() => 
-    PrestadorServiciosDetailsController.getButtonConfig(provider?.estado, misConexiones),
-    [provider?.estado, misConexiones]
+    PrestadorServiciosDetailsController.getButtonConfig(provider?.estado, misConexiones, esVistaPrestador),
+    [provider?.estado, misConexiones, esVistaPrestador]
   );
 
   // Configuración de estrellas

@@ -76,6 +76,7 @@ async function loginController(req, res) {
     const servicio = prestador?.prestadorservicio?.[0]?.servicio;
 
     Object.assign(userData, {
+      prestadorId: prestador?.id != null ? String(prestador.id) : null,
       descripcion: servicio?.descripcion ?? userData.descripcion,
       perfil: prestador?.perfil ?? userData.perfil,
       tipoMascota: servicio?.tipoMascota ?? userData.tipoMascota,

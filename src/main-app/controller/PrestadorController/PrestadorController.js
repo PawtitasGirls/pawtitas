@@ -34,6 +34,7 @@ export class PrestadorController {
 
     return {
       id: id?.toString() || '',
+      servicioId: servicio?.id?.toString?.() || servicio?.id || '',
       nombre: nombreCompleto || 'Sin nombre',
       rating: 0, // TODO: Implementar sistema de ratings
       descripcion: servicio?.descripcion || 'Sin descripción',
