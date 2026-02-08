@@ -26,7 +26,6 @@ export const styles = StyleSheet.create({
     paddingVertical: 20,
     paddingBottom: 60,
   },
-  // Estilos para el estado de carga
   loadingContainer: {
     flex: 1,
     justifyContent: "center",
@@ -38,7 +37,6 @@ export const styles = StyleSheet.create({
     color: colors.text.secondary,
     marginTop: 16,
   },
-  // Estilos para información importante
   additionalInfoContainer: {
     backgroundColor: colors.surfaceVariant,
     borderRadius: 16,
@@ -90,8 +88,7 @@ export const styles = StyleSheet.create({
     color: colors.text.secondary,
     lineHeight: 22,
     flex: 1,
-  },
-  // Estilos para componentes de roles específicos
+    },
   checkboxGroup: {
     marginTop: 8,
     marginBottom: 16,
@@ -165,6 +162,12 @@ export const styles = StyleSheet.create({
     color: colors.text.secondary,
     fontStyle: "italic",
     marginTop: 4,
+  },
+  ubicacionHint: {
+    ...typography.styles.caption,
+    color: colors.text.secondary,
+    marginBottom: 4,
+    fontStyle: "italic",
   },
 });
 
