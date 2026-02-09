@@ -12,6 +12,7 @@ const baseConfig = {
   orientation: "portrait",
   icon: "./assets/icon.png",
   userInterfaceStyle: "light",
+  scheme: "pawtitas",
   splash: {
     backgroundColor: "#ffffff",
     resizeMode: "contain"
@@ -47,6 +48,10 @@ const appConfigs = {
   app: {
     name: "Pawtitas",
     slug: "pawtitas-app",
+    ios: {
+      ...baseConfig.ios,
+      bundleIdentifier: "com.pawtitas.app",
+    },
     android: {
       package: "com.pawtitas.app",
       adaptiveIcon: {
@@ -60,7 +65,19 @@ const appConfigs = {
         "ACCESS_FINE_LOCATION",
         "INTERNET"
       ],
-      usesCleartextTraffic: true
+      usesCleartextTraffic: true,
+      intentFilters: [
+        {
+          action: "VIEW",
+          autoVerify: true,
+          data: [
+            { scheme: "pawtitas", host: "payment", pathPrefix: "/success" },
+            { scheme: "pawtitas", host: "payment", pathPrefix: "/failure" },
+            { scheme: "pawtitas", host: "payment", pathPrefix: "/pending" }
+          ],
+          category: ["BROWSABLE", "DEFAULT"]
+        }
+      ]
     }
   },
   landing: {

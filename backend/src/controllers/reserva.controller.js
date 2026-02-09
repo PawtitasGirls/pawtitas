@@ -91,8 +91,12 @@ async function createReservaController(req, res) {
 
     const precioUnitario = servicio.precio != null ? servicio.precio : new Prisma.Decimal(0);
     const cantidad = 1;
-    const montoTotal = Prisma.Decimal.mul(precioUnitario, cantidad);
-    const comision = new Prisma.Decimal(0);
+    const subtotal = Prisma.Decimal.mul(precioUnitario, cantidad);
+    const porcentajeComision = parseFloat(process.env.COMISION_PORCENTAJE || '10');
+    const comision = porcentajeComision > 0
+      ? Prisma.Decimal.div(Prisma.Decimal.mul(subtotal, porcentajeComision), 100)
+      : new Prisma.Decimal(0);
+    const montoTotal = Prisma.Decimal.add(subtotal, comision);
     const fechaServicioDate = fechaServicio
       ? new Date(fechaServicio)
       : new Date(Date.now() + 24 * 60 * 60 * 1000);
