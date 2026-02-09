@@ -5,4 +5,5 @@ export * from './osmService';
 export * from './api/apiUsuario';
 export * from './api/apiMascota';
 export * from './api/apiReserva';
+export * from './api/apiMercadoPago';
 export * from './registroService';
