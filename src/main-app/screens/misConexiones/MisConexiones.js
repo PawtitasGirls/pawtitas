@@ -11,13 +11,13 @@ import ConexionCard from '../../components/ConexionCard/ConexionCard';
 import ConexionDetalles from '../../components/ConexionDetalles/ConexionDetalles';
 import ConfirmacionDialogo from '../../components/ConfirmacionDialogo';
 import CalendarioPagoModal from '../../components/CalendarioPagoModal';
+import MercadoPagoWebView from '../../components/MercadoPagoWebView';
 import Paginador from '../../components/Paginador';
 import { MensajeFlotante } from '../../components';
 import { useMisConexiones } from '../../hooks/useMisConexiones';
 import { usePaginacion } from '../../hooks/usePaginacion';
 import { styles } from './MisConexiones.styles';
 
-// Pantalla de Mis Conexiones
 const MisConexiones = () => {
   const navigation = useNavigation();
   const {
@@ -32,6 +32,9 @@ const MisConexiones = () => {
     handlePago,
     handleConfirmarPago,
     handleCancelarCalendario,
+    handlePaymentSuccess,
+    handlePaymentFailure,
+    handleClosePaymentWebView,
     handleFinalizarServicio,
     handleRechazar,
     handleConfirmarRechazo,
@@ -156,7 +159,6 @@ const MisConexiones = () => {
         onClose={handleCloseResenaModal}
       />
 
-      {/* Modal de Calendario para Pago */}
       <CalendarioPagoModal
         visible={state.showCalendarioModal}
         providerName={state.selectedProvider?.nombre}
@@ -164,7 +166,12 @@ const MisConexiones = () => {
         onConfirm={handleConfirmarPago}
       />
 
-      {/* Confirmación para rechazar */}
+      <MercadoPagoWebView
+        visible={state.showPaymentWebView}
+        paymentUrl={state.paymentUrl}
+        onClose={handleClosePaymentWebView}
+      />
+
       <ConfirmacionDialogo
         visible={state.showRechazarModal}
         title="Rechazar solicitud"
@@ -176,7 +183,6 @@ const MisConexiones = () => {
         type="danger"
       />
 
-      {/* Mensaje flotante */}
       <MensajeFlotante
         visible={state.showMensajeFlotante}
         message={state.mensajeFlotante.text}
@@ -185,7 +191,6 @@ const MisConexiones = () => {
         duration={mensajeFlotanteConfig.duration}
       />
 
-      {/* Navegación inferior */}
       <MenuInferior />
     </SafeAreaView>
   );

@@ -1,12 +1,12 @@
 import { useRef, useMemo } from 'react';
 import { ConexionDetallesController } from '../controller';
 
-export const useConexionDetalles = (provider, misConexiones, onClose, esVistaPrestador = false) => {
+export const useConexionDetalles = (provider, misConexiones, visible = true, onClose, esVistaPrestador = false, onModalHide) => {
   const scrollViewRef = useRef(null);
-  
+
   const isValidProvider = ConexionDetallesController.validateProvider(provider);
-  
-  const providerInfo = useMemo(() => 
+
+  const providerInfo = useMemo(() =>
     ConexionDetallesController.getProviderInfo(provider),
     [provider]
   );
@@ -21,61 +21,49 @@ export const useConexionDetalles = (provider, misConexiones, onClose, esVistaPre
     handleRechazar: () => handlers.onRechazar?.(provider),
   });
 
-  const getMenuItems = (actionHandlers) => 
+  const getMenuItems = (actionHandlers) =>
     ConexionDetallesController.getMenuItems(provider?.estado, misConexiones, actionHandlers);
 
-  const buttonConfig = useMemo(() => 
+  const buttonConfig = useMemo(() =>
     ConexionDetallesController.getButtonConfig(provider?.estado, misConexiones, esVistaPrestador),
     [provider?.estado, misConexiones, esVistaPrestador]
   );
 
-  // Configuración de estrellas
-  const ratingStars = useMemo(() => 
+  const ratingStars = useMemo(() =>
     ConexionDetallesController.getRatingStars(provider?.rating || 0),
     [provider?.rating]
   );
 
-  // Props del modal
-  const modalProps = useMemo(() => 
-    ConexionDetallesController.getModalProps(true, onClose, scrollViewRef),
-    [onClose]
+  const modalProps = useMemo(() =>
+    ConexionDetallesController.getModalProps(visible, onClose, scrollViewRef, onModalHide),
+    [visible, onClose, onModalHide]
   );
 
-  // Texto del tipo de proveedor
   const providerTypeText = useMemo(() => 
     ConexionDetallesController.getProviderTypeText(provider?.tipo),
     [provider?.tipo]
   );
 
-  // Configuración de secciones
   const sectionConfig = useMemo(() => 
     ConexionDetallesController.getSectionConfig(misConexiones),
     [misConexiones]
   );
 
-  // Pasos a seguir
   const steps = useMemo(() => 
     ConexionDetallesController.getSteps(),
     []
   );
 
   return {
-    // Referencias
     scrollViewRef,
-    
-    // Data
     providerInfo,
     isValidProvider,
-    
-    // Configuraciones
     buttonConfig,
     ratingStars,
     modalProps,
     providerTypeText,
     sectionConfig,
     steps,
-    
-    // Utils
     createActionHandlers,
     getMenuItems
   };
