@@ -15,12 +15,14 @@ import { useConexionDetalles } from '../../hooks/useConexionDetalles';
 import { useLocation } from '../../contexts';
 import { styles } from './ConexionDetalles.styles';
 
-const ConexionDetalles = ({ 
-  provider, 
+const ConexionDetalles = ({
+  provider,
+  visible = true,
   onClose,
+  onModalHide,
   onResenas,
   onConectar,
-  misConexiones = false, 
+  misConexiones = false,
   esVistaPrestador = false,
   onChat,
   onPago,
@@ -30,7 +32,6 @@ const ConexionDetalles = ({
   loadingPrimary = false,
 }) => {
   const { formatDistance } = useLocation();
-  
   const {
     scrollViewRef,
     providerInfo,
@@ -43,7 +44,7 @@ const ConexionDetalles = ({
     steps,
     createActionHandlers,
     getMenuItems
-  } = useConexionDetalles(provider, misConexiones, onClose, esVistaPrestador);
+  } = useConexionDetalles(provider, misConexiones, visible, onClose, esVistaPrestador, onModalHide);
 
   const actionHandlers = createActionHandlers({
     onResenas,

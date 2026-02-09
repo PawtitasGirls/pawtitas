@@ -87,12 +87,13 @@ export class ConexionDetallesController {
     }));
   }
 
-  static getModalProps(visible, onClose, scrollViewRef) {
+  static getModalProps(visible, onClose, scrollViewRef, onModalHide) {
     return {
       isVisible: visible,
       onBackdropPress: onClose,
       onBackButtonPress: onClose,
       onSwipeComplete: onClose,
+      onModalHide,
       swipeDirection: ['down'],
       style: 'modalContainer',
       propagateSwipe: true,
@@ -100,7 +101,6 @@ export class ConexionDetallesController {
       backdropTransitionOutTiming: 0,
       useNativeDriverForBackdrop: true,
       avoidKeyboard: true,
-      // Animaciones
       animationIn: 'slideInUp',
       animationOut: 'slideOutDown',
       animationInTiming: 300,
