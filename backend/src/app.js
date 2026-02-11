@@ -7,6 +7,7 @@ const adminRoutes = require('./routes/admin.routes');
 const contactoRoutes = require('./routes/contacto.routes');
 const overpassRoutes = require('./routes/overpass.routes');
 const healthRoutes = require('./routes/health.routes');
+const testRoutes = require('./routes/test.routes');
 
 const app = express();
 
@@ -19,5 +20,10 @@ app.use(adminRoutes);
 app.use(contactoRoutes);
 app.use(overpassRoutes);
 app.use(healthRoutes);
+app.use(testRoutes);
 
 module.exports = app;
+
+
+
+
