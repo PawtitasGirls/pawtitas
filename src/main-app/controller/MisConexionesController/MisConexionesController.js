@@ -1,4 +1,3 @@
-// Configuración de conexiones
 export const CONEXIONES_CONFIG = {
   FLOATING_MESSAGE_DURATION: 4000,
   SEARCH_DEBOUNCE_DELAY: 300,
@@ -11,7 +10,6 @@ export const CONEXIONES_CONFIG = {
 };
 
 export class MisConexionesController {
-  // Obtener datos iniciales
   static getInitialState() {
     return {
       searchQuery: '',
@@ -26,72 +24,6 @@ export class MisConexionesController {
     };
   }
 
-  // Proveedores de ejemplo. Implementar API. 
-  static getMockProviders() {
-    return [
-      {
-        id: '1',
-        nombre: 'Juan Perez',
-        rating: 5,
-        descripcion: 'Cuidador profesional con 5 años de experiencia en cuidado de mascotas.',
-        precio: '$30.000',
-        ubicacion: 'Belgrano, CABA',
-        disponibilidad: 'Lunes, Miércoles, Jueves',
-        horario: 'A convenir',
-        tipo: 'cuidador',
-        estado: 'confirmado',
-        // Coordenadas de Belgrano, CABA
-        latitude: -34.5628,
-        longitude: -58.4556,
-      },
-      {
-        id: '2',
-        nombre: 'Carlos Gómez',
-        rating: 5,
-        descripcion: 'Paseador profesional con 5 años de experiencia en paseo de perros de todas las razas.',
-        precio: '$25.000',
-        ubicacion: 'Belgrano, CABA',
-        disponibilidad: 'Lunes, Miércoles, Jueves',
-        horario: 'A convenir',
-        tipo: 'paseador',
-        estado: 'pendiente',
-        // Coordenadas de Belgrano, CABA
-        latitude: -34.5628,
-        longitude: -58.4556,
-      },
-      {
-        id: '3',
-        nombre: 'Clínica Veterinaria San Antonio',
-        rating: 5,
-        descripcion: 'Clínica veterinaria especializada en medicina interna y cirugía de pequeños animales.',
-        precio: '$35.000',
-        ubicacion: 'Palermo, CABA',
-        disponibilidad: 'Lunes a Viernes',
-        horario: '9:00 - 18:00',
-        tipo: 'veterinario',
-        estado: 'finalizado',
-        // Coordenadas de Palermo, CABA
-        latitude: -34.5889,
-        longitude: -58.4199,
-      },
-      {
-        id: '4',
-        nombre: 'Laura Fernández',
-        rating: 3,
-        descripcion: 'Paseadora con 2 años de experiencia. Especializada en perros pequeños y medianos.',
-        precio: '$18.000',
-        ubicacion: 'Palermo, CABA',
-        disponibilidad: 'Martes, Jueves, Viernes',
-        horario: '2-4 horas',
-        tipo: 'paseador',
-        estado: 'rechazado',
-        // Coordenadas de Palermo, CABA
-        latitude: -34.5889,
-        longitude: -58.4199,
-      },
-    ];
-  }
-
   // Remover tildes para búsqueda
   static normalizeText(text) {
     return text
@@ -100,11 +32,9 @@ export class MisConexionesController {
       .replace(/[\u0300-\u036f]/g, '');
   }
 
-  // Filtrar proveedores
   static filterProviders(providers, searchQuery, selectedFilter) {
     let filtered = providers;
 
-    // Filtrar por búsqueda
     if (searchQuery.trim()) {
       const normalizedQuery = this.normalizeText(searchQuery);
       filtered = filtered.filter(provider => 
@@ -114,7 +44,6 @@ export class MisConexionesController {
       );
     }
 
-    // Filtrar por tipo de proveedor
     if (selectedFilter !== 'todos') {
       filtered = filtered.filter(provider => 
         provider.tipo === selectedFilter
@@ -124,7 +53,7 @@ export class MisConexionesController {
     return filtered;
   }
 
-  // Obtener tipo de proveedor
+  // Obtener tipo de proveedor, o dueño cuando la vista es del prestador
   static getProviderType(tipo) {
     switch(tipo) {
       case 'cuidador':
@@ -133,13 +62,14 @@ export class MisConexionesController {
         return 'paseador';
       case 'veterinario':
         return 'veterinario';
+      case 'dueño':
+        return 'dueño';
       default:
         return 'prestador de servicio';
     }
   }
 
 
-  // Actualizar estado de proveedor
   static updateProviderState(providers, providerId, newState) {
     return providers.map(p => 
       p.id === providerId 
@@ -148,7 +78,6 @@ export class MisConexionesController {
     );
   }
 
-  // Obtener mensajes
   static getActionMessages(action) {
     const messages = {
       rechazar: {
@@ -163,12 +92,10 @@ export class MisConexionesController {
     return messages[action] || { type: '', text: '' };
   }
 
-  // Obtener configuración de filtros
   static getFilterOptions() {
     return CONEXIONES_CONFIG.FILTER_OPTIONS;
   }
 
-  // Obtener configuración de mensaje flotante
   static getMensajeFlotanteConfig() {
     return {
       duration: CONEXIONES_CONFIG.FLOATING_MESSAGE_DURATION

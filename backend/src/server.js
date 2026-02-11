@@ -1,5 +1,7 @@
 require('dotenv').config();
 
+BigInt.prototype.toJSON = function () { return this.toString(); };
+
 const app = require('./app');
 const prisma = require('./config/prisma');
 

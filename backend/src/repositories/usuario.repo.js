@@ -6,7 +6,7 @@ const prisma = require('../config/prisma');
 async function findByEmail(email) {
   return prisma.usuario.findUnique({
     where: { email },
-    include: { domicilio: true },
+    include: { domicilio: true, duenio: true, prestador: true },
   });
 }
 

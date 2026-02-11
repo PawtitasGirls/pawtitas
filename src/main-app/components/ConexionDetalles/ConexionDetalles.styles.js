@@ -88,6 +88,12 @@ export const styles = StyleSheet.create({
     color: '#f5a3c1ff',
     fontWeight: '600',
   },
+  reservaPara: {
+    ...typography.styles.body2,
+    fontSize: 13,
+    color: colors.text.secondary,
+    marginTop: 6,
+  },
   closeButton: {
     padding: 8,
     borderRadius: 20,
@@ -140,6 +146,54 @@ export const styles = StyleSheet.create({
     ...typography.styles.body,
     color: colors.text.secondary,
     lineHeight: 22,
+  },
+  mascotaList: {
+    gap: 12,
+  },
+  mascotaBlock: {
+    backgroundColor: colors.surfaceVariant,
+    borderRadius: 12,
+    padding: 14,
+    marginBottom: 4,
+  },
+  mascotaBlockHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+    paddingBottom: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border.light,
+  },
+  mascotaBlockEmoji: {
+    fontSize: 22,
+    marginRight: 10,
+  },
+  mascotaBlockTitle: {
+    ...typography.styles.bodyBold,
+    fontSize: 16,
+    color: colors.text.primary,
+    flex: 1,
+  },
+  mascotaBlockContent: {
+    paddingLeft: 2,
+  },
+  mascotaRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginBottom: 6,
+  },
+  mascotaLabel: {
+    ...typography.styles.bodyBold,
+    fontSize: 14,
+    color: colors.text.primary,
+    minWidth: 140,
+  },
+  mascotaValue: {
+    ...typography.styles.body,
+    fontSize: 14,
+    color: colors.text.secondary,
+    flex: 1,
+    lineHeight: 20,
   },
   stepItem: {
     flexDirection: 'row',

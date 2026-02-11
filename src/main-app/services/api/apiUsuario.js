@@ -18,7 +18,8 @@ export async function apiUsuario(path, options = {}) {
     headers.Authorization = `Bearer ${authToken}`;
   }
 
-  const response = await fetch(`${API_BASE}${path}`, {
+  const url = `${API_BASE}${path}`;
+  const response = await fetch(url, {
     headers,
     ...options,
   });
@@ -57,5 +58,16 @@ export async function updatePrestadorEstado(usuarioId, { estado, motivoRechazo }
     method: 'PATCH',
     body: JSON.stringify({ estado, motivoRechazo }),
   });
+}
+
+export async function getPrestadoresPorPerfil(perfil, ciudad = null) {
+  const params = new URLSearchParams();
+  if (perfil) params.append('perfil', perfil);
+  if (ciudad) params.append('ciudad', ciudad);
+  
+  const queryString = params.toString();
+  const url = `/api/prestadores${queryString ? `?${queryString}` : ''}`;
+  
+  return apiUsuario(url, { method: 'GET' });
 }
 

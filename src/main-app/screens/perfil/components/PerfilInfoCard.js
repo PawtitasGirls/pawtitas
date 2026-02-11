@@ -3,11 +3,11 @@ import { View, Text, TouchableOpacity, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { colors } from '../../../../shared/styles';
 import { styles } from './PerfilInfoCard.styles';
+import { ROLES } from '../../../constants/roles';
 
 // Mostrar la información del perfil del usuario
-// Implementar la llamada a la API
-export const PerfilInfoCard = ({ user, onEdit }) => {
-  // Función para renderizar las estrellas de calificación
+export const PerfilInfoCard = ({ user, onEdit, role }) => {
+  const isAdmin = role === ROLES.ADMIN;
   const renderStars = (rating) => {
     const stars = [];
     for (let i = 1; i <= 5; i++) {
@@ -43,25 +43,31 @@ export const PerfilInfoCard = ({ user, onEdit }) => {
         <View style={styles.header}>
           <View style={styles.nameContainer}>
             <Text style={styles.userName}>{user.name}</Text>
-            <View style={styles.ratingContainer}>
-              {renderStars(user.rating)}
-            </View>
+            {!isAdmin && (
+              <View style={styles.ratingContainer}>
+                {renderStars(user.rating)}
+              </View>
+            )}
           </View>
-          <TouchableOpacity 
-            style={styles.editButton}
-            onPress={onEdit}
-            activeOpacity={0.7}
-          >
-            <Ionicons name="pencil-outline" size={16} color={colors.text.secondary} />
-            <Text style={styles.editText}>Editar</Text>
-          </TouchableOpacity>
+          {!isAdmin && (
+            <TouchableOpacity 
+              style={styles.editButton}
+              onPress={onEdit}
+              activeOpacity={0.7}
+            >
+              <Ionicons name="pencil-outline" size={16} color={colors.text.secondary} />
+              <Text style={styles.editText}>Editar</Text>
+            </TouchableOpacity>
+          )}
         </View>
       </View>
 
       {/* Descripción del usuario */}
-      <Text style={styles.description}>
-        {user.description}
-      </Text>
+      {!isAdmin && (
+        <Text style={styles.description}>
+          {user.description}
+        </Text>
+      )}
 
       {/* Información de contacto */}
       <View style={styles.contactInfo}>
@@ -70,23 +76,29 @@ export const PerfilInfoCard = ({ user, onEdit }) => {
           <Text style={styles.contactText}>{user.email}</Text>
         </View>
         
-        <View style={styles.contactItem}>
-          <Text style={styles.emojiIcon}>📞</Text>
-          <Text style={styles.contactText}>{user.phone}</Text>
-        </View>
-        
-        <View style={styles.contactItem}>
-          <Text style={styles.emojiIcon}>📍</Text>
-          <Text style={styles.contactText}>{user.location}</Text>
-        </View>
+        {!isAdmin && (
+          <>
+            <View style={styles.contactItem}>
+              <Text style={styles.emojiIcon}>📞</Text>
+              <Text style={styles.contactText}>{user.phone}</Text>
+            </View>
+            
+            <View style={styles.contactItem}>
+              <Text style={styles.emojiIcon}>📍</Text>
+              <Text style={styles.contactText}>{user.location}</Text>
+            </View>
+          </>
+        )}
       </View>
 
       {/* Fecha de registro */}
-      <View style={styles.registrationContainer}>
-        <Text style={styles.registrationText}>
-          Registrado el {user.registrationDate}
-        </Text>
-      </View>
+      {!isAdmin && (
+        <View style={styles.registrationContainer}>
+          <Text style={styles.registrationText}>
+            Registrado el {user.registrationDate}
+          </Text>
+        </View>
+      )}
     </View>
   );
 };

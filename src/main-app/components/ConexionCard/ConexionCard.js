@@ -4,10 +4,10 @@ import { Ionicons } from '@expo/vector-icons';
 import { colors } from '../../../shared/styles';
 import EstadosChip from '../EstadosChip';
 import { useLocation } from '../../contexts';
-import { styles } from './PrestadorServiciosCard.styles';
+import { styles } from './ConexionCard.styles';
 
-// Componente reutilizable para mostrar una tarjeta de prestador de servicio (cuidador, paseador o veterinario)
-const PrestadorServiciosCard = ({ provider, onPress, providerType, misConexiones = false }) => {
+// Componente reutilizable para mostrar una tarjeta de prestador de servicio (cuidador, paseador o veterinario) o dueño
+const ConexionCard = ({ provider, onPress, providerType, misConexiones = false }) => {
   const { formatDistance } = useLocation();
   
   const { 
@@ -22,6 +22,7 @@ const PrestadorServiciosCard = ({ provider, onPress, providerType, misConexiones
     estado,
     tipo,
     distance,
+    mascota,
   } = provider;
   
   const getProviderTypeText = (type) => {
@@ -73,6 +74,12 @@ const PrestadorServiciosCard = ({ provider, onPress, providerType, misConexiones
                 <Text style={styles.nombre}>{nombre}</Text>
                 {misConexiones && <EstadosChip estado={estado} showIcon={true} iconSize={14} />}
               </View>
+              {misConexiones && mascota?.nombre ? (
+                <Text style={styles.mascotaPara}>
+                  Para: {mascota.nombre}
+                  {(mascota.tipo || mascota.raza) ? ` (${[mascota.tipo, mascota.raza].filter(Boolean).join(', ')})` : ''}
+                </Text>
+              ) : null}
               <View style={styles.ratingContainer}>
                 {renderStars(rating)}
               </View>
@@ -92,9 +99,11 @@ const PrestadorServiciosCard = ({ provider, onPress, providerType, misConexiones
           {descripcion}
         </Text>
         
-        <View style={styles.infoRow}>
-          <Text style={styles.precio}>{precio}</Text>
-        </View>
+        {tipo !== 'dueño' && (
+          <View style={styles.infoRow}>
+            <Text style={styles.precio}>{precio}</Text>
+          </View>
+        )}
         
         <View style={styles.detailsContainer}>
           <View style={styles.detailItem}>
@@ -107,15 +116,18 @@ const PrestadorServiciosCard = ({ provider, onPress, providerType, misConexiones
             )}
           </View>
           
-          <View style={styles.detailItem}>
-            <Ionicons name="calendar-outline" size={16} color={colors.text.secondary} />
-            <Text style={styles.detailText}>{disponibilidad}</Text>
-          </View>
-          
-          <View style={styles.detailItem}>
-            <Ionicons name="time-outline" size={16} color={colors.text.secondary} />
-            <Text style={styles.detailText}>{horario}</Text>
-          </View>
+          {tipo !== 'dueño' && (
+            <>
+              <View style={styles.detailItem}>
+                <Ionicons name="calendar-outline" size={16} color={colors.text.secondary} />
+                <Text style={styles.detailText}>{disponibilidad}</Text>
+              </View>
+              <View style={styles.detailItem}>
+                <Ionicons name="time-outline" size={16} color={colors.text.secondary} />
+                <Text style={styles.detailText}>{horario}</Text>
+              </View>
+            </>
+          )}
         </View>
         
         {misConexiones && providerTypeText && (
@@ -130,4 +142,4 @@ const PrestadorServiciosCard = ({ provider, onPress, providerType, misConexiones
   );
 };
 
-export default PrestadorServiciosCard;
+export default ConexionCard;

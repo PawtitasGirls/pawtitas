@@ -16,14 +16,12 @@ import ResenasScreen from "../screens/resenas/Resenas";
 import ChatScreen from "../screens/chat/Chat";
 import Conversacion from "../screens/chat/Conversacion";
 import MapaScreen from "../screens/mapa/Mapa";
-import SuscripcionesScreen from "../screens/registro/suscripciones/suscripciones";
 import EstadoCuentaScreen from "../screens/estadoCuenta/EstadoCuenta";
 
 export const publicScreens = [
   { name: "Splash", component: SplashScreen },
   { name: "Bienvenida", component: BienvenidaScreen },
   { name: "Registro", component: RegistroScreen },
-  { name: "Suscripciones", component: SuscripcionesScreen },
   { name: "Inicio", component: InicioScreen },
   { name: "Home", component: HomeScreen },
   { name: "Perfil", component: PerfilScreen },

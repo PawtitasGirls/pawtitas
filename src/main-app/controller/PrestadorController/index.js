@@ -1,0 +1,1 @@
+export { PrestadorController } from './PrestadorController';

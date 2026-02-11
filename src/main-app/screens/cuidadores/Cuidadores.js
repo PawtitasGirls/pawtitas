@@ -1,54 +1,57 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { View, Text, ActivityIndicator } from 'react-native';
 import { PrestadorServiciosScreen } from '../../components';
-
-// Implementar la llamada a la API. Estos datos son de ejemplo.
-const CUIDADORES_DATA = [
-  {
-    id: '1',
-    nombre: 'Juan Perez',
-    rating: 5,
-    descripcion: 'Cuidadora profesional con 5 años de experiencia en cuidado de mascotas.',
-    precio: '$30.000',
-    ubicacion: 'Belgrano, CABA',
-    disponibilidad: 'Lunes, Miércoles, Jueves',
-    horario: 'A convenir',
-    // Coordenadas de Belgrano, CABA
-    latitude: -34.5628,
-    longitude: -58.4556,
-  },
-  {
-    id: '2',
-    nombre: 'Susana Jimenez',
-    rating: 3,
-    descripcion: 'Cuidadora con 1 año de experiencia en cuidado de mascotas.',
-    precio: '$15.000',
-    ubicacion: 'Colegiales, CABA',
-    disponibilidad: 'Viernes, Sábado',
-    horario: '5-8 horas',
-    // Coordenadas de Colegiales, CABA
-    latitude: -34.5741,
-    longitude: -58.4487,
-  },
-  {
-    id: '3',
-    nombre: 'Paula Benal',
-    rating: 4,
-    descripcion: 'Cuidadora profesional con 3 años de experiencia. Solo cuido gatos.',
-    precio: '$25.000',
-    ubicacion: 'Belgrano, CABA',
-    disponibilidad: 'Lunes, Miércoles, Jueves',
-    horario: 'A convenir',
-    // Coordenadas de Belgrano, CABA (diferente punto)
-    latitude: -34.5580,
-    longitude: -58.4589,
-  }
-];
+import { PrestadorController } from '../../controller';
+import { styles } from './Cuidadores.styles';
 
 const Cuidadores = ({ navigation }) => {
+  const [providers, setProviders] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    loadCuidadores();
+  }, []);
+
+  const loadCuidadores = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const prestadores = await PrestadorController.getPrestadores('cuidador');
+      setProviders(prestadores);
+    } catch (err) {
+      setError(err.message);
+      setProviders([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <View style={styles.centerContainer}>
+        <ActivityIndicator size="large" color="#1E88E5" />
+        <Text style={styles.loadingText}>Cargando cuidadores</Text>
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={styles.centerContainer}>
+        <Text style={styles.errorText}>{error}</Text>
+        <Text style={styles.retryText} onPress={loadCuidadores}>
+          Por favor, intente nuevamente
+        </Text>
+      </View>
+    );
+  }
+
   return (
     <PrestadorServiciosScreen
       navigation={navigation}
-      providers={CUIDADORES_DATA}
+      providers={providers}
       providerType="cuidador"
       screenTitle="Cuidadores"
       screenSubtitle="Elige y contacta a cuidadores verificados, priorizando los más cercanos"

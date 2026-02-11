@@ -48,6 +48,8 @@ const buildFormDataFromUser = (role, userData) => {
     const horarios = userData.horarios || "";
     const tipoMascota = userData.tipoMascota || "";
 
+    next.perfilRegistrado = perfil;
+
     if ("precio" in next && userData.precio != null) {
       next.precio = String(userData.precio);
     }
@@ -190,7 +192,6 @@ export default function EditarPerfil({ navigation, route }) {
         email: formData.email,
         telefono: formData.telefono,
         ubicacion: formData.ubicacion,
-        services: formData.services,
         precio: formData.precio,
         duracion: formData.duracion,
         availability: formData.availability,
@@ -198,6 +199,7 @@ export default function EditarPerfil({ navigation, route }) {
         petTypesCustom: formData.petTypesCustom,
         serviceActive: formData.serviceActive,
       };
+      if (userRole !== ROLES.PRESTADOR) payload.services = formData.services;
 
       const response = await updateUserProfile(user.id, payload);
 
@@ -214,7 +216,7 @@ export default function EditarPerfil({ navigation, route }) {
           index: 0,
           routes: [{ name: "Perfil" }],
         });
-      }, 3000);
+      }, 1000);
       
     } catch (error) {
       setMessage({ type: "error", text: error?.message || "Error al guardar el perfil. Inténtalo de nuevo." });

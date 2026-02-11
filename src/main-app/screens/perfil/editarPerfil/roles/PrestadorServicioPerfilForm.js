@@ -4,27 +4,31 @@ import { PerfilInputField, AvatarPicker } from "../../../../components";
 import { styles } from "../editarPerfil.styles";
 import { colors } from "../../../../../shared/styles";
 
-// Componente de formulario específico para el rol de prestador de servicios
+const PERFIL_LABELS = {
+  Cuidador: "Cuidador",
+  Paseador: "Paseador",
+  "Veterinario a domicilio": "Veterinario a domicilio",
+  "Clínica Veterinaria": "Clínica Veterinaria",
+  Veterinaria: "Clínica Veterinaria",
+  VeterinariaDomicilio: "Veterinario a domicilio",
+};
+
+const getPerfilDisplayLabel = (perfil) => {
+  if (!perfil?.trim()) return "";
+  const first = perfil.split(",")[0]?.trim() || "";
+  return PERFIL_LABELS[first] || first;
+};
 
 export default function PrestadorServicioPerfilForm({ formData, handleInputChange, errors }) {
-  // Disponibilidad semanal
   const handleAvailabilityChange = (day, value) => {
     const updatedAvailability = { ...formData.availability, [day]: value };
     handleInputChange("availability", updatedAvailability);
   };
 
-  // Servicios ofrecidos
-  const handleServiceChange = (service, value) => {
-    const updatedServices = { ...formData.services, [service]: value };
-    handleInputChange("services", updatedServices);
-  };
-
-  // Servicio activo
   const handleServiceActiveChange = (value) => {
     handleInputChange("serviceActive", value);
   };
 
-  // Tipos de mascota
   const handlePetTypeChange = (petType, value) => {
     const updatedPetTypes = { ...formData.petTypes, [petType]: value };
     handleInputChange("petTypes", updatedPetTypes);
@@ -97,55 +101,19 @@ export default function PrestadorServicioPerfilForm({ formData, handleInputChang
           error={errors.ubicacion}
           required={true}
         />
+        <Text style={styles.ubicacionHint}>
+          Indicá calle, altura y localidad para que podamos ubicarte mejor en el mapa.
+        </Text>
       </View>
 
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Perfil</Text>
-        {errors.services && (
-          <Text style={styles.errorText}>{errors.services}</Text>
-        )}
-        
-        <View style={styles.checkboxGroup}>
-          <View style={styles.checkboxItem}>
-            <Switch 
-              value={formData.services?.cuidador || false}
-              onValueChange={(value) => handleServiceChange("cuidador", value)}
-              trackColor={{ false: colors.border.medium, true: "#B77B5D" }}
-              thumbColor={colors.surface}
-            />
-            <Text style={styles.checkboxLabel}>Cuidador</Text>
-          </View>
-          
-          <View style={styles.checkboxItem}>
-            <Switch 
-              value={formData.services?.paseador || false}
-              onValueChange={(value) => handleServiceChange("paseador", value)}
-              trackColor={{ false: colors.border.medium, true: "#B77B5D" }}
-              thumbColor={colors.surface}
-            />
-            <Text style={styles.checkboxLabel}>Paseador</Text>
-          </View>
-          
-          <View style={styles.checkboxItem}>
-            <Switch 
-              value={formData.services?.veterinarioDomicilio || false}
-              onValueChange={(value) => handleServiceChange("veterinarioDomicilio", value)}
-              trackColor={{ false: colors.border.medium, true: "#B77B5D" }}
-              thumbColor={colors.surface}
-            />
-            <Text style={styles.checkboxLabel}>Veterinario a domicilio</Text>
-          </View>
-          
-          <View style={styles.checkboxItem}>
-            <Switch 
-              value={formData.services?.clinicaVeterinaria || false}
-              onValueChange={(value) => handleServiceChange("clinicaVeterinaria", value)}
-              trackColor={{ false: colors.border.medium, true: "#B77B5D" }}
-              thumbColor={colors.surface}
-            />
-            <Text style={styles.checkboxLabel}>Clínica Veterinaria</Text>
-          </View>
-        </View>
+        <Text style={styles.perfilRegistradoLabel}>
+          {getPerfilDisplayLabel(formData.perfilRegistrado) || "—"}
+        </Text>
+        <Text style={styles.perfilRegistradoHint}>
+          Para modificar tu perfil de servicio, comunicate con el administrador.
+        </Text>
       </View>
 
       <View style={styles.section}>

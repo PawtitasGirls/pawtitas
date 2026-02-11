@@ -41,6 +41,10 @@ const VALIDATION_RULES = {
     required: true,
     message: 'La especie es obligatoria'
   },
+  genero: {
+    required: true,
+    message: 'El género es obligatorio'
+  },
   raza: {
     required: true,
     message: 'La raza es obligatoria'
@@ -51,6 +55,7 @@ const PLACEHOLDERS = {
   nombre: 'Ej: Luna',
   edad: 'Ej: 2',
   especie: 'Ej: Perro, gato, conejo',
+  genero: 'Ej: Macho, Hembra',
   raza: 'Ej: Golden Retriever',
   infoAdicional: 'Información adicional sobre la mascota'
 };
@@ -73,13 +78,13 @@ const MEDICAL_CHECKBOXES = [
   }
 ];
 
-// Estado inicial del formulario
 const getInitialFormData = (mascotaData = null) => ({
   avatarUri: mascotaData?.avatarUri || null,
   nombre: mascotaData?.nombre || '',
   edad: mascotaData?.edad ? String(mascotaData.edad) : '',
   edadUnidad: mascotaData?.edadUnidad || FORM_CONFIG.DEFAULT_AGE_UNIT,
   especie: mascotaData?.especie || '',
+  genero: mascotaData?.genero || '',
   raza: mascotaData?.raza || '',
   infoAdicional: mascotaData?.infoAdicional || '',
   infoMedica: mascotaData?.infoMedica || '',
@@ -88,46 +93,38 @@ const getInitialFormData = (mascotaData = null) => ({
   cuidadoEspecial: mascotaData?.cuidadoEspecial || false
 });
 
-// Componente para el modal de mascota 
 const MascotaFormModal = ({ 
   visible, 
   onClose, 
   mascotaData = null,
   onSave 
 }) => {
-  // Estado para los datos del formulario
   const [formData, setFormData] = useState(() => getInitialFormData(mascotaData));
 
-  // Estado para validación y mensajes
   const [errors, setErrors] = useState({});
   const [message, setMessage] = useState({ type: "", text: "" });
   const [showMensajeFlotante, setShowMensajeFlotante] = useState(false);
   const [showExitConfirmation, setShowExitConfirmation] = useState(false);
 
-  // Actualizar los datos del formulario cuando mascotaData cambia
   useEffect(() => {
     setFormData(getInitialFormData(mascotaData));
     
-    // Limpiar errores y mensajes al cambiar los datos
     setErrors({});
     setMessage({ type: "", text: "" });
     setShowMensajeFlotante(false);
   }, [mascotaData]);
 
-  // Manejar cambios en los inputs
   const handleInputChange = useCallback((field, value) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
     }));
     
-    // Limpiar error del campo cuando el usuario empiece a escribir
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: "" }));
     }
   }, [errors]);
 
-  // Función de validación reutilizable
   const validateField = useCallback((field, value, rules) => {
     if (rules.required && !value.trim()) {
       return rules.message;
@@ -143,7 +140,6 @@ const MascotaFormModal = ({
     return null;
   }, []);
 
-  // Validar los datos del formulario
   const validateForm = useCallback(() => {
     const newErrors = {};
     
@@ -158,7 +154,6 @@ const MascotaFormModal = ({
     return Object.keys(newErrors).length === 0;
   }, [formData, validateField]);
 
-  // Manejar el envío del formulario
   const handleSubmit = useCallback(() => {
     if (!validateForm()) {
       setMessage({ type: "error", text: "Por favor, corrige los errores en el formulario" });
@@ -166,12 +161,10 @@ const MascotaFormModal = ({
       return;
     }
 
-    // Llamar a la función onSave con los datos del formulario
     onSave(formData);
     onClose();
   }, [validateForm, formData, onSave, onClose]);
 
-  // Manejar el ocultamiento del mensaje flotante
   const handleHideMensajeFlotante = useCallback(() => {
     setShowMensajeFlotante(false);
     setMessage({ type: "", text: "" });
@@ -184,6 +177,7 @@ const MascotaFormModal = ({
       formData.nombre.trim() !== '' ||
       formData.edad.trim() !== '' ||
       formData.especie.trim() !== '' ||
+      formData.genero.trim() !== '' ||
       formData.raza.trim() !== '' ||
       formData.infoAdicional.trim() !== '' ||
       formData.padeceEnfermedad ||
@@ -192,7 +186,6 @@ const MascotaFormModal = ({
     );
   }, [formData]);
 
-  // Manejar el intento de cerrar el modal
   const handleCloseAttempt = useCallback(() => {
     try {
       if (hasFormData) {
@@ -202,31 +195,24 @@ const MascotaFormModal = ({
       }
     } catch (error) {
       console.error('Error al intentar cerrar modal:', error);
-      // Fallback: cerrar directamente
       onClose();
     }
   }, [hasFormData, onClose]);
 
-  // Confirmar salida y cerrar modal
   const confirmExit = useCallback(() => {
     try {
-      // Cerrar el modal de confirmación primero
       setShowExitConfirmation(false);
-      // Luego cerrar el modal principal
       onClose();
     } catch (error) {
       console.error('Error al confirmar salida:', error);
-      // Fallback: cerrar directamente
       onClose();
     }
   }, [onClose]);
 
-  // Cancelar salida
   const cancelExit = useCallback(() => {
     setShowExitConfirmation(false);
   }, []);
 
-  // Renderizar el modal
   return (
     <Modal
       visible={visible}
@@ -256,17 +242,18 @@ const MascotaFormModal = ({
             </TouchableOpacity>
           </View>
 
-          <AvatarPicker
-            iconName="paw"
-            size={64}
-            imageUri={formData.avatarUri}
-            onImageSelected={(image) => handleInputChange('avatarUri', image.uri)}
-          />
-
           <ScrollView 
             style={styles.formContainer}
             showsVerticalScrollIndicator={false}
           >
+            <View style={styles.avatarContainer}>
+              <AvatarPicker
+                iconName="paw"
+                size={64}
+                imageUri={formData.avatarUri}
+                onImageSelected={(image) => handleInputChange('avatarUri', image.uri)}
+              />
+            </View>
             <View style={styles.inputGroup}>
             <Text style={styles.inputLabel}>Nombre *</Text>
             <TextInput
@@ -311,6 +298,18 @@ const MascotaFormModal = ({
                 </View>
               </View>
               {errors.edad && <Text style={styles.errorText}>{errors.edad}</Text>}
+            </View>
+            
+            <View style={styles.inputGroup}>
+            <Text style={styles.inputLabel}>Género *</Text>
+            <TextInput
+                style={[styles.input, errors.genero && styles.inputError]}
+                value={formData.genero}
+                onChangeText={(value) => handleInputChange('genero', value)}
+                placeholder={PLACEHOLDERS.genero}
+                placeholderTextColor={colors.text.disabled}
+            />
+            {errors.genero && <Text style={styles.errorText}>{errors.genero}</Text>}
             </View>
 
             <View style={styles.inputGroup}>
@@ -381,7 +380,6 @@ const MascotaFormModal = ({
         </View>
       </KeyboardAvoidingView>
 
-      {/* Modal de confirmación de salida */}
       <ConfirmacionDialogo
         visible={showExitConfirmation}
         title="Descartar cambios"

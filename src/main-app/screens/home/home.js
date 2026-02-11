@@ -20,7 +20,7 @@ const ServiceCategory = ({ emoji, title, description, onPress }) => (
 );
 
 // Componente para el encabezado de la pantalla Home
-const HomeHeader = ({ hidePendingControls }) => {
+const HomeHeader = ({ hidePendingControls, hideForAdmin }) => {
   const [locationModalVisible, setLocationModalVisible] = useState(false);
   const { 
     userLocation, 
@@ -61,7 +61,7 @@ const HomeHeader = ({ hidePendingControls }) => {
     {/* Primer bloque: buscador, notificaciones, modal */}
     <View style={styles.header}>
       {/* Fila superior */}
-      {!hidePendingControls && (
+      {!hidePendingControls && !hideForAdmin && (
         <View style={styles.topRow}>
           {/* Buscador */}
           <View style={styles.searchContainer}>
@@ -84,7 +84,7 @@ const HomeHeader = ({ hidePendingControls }) => {
       )}
 
       {/* Fila inferior - Botón de ubicación */}
-      {!hidePendingControls && (
+      {!hidePendingControls && !hideForAdmin && (
         <TouchableOpacity
           style={[
             styles.locationButton,
@@ -107,7 +107,7 @@ const HomeHeader = ({ hidePendingControls }) => {
       )}
 
       {/* Modal de ubicación */}
-      {!hidePendingControls && (
+      {!hidePendingControls && !hideForAdmin && (
         <Modal
           transparent
           visible={locationModalVisible}
@@ -205,6 +205,7 @@ const HomeScreen = () => {
   const estadoPrestador = String(user?.estadoPrestador || '').toUpperCase();
   const isPrestadorPendiente =
     role === ROLES.PRESTADOR && estadoPrestador === 'PENDIENTE';
+  const isAdmin = role === ROLES.ADMIN;
 
   // Categorías de servicios
   const serviceCategories = [
@@ -265,7 +266,7 @@ const HomeScreen = () => {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
-        <HomeHeader hidePendingControls={isPrestadorPendiente} />
+        <HomeHeader hidePendingControls={isPrestadorPendiente} hideForAdmin={isAdmin} />
 
         {isPrestadorPendiente && (
           <View style={styles.pendingBanner}>

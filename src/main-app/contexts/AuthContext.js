@@ -11,7 +11,9 @@ export const AuthProvider = ({ children }) => {
     const token = loginResponse?.token || null;
 
     if (loginResponse?.admin) {
-      setAuth({ user: { id: loginResponse?.userData?.id || null }, role: ROLES.ADMIN, token });
+      setAuth({ 
+        user: loginResponse?.userData || { id: null }, 
+        role: ROLES.ADMIN, token });
       return;
     }
 

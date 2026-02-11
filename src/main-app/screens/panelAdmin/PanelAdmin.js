@@ -101,7 +101,7 @@ const PanelAdmin = () => {
 
   // Manejar navegación hacia atrás
   const handleBackPress = () => {
-    navigation.goBack();
+    navigation.navigate('Home');
   };
 
   // Manejar selección de usuario

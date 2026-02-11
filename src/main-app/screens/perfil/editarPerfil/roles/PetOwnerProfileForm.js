@@ -61,6 +61,9 @@ export default function PetOwnerProfileForm({ formData, handleInputChange, error
         placeholder="Tu dirección o zona"
         error={errors.ubicacion}
       />
+      <Text style={styles.ubicacionHint}>
+        Indicá calle, altura y localidad para que podamos ubicarte mejor en el mapa.
+      </Text>
     </View>
   );
 }
