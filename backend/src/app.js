@@ -7,6 +7,7 @@ const adminRoutes = require('./routes/admin.routes');
 const contactoRoutes = require('./routes/contacto.routes');
 const overpassRoutes = require('./routes/overpass.routes');
 const healthRoutes = require('./routes/health.routes');
+const testRoutes = require('./routes/test.routes');
 const mascotaRoutes = require('./routes/mascota.routes');
 const reservaRoutes = require('./routes/reserva.routes');
 const mercadopagoRoutes = require('./routes/mercadopago.routes');
@@ -22,8 +23,13 @@ app.use(adminRoutes);
 app.use(contactoRoutes);
 app.use(overpassRoutes);
 app.use(healthRoutes);
+app.use(testRoutes);
 app.use(mascotaRoutes);
 app.use(reservaRoutes);
 app.use(mercadopagoRoutes);
 
 module.exports = app;
+
+
+
+
