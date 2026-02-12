@@ -20,8 +20,8 @@ import { useStreamChat, useAuth } from "../../contexts";
 import { normalizeRole, ROLES } from "../../constants/roles";
 import { setAuthToken } from "../../services";
 
-const API_BASE =
-  process.env.EXPO_PUBLIC_API_BASE_URL || "http://192.168.1.32:3001";
+const API_BASE = process.env.EXPO_PUBLIC_API_BASE_URL;
+
 
 export default function InicioScreen({ navigation }) {
   const [form, setForm] = useState({ correo: "", password: "" });
