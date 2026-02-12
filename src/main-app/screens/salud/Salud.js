@@ -1,54 +1,57 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { View, Text, ActivityIndicator } from 'react-native';
 import { PrestadorServiciosScreen } from '../../components';
-
-// Implementar la llamada a la API. Estos datos son de ejemplo.
-const SALUD_DATA = [
-  {
-    id: '1',
-    nombre: 'Clínica Veterinaria San Antonio',
-    rating: 5,
-    descripcion: 'Clínica veterinaria especializada en medicina interna y cirugía de pequeños animales.',
-    precio: '$35.000',
-    ubicacion: 'Palermo, CABA',
-    disponibilidad: 'Lunes a Viernes',
-    horario: '9:00 - 18:00',
-    // Coordenadas de Palermo, CABA
-    latitude: -34.5889,
-    longitude: -58.4199,
-  },
-  {
-    id: '2',
-    nombre: 'Dra. Carolina Sánchez',
-    rating: 4,
-    descripcion: 'Veterinaria especializada en dermatología y nutrición animal. Atención personalizada para mascotas.',
-    precio: '$28.000',
-    ubicacion: 'Belgrano, CABA',
-    disponibilidad: 'Martes, Jueves, Sábados',
-    horario: '10:00 - 19:00',
-    // Coordenadas de Belgrano, CABA
-    latitude: -34.5628,
-    longitude: -58.4556,
-  },
-  {
-    id: '3',
-    nombre: 'Dr. Matías López',
-    rating: 5,
-    descripcion: 'Especialista en medicina preventiva y emergencias veterinarias. Más de 10 años de experiencia en clínicas de Buenos Aires.',
-    precio: '$32.000',
-    ubicacion: 'Recoleta, CABA',
-    disponibilidad: 'Lunes, Miércoles, Viernes',
-    horario: '8:00 - 16:00',
-    // Coordenadas de Recoleta, CABA
-    latitude: -34.5875,
-    longitude: -58.3974,
-  }
-];
+import { PrestadorController } from '../../controller';
+import { styles } from './Salud.styles';
 
 const Salud = ({ navigation }) => {
+  const [providers, setProviders] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    loadSalud();
+  }, []);
+
+  const loadSalud = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const prestadores = await PrestadorController.getPrestadores('salud');
+      setProviders(prestadores);
+    } catch (err) {
+      setError(err.message);
+      setProviders([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <View style={styles.centerContainer}>
+        <ActivityIndicator size="large" color="#1E88E5" />
+        <Text style={styles.loadingText}>Cargando médicos veterinarios y clínicas</Text>
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={styles.centerContainer}>
+        <Text style={styles.errorText}>{error}</Text>
+        <Text style={styles.retryText} onPress={loadSalud}>
+          Por favor, intente nuevamente
+        </Text>
+      </View>
+    );
+  }
+
   return (
     <PrestadorServiciosScreen
       navigation={navigation}
-      providers={SALUD_DATA}
+      providers={providers}
       providerType="médico o clínica veterinaria"
       screenTitle="Salud y Bienestar"
       screenSubtitle="Elige y contacta médicos veterinarios y clínicas certificadas, priorizando los más cercanos"

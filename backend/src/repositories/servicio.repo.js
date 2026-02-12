@@ -1,33 +1,21 @@
 const prisma = require('../config/prisma');
 
-/**
- * Crea un nuevo servicio
- */
 async function create(data) {
   return prisma.servicio.create({ data });
 }
 
-/**
- * Actualiza un servicio
- */
 async function update(id, data) {
   return prisma.servicio.update({ where: { id }, data });
 }
 
-/**
- * Busca o crea un servicio por descripción
- */
 async function upsert(descripcion, data) {
-  return prisma.servicio.upsert({
+  const existing = await prisma.servicio.findFirst({
     where: { descripcion },
-    update: {},
-    create: data,
   });
+  if (existing) return existing;
+  return prisma.servicio.create({ data: { ...data, descripcion } });
 }
 
-/**
- * Busca el primer servicio de un prestador
- */
 async function findFirstByPrestadorId(prestadorId) {
   const link = await prisma.prestadorservicio.findFirst({
     where: { prestadorId },
@@ -37,18 +25,12 @@ async function findFirstByPrestadorId(prestadorId) {
   return link?.servicioId || null;
 }
 
-/**
- * Crea relación prestador-servicio
- */
 async function createPrestadorServicio(prestadorId, servicioId) {
   return prisma.prestadorservicio.create({
     data: { prestadorId, servicioId },
   });
 }
 
-/**
- * Upsert relación prestador-servicio
- */
 async function upsertPrestadorServicio(prestadorId, servicioId) {
   return prisma.prestadorservicio.upsert({
     where: {

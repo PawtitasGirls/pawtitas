@@ -4,13 +4,14 @@ const usuarioRepo = require('../repositories/usuario.repo');
 const prestadorRepo = require('../repositories/prestador.repo');
 const duenioRepo = require('../repositories/duenio.repo');
 const servicioRepo = require('../repositories/servicio.repo');
+const mascotaRepo = require('../repositories/mascota.repo');
 const { splitNombreApellido } = require('../utils/strings');
 const { descomponerUbicacion } = require('../utils/ubicacion');
 const {
-  buildPerfilFromServices,
   buildHorariosFromAvailability,
   buildTipoMascotaFromPetTypes,
 } = require('../utils/mappers');
+const { getCoordinatesForDomicilio } = require('../services/geocoding.service');
 
 // Obtener perfil de usuario
 async function getPerfilController(req, res) {
@@ -72,14 +73,22 @@ async function getPerfilController(req, res) {
       creadoEn: usuario.creadoEn,
     };
 
-    if (usuario.rol === 'DUENIO' && usuario.duenio?.comentarios) {
-      userData.descripcion = usuario.duenio.comentarios;
+    if (usuario.rol === 'DUENIO' && usuario.duenio) {
+      userData.duenioId = usuario.duenio.id?.toString?.() || usuario.duenio.id;
+      if (usuario.duenio.comentarios) {
+        userData.descripcion = usuario.duenio.comentarios;
+      }
+      
+      // Contar las mascotas del dueño
+      const mascotas = await mascotaRepo.findByDuenioId(usuario.duenio.id);
+      userData.petsCount = mascotas.length;
     }
 
     if (usuario.rol === 'PRESTADOR') {
       const prestador = await prestadorRepo.findByUsuarioId(usuario.id);
       const servicio = prestador?.prestadorservicio?.[0]?.servicio || null;
       
+      if (prestador?.id != null) userData.prestadorId = String(prestador.id);
       if (servicio?.descripcion) userData.descripcion = servicio.descripcion;
       if (prestador?.perfil) userData.perfil = prestador.perfil;
       if (servicio?.tipoMascota) userData.tipoMascota = servicio.tipoMascota;
@@ -175,6 +184,41 @@ async function updatePerfilController(req, res) {
     const priceNumber = Number(precio);
     const hasPrice = Number.isFinite(priceNumber);
 
+    let coords = null;
+    if (ubicacion) {
+      try {
+        coords = await getCoordinatesForDomicilio({ calle, numero, ciudad });
+        if (!coords) {
+          await new Promise((r) => setTimeout(r, 400));
+          coords = await getCoordinatesForDomicilio({ calle, numero, ciudad });
+        }
+        if (!coords) {
+          return res.status(400).json({
+            success: false,
+            message:
+              'No se pudieron obtener las coordenadas para la dirección. Verificá calle, número y barrio/ciudad e intentá de nuevo.',
+          });
+        }
+      } catch (err) {
+        console.warn('Geocoding domicilio falló:', err?.message ?? err);
+        return res.status(400).json({
+          success: false,
+          message:
+            'No se pudieron obtener las coordenadas para la dirección. Intentá de nuevo más tarde.',
+        });
+      }
+    }
+
+    const domicilioData = ubicacion
+      ? {
+          calle,
+          numero,
+          ciudad,
+          latitude: coords.latitude,
+          longitude: coords.longitude,
+        }
+      : null;
+
     // Actualizar datos
     await prisma.$transaction(async (tx) => {
       const dataUsuario = {};
@@ -187,15 +231,15 @@ async function updatePerfilController(req, res) {
         await tx.usuario.update({ where: { id: userId }, data: dataUsuario });
       }
 
-      if (ubicacion) {
+      if (domicilioData) {
         if (usuario.domicilioId) {
           await tx.domicilio.update({
             where: { id: usuario.domicilioId },
-            data: { calle, numero, ciudad },
+            data: domicilioData,
           });
         } else {
           const nuevoDom = await tx.domicilio.create({
-            data: { calle, numero, ciudad },
+            data: domicilioData,
           });
           await tx.usuario.update({
             where: { id: userId },
@@ -213,21 +257,13 @@ async function updatePerfilController(req, res) {
       }
 
       if (normalizedRole === 'prestador') {
-        const perfilValue = buildPerfilFromServices(services);
         const horariosValue = buildHorariosFromAvailability(availability);
         const tipoMascotaValue = buildTipoMascotaFromPetTypes(petTypes, petTypesCustom);
 
         const prestador = await tx.prestador.upsert({
           where: { usuarioId: userId },
           update: {},
-          create: { usuarioId: userId, perfil: perfilValue || 'Pendiente' },
-        });
-
-        await tx.prestador.update({
-          where: { id: prestador.id },
-          data: {
-            perfil: perfilValue || null,
-          },
+          create: { usuarioId: userId, perfil: 'Pendiente' },
         });
 
         const existingLink = await tx.prestadorservicio.findFirst({
@@ -321,6 +357,8 @@ async function updatePerfilController(req, res) {
             calle: updatedUser.domicilio.calle,
             numero: updatedUser.domicilio.numero,
             ciudad: updatedUser.domicilio.ciudad,
+            latitude: updatedUser.domicilio.latitude ?? undefined,
+            longitude: updatedUser.domicilio.longitude ?? undefined,
           }
         : null,
       creadoEn: updatedUser.creadoEn,
@@ -340,7 +378,81 @@ async function updatePerfilController(req, res) {
   }
 }
 
+const PERFIL_QUERY_MAP = {
+  cuidador: ['Cuidador'],
+  paseador: ['Paseador'],
+  salud: ['Veterinario a domicilio', 'Clínica Veterinaria'],
+};
+
+async function listPrestadoresController(req, res) {
+  try {
+    const { perfil, ciudad } = req.query ?? {};
+
+    const perfilNorm = perfil ? String(perfil).toLowerCase().trim() : null;
+    const perfilesValores = perfilNorm ? PERFIL_QUERY_MAP[perfilNorm] : null;
+
+    const filtros = {
+      ...(perfilesValores?.length && { perfilValores: perfilesValores }),
+      ...(ciudad && { ciudad: String(ciudad) }),
+    };
+
+    const prestadores = await prestadorRepo.findActivosConFiltros(filtros);
+
+    const result = prestadores.map((p) => {
+      const { usuario, perfil, fechaIngreso, prestadorservicio = [] } = p;
+      const { domicilio } = usuario ?? {};
+
+      const servicioMain = prestadorservicio[0]?.servicio;
+
+      return {
+        id: String(p.id),
+        usuarioId: usuario?.id ? String(usuario.id) : null,
+
+        nombre: usuario?.nombre ?? '',
+        apellido: usuario?.apellido ?? '',
+        nombreCompleto:
+          [usuario?.nombre, usuario?.apellido].filter(Boolean).join(' ') || 'Sin nombre',
+
+        email: usuario?.email ?? '',
+        celular: usuario?.celular ?? '',
+        perfil: perfil ?? '',
+
+        domicilio: domicilio && {
+          calle: domicilio.calle ?? '',
+          numero: domicilio.numero ?? '',
+          ciudad: domicilio.ciudad ?? '',
+          ubicacion: [domicilio.calle, domicilio.numero, domicilio.ciudad]
+            .filter(Boolean)
+            .join(', '),
+          latitude: domicilio.latitude ?? null,
+          longitude: domicilio.longitude ?? null,
+        },
+
+        servicio: servicioMain && {
+          id: String(servicioMain.id),
+          descripcion: servicioMain.descripcion ?? '',
+          precio: servicioMain.precio ?? 0,
+          horarios: servicioMain.horarios ?? '',
+          tipoMascota: servicioMain.tipoMascota ?? '',
+          duracion: servicioMain.duracion ?? '',
+          disponible: Boolean(servicioMain.disponible),
+        },
+
+        fechaIngreso,
+      };
+    });
+
+    return res.json({ success: true, data: result });
+  } catch (error) {
+    console.error('listPrestadores error', error);
+    return res
+      .status(500)
+      .json({ success: false, message: 'Error al listar prestadores' });
+  }
+}
+
 module.exports = {
   getPerfilController,
   updatePerfilController,
+  listPrestadoresController,
 };

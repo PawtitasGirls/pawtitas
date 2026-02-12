@@ -77,4 +77,89 @@ export const styles = StyleSheet.create({
   separator: {
     height: 16,
   },
+  emptyState: {
+    flex: 1,
+    paddingVertical: 60,
+    paddingHorizontal: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  emptyTitle: {
+    ...typography.styles.h3,
+    color: colors.text.primary,
+    textAlign: 'center',
+    marginBottom: 8,
+  },
+  emptySubtitle: {
+    ...typography.styles.body,
+    color: colors.text.secondary,
+    textAlign: 'center',
+    lineHeight: 22,
+  },
+  mascotaModalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    padding: 24,
+  },
+  mascotaModalContent: {
+    backgroundColor: colors.surface,
+    borderRadius: 12,
+    padding: 20,
+    maxHeight: '70%',
+  },
+  mascotaModalTitle: {
+    ...typography.styles.h3,
+    color: colors.text.primary,
+    marginBottom: 16,
+    textAlign: 'center',
+  },
+  mascotaModalItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border.light,
+  },
+  mascotaModalItemSelected: {
+    backgroundColor: colors.surfaceVariant || colors.border.light,
+  },
+  mascotaModalItemText: {
+    ...typography.styles.body,
+    color: colors.text.primary,
+    flex: 1,
+  },
+  mascotaModalAvanzar: {
+    marginTop: 16,
+    paddingVertical: 14,
+    paddingHorizontal: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.primaryDark,
+    borderRadius: 12,
+  },
+  mascotaModalAvanzarDisabled: {
+    backgroundColor: colors.border.medium,
+    opacity: 0.8,
+  },
+  mascotaModalAvanzarText: {
+    ...typography.styles.body,
+    fontWeight: '600',
+    color: colors.text.inverse,
+  },
+  mascotaModalLoading: {
+    padding: 16,
+    alignItems: 'center',
+  },
+  mascotaModalCancel: {
+    marginTop: 16,
+    padding: 14,
+    alignItems: 'center',
+  },
+  mascotaModalCancelText: {
+    ...typography.styles.body,
+    color: colors.text.secondary,
+  },
 });

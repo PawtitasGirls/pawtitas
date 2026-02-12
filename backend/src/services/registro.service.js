@@ -2,14 +2,9 @@ const bcrypt = require('bcryptjs');
 const { Prisma } = require('@prisma/client');
 const prisma = require('../config/prisma');
 const usuarioRepo = require('../repositories/usuario.repo');
-const generoRepo = require('../repositories/genero.repo');
-const domicilioRepo = require('../repositories/domicilio.repo');
-const prestadorRepo = require('../repositories/prestador.repo');
-const duenioRepo = require('../repositories/duenio.repo');
-const servicioRepo = require('../repositories/servicio.repo');
 const { descomponerUbicacion } = require('../utils/ubicacion');
+const { updateDomicilioWithCoordinates } = require('./geocoding.service');
 
-// Registrar nuevo usuario (dueño o prestador)
 async function registerUser({
   nombre,
   apellido,
@@ -43,7 +38,6 @@ async function registerUser({
     throw new Error(`Faltan: ${missing.join(', ')}`);
   }
 
-  // Validar fecha
   const fecha = new Date(fechaNacimiento);
   if (Number.isNaN(fecha.getTime())) {
     throw new Error('fechaNacimiento inválida');
@@ -62,7 +56,6 @@ async function registerUser({
     throw new Error(`Ya existe un usuario registrado con este ${conflicts.join(' y ')}`);
   }
 
-  // Hashear contraseña
   const hashedPassword = await bcrypt.hash(password, 10);
 
   // Crear usuario
@@ -105,21 +98,16 @@ async function registerUser({
       });
 
       if (especialidad) {
-        const servicio = await tx.servicio.upsert({
-          where: { descripcion: especialidad },
-          update: {},
-          create: {
+          const servicio = await tx.servicio.create({
+          data: {
             descripcion: especialidad,
             tipoMascota: 'General',
+            horarios: '',
             precio: new Prisma.Decimal(0),
           },
         });
-        await tx.prestadorservicio.upsert({
-          where: {
-            prestadorId_servicioId: { prestadorId: prestador.id, servicioId: servicio.id },
-          },
-          update: {},
-          create: { prestadorId: prestador.id, servicioId: servicio.id },
+        await tx.prestadorservicio.create({
+          data: { prestadorId: prestador.id, servicioId: servicio.id },
         });
       }
     } else {
@@ -128,6 +116,12 @@ async function registerUser({
 
     return usuarioRow;
   });
+
+  try {
+    await updateDomicilioWithCoordinates(result.domicilioId, { calle, numero, ciudad });
+  } catch (err) {
+    console.warn('Geocoding domicilio en registro falló:', err?.message ?? err);
+  }
 
   return result;
 }

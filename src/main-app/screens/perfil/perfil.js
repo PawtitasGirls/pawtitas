@@ -42,7 +42,6 @@ const roleLabelByRole = (role) => {
   return 'Usuario';
 };
 
-// Perfil del usuario
 const PerfilScreen = () => {
   const navigation = useNavigation();
   const { user, role, clearAuth } = useAuth();
@@ -79,7 +78,7 @@ const PerfilScreen = () => {
     };
   }, [user, role]);
 
-  // Handlers para acciones del usuario
+  // Acciones del usuario
   const handleEditProfile = () => {
     navigation.navigate('EditarPerfil', { role });
   };
@@ -120,7 +119,6 @@ const PerfilScreen = () => {
 
   return (
     <View style={styles.container}>
-      {/* Header */}
       <PerfilHeader
         title="PERFIL"
         rightComponent={
@@ -134,19 +132,17 @@ const PerfilScreen = () => {
         }
       />
 
-      {/* Contenido principal */}
       <ScrollView
         style={styles.content}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
-        {/* Tarjeta de información del perfil */}
         <PerfilInfoCard
           user={userProfile}
           onEdit={handleEditProfile}
+          role={role}
         />
 
-        {/* Sección de mascotas */}
         {role === ROLES.DUENIO && (
           <MascotasSection
             petsCount={userProfile.petsCount}
@@ -155,11 +151,9 @@ const PerfilScreen = () => {
           />
         )}
 
-        {/* Botón de cerrar sesión */}
         <LogoutBtn onPress={handleLogout} />
       </ScrollView>
 
-      {/* Navegación inferior */}
       <MenuInferior />
     </View>
   );

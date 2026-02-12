@@ -51,6 +51,11 @@ export const styles = StyleSheet.create({
   formContainer: {
     marginBottom: 20,
   },
+  avatarContainer: {
+    alignItems: 'center',
+    paddingVertical: 16,
+    marginBottom: 8,
+  },
   inputGroup: {
     marginBottom: 18,
   },

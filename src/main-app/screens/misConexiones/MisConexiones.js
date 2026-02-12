@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { ScrollView } from 'react-native';
+import { ScrollView, View, Text, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import ScreenHeader from '../../components/ScreenHeader';
@@ -7,22 +7,24 @@ import MenuInferior from '../../components/MenuInferior/MenuInferior';
 import BarraBuscador from '../../components/BarraBuscador/BarraBuscador';
 import Filtros from '../../components/Filtros/Filtros';
 import ResenaFormModal from '../../components/ResenaFormModal/ResenaFormModal';
-import PrestadorServiciosCard from '../../components/PrestadorServiciosCard/PrestadorServiciosCard';
-import PrestadorServiciosDetails from '../../components/PrestadorServiciosDetails/PrestadorServiciosDetails';
+import ConexionCard from '../../components/ConexionCard/ConexionCard';
+import ConexionDetalles from '../../components/ConexionDetalles/ConexionDetalles';
 import ConfirmacionDialogo from '../../components/ConfirmacionDialogo';
 import CalendarioPagoModal from '../../components/CalendarioPagoModal';
+import MercadoPagoWebView from '../../components/MercadoPagoWebView';
 import Paginador from '../../components/Paginador';
 import { MensajeFlotante } from '../../components';
 import { useMisConexiones } from '../../hooks/useMisConexiones';
 import { usePaginacion } from '../../hooks/usePaginacion';
 import { styles } from './MisConexiones.styles';
 
-// Pantalla de Mis Conexiones
 const MisConexiones = () => {
   const navigation = useNavigation();
   const {
     state,
     providers,
+    loadingConexiones,
+    isPrestadorView,
     handleSearch,
     handleFilterChange,
     handleProviderPress,
@@ -30,6 +32,9 @@ const MisConexiones = () => {
     handlePago,
     handleConfirmarPago,
     handleCancelarCalendario,
+    handlePaymentSuccess,
+    handlePaymentFailure,
+    handleClosePaymentWebView,
     handleFinalizarServicio,
     handleRechazar,
     handleConfirmarRechazo,
@@ -77,16 +82,14 @@ const MisConexiones = () => {
         showBackButton={true}
       />
       
-      {/* Barra de búsqueda */}
       <BarraBuscador
         value={state.searchQuery}
         onChangeText={handleSearch}
-        placeholder="Buscar prestadores de servicios"
+        placeholder="Buscar conexiones"
         onFilterPress={toggleFilters}
         filterIcon="menu-outline"
       />
 
-      {/* Filtros */}
       <Filtros
         filters={filterOptions}
         selectedFilter={state.selectedFilter}
@@ -94,14 +97,30 @@ const MisConexiones = () => {
         visible={state.showFilters}
       />
 
-      {/* Lista de prestadores de servicios */}
+      {loadingConexiones ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" />
+          <Text style={styles.loadingText}>Cargando conexiones...</Text>
+        </View>
+      ) : providers.length === 0 ? (
+        <View style={styles.emptyContainer}>
+          <Text style={styles.emptyTitle}>
+            {isPrestadorView ? 'Aún no tenés solicitudes' : 'Aún no tenés conexiones'}
+          </Text>
+          <Text style={styles.emptySubtitle}>
+            {isPrestadorView
+              ? 'Cuando un cliente te envíe una solicitud de servicio, aparecerá acá.'
+              : 'Conectá con prestadores de servicios desde Cuidadores, Paseadores o Salud y aparecerán acá.'}
+          </Text>
+        </View>
+      ) : (
       <ScrollView 
         style={styles.content}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.usersList}
       >
         {providersActuales.map((provider) => (
-          <PrestadorServiciosCard
+          <ConexionCard
             key={provider.id}
             provider={provider}
             providerType={getProviderType(provider.tipo)}
@@ -115,9 +134,9 @@ const MisConexiones = () => {
           onCambioPagina={manejarCambioPagina}
         />
       </ScrollView>
+      )}
       
-      {/* Detalles del prestador */}
-      <PrestadorServiciosDetails
+      <ConexionDetalles
         visible={state.showDetalles}
         provider={state.selectedProvider}
         providerType={state.selectedProvider ? getProviderType(state.selectedProvider.tipo) : ''}
@@ -125,6 +144,7 @@ const MisConexiones = () => {
         onResenas={handleResenas}
         onConectar={handleConectar}
         misConexiones={true}
+        esVistaPrestador={isPrestadorView}
         onChat={handleChatWithNavigation}
         onPago={handlePago}
         onFinalizarServicio={handleFinalizarServicio}
@@ -139,7 +159,6 @@ const MisConexiones = () => {
         onClose={handleCloseResenaModal}
       />
 
-      {/* Modal de Calendario para Pago */}
       <CalendarioPagoModal
         visible={state.showCalendarioModal}
         providerName={state.selectedProvider?.nombre}
@@ -147,7 +166,12 @@ const MisConexiones = () => {
         onConfirm={handleConfirmarPago}
       />
 
-      {/* Confirmación para rechazar */}
+      <MercadoPagoWebView
+        visible={state.showPaymentWebView}
+        paymentUrl={state.paymentUrl}
+        onClose={handleClosePaymentWebView}
+      />
+
       <ConfirmacionDialogo
         visible={state.showRechazarModal}
         title="Rechazar solicitud"
@@ -159,7 +183,6 @@ const MisConexiones = () => {
         type="danger"
       />
 
-      {/* Mensaje flotante */}
       <MensajeFlotante
         visible={state.showMensajeFlotante}
         message={state.mensajeFlotante.text}
@@ -168,7 +191,6 @@ const MisConexiones = () => {
         duration={mensajeFlotanteConfig.duration}
       />
 
-      {/* Navegación inferior */}
       <MenuInferior />
     </SafeAreaView>
   );

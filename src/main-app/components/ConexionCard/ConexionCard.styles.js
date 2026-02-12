@@ -50,6 +50,12 @@ export const styles = StyleSheet.create({
     fontSize: 18,
     color: colors.text.primary,
   },
+  mascotaPara: {
+    ...typography.styles.body2,
+    fontSize: 13,
+    color: colors.text.secondary,
+    marginTop: 2,
+  },
   ratingContainer: {
     flexDirection: 'row',
     alignItems: 'center',

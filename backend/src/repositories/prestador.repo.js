@@ -1,8 +1,5 @@
 const prisma = require('../config/prisma');
 
-/**
- * Busca un prestador por usuarioId
- */
 async function findByUsuarioId(usuarioId) {
   return prisma.prestador.findUnique({
     where: { usuarioId },
@@ -16,9 +13,6 @@ async function findByUsuarioId(usuarioId) {
   });
 }
 
-/**
- * Crea o actualiza un prestador
- */
 async function upsert(usuarioId, data) {
   return prisma.prestador.upsert({
     where: { usuarioId },
@@ -27,9 +21,6 @@ async function upsert(usuarioId, data) {
   });
 }
 
-/**
- * Actualiza un prestador
- */
 async function update(id, data) {
   return prisma.prestador.update({
     where: { id },
@@ -37,11 +28,47 @@ async function update(id, data) {
   });
 }
 
-/**
- * Crea un prestador
- */
 async function create(data) {
   return prisma.prestador.create({ data });
+}
+
+async function findActivosConFiltros(filtros = {}) {
+  const where = {
+    estado: 'ACTIVO',
+  };
+
+  if (filtros.perfilValores?.length) {
+    where.OR = filtros.perfilValores.map((valor) => ({
+      perfil: { contains: valor },
+    }));
+  }
+
+  if (filtros.ciudad) {
+    where.usuario = {
+      ...where.usuario,
+      domicilio: {
+        ciudad: {
+          contains: filtros.ciudad,
+          mode: 'insensitive',
+        },
+      },
+    };
+  }
+
+  return prisma.prestador.findMany({
+    where,
+    include: {
+      usuario: {
+        include: { domicilio: true },
+      },
+      prestadorservicio: {
+        include: { servicio: true },
+      },
+    },
+    orderBy: {
+      fechaIngreso: 'desc',
+    },
+  });
 }
 
 module.exports = {
@@ -49,4 +76,5 @@ module.exports = {
   upsert,
   update,
   create,
+  findActivosConFiltros,
 };

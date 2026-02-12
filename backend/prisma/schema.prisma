@@ -28,12 +28,14 @@ model chat {
 }
 
 model domicilio {
-  id      BigInt    @id @default(autoincrement())
-  calle   String
-  numero  String
-  ciudad  String
-  persona persona[]
-  usuario usuario[]
+  id        BigInt    @id @default(autoincrement())
+  calle     String
+  numero    String
+  ciudad    String
+  latitude  Float?
+  longitude Float?
+  persona   persona[]
+  usuario   usuario[]
 
   @@map("Domicilio")
 }
@@ -72,9 +74,13 @@ model genero {
 
 model mascota {
   id          BigInt    @id @default(autoincrement())
+  nombre      String
   tipo        String
+  raza        String?
   edad        Int
+  edadUnidad  String    @default("años")
   condiciones String?
+  infoAdicional String?
   genero      String
   duenioId    BigInt
   duenio      duenio    @relation(fields: [duenioId], references: [id], map: "Mascota_duenioId_fkey")

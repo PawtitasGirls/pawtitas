@@ -12,7 +12,12 @@ import { Picker } from "@react-native-picker/picker";
 import * as DocumentPicker from 'expo-document-picker';
 import { MensajeFlotante, CampoSeleccion, CampoFecha } from "../../components";
 import { RegistroController, REGISTRO_CONFIG, ESPECIALIDADES_OPTIONS, PERFIL_OPTIONS, GENERO_OPTIONS } from "../../controller";
+import { registrarUsuario } from "../../services";
 import { styles } from "./registro.styles";
+
+const SUCCESS_MESSAGE_DUEÑO = "¡Bienvenido/a! Tu registro fue exitoso, ya podés usar la app.";
+const SUCCESS_MESSAGE_PRESTADOR = "¡Listo! Tu registro fue exitoso. Revisaremos tus datos y te notificaremos por correo cuando tu cuenta esté habilitada.";
+const NAVIGATE_DELAY_MS = 3000;
 
 export default function RegistroScreen({ navigation }) {
   const [perfil, setPerfil] = useState("");
@@ -22,10 +27,10 @@ export default function RegistroScreen({ navigation }) {
   const [form, setForm] = useState(() => RegistroController.getInitialFormData());
   const [errors, setErrors] = useState({});
   const [successMessage, setSuccessMessage] = useState("");
+  const [submitting, setSubmitting] = useState(false);
   const [isScrollAtBottom, setIsScrollAtBottom] = useState(false);
   const scrollViewRef = useRef(null);
 
-  // Función para manejar el cambio de fecha
   const handleDateChange = (event, selectedDate) => {
     const result = RegistroController.handleDateChange(
       event,
@@ -43,17 +48,14 @@ export default function RegistroScreen({ navigation }) {
     }
   };
 
-  // Función para abrir/cerrar el date picker
   const toggleDatePicker = () => {
     setShowDatePicker(!showDatePicker);
   };
 
-  // Función para cerrar el date picker
   const closeDatePicker = () => {
     setShowDatePicker(false);
   };
 
-  // Función para abrir/cerrar el picker de género
   const toggleGeneroPicker = () => {
     setShowGeneroPicker(!showGeneroPicker);
   };
@@ -62,17 +64,14 @@ export default function RegistroScreen({ navigation }) {
     setShowGeneroPicker(false);
   };
 
-  // Cambio de género
   const handleGeneroChange = (value) => {
     handleInputChange("genero", value);
-    // Limpiar error del campo
     if (errors.genero) {
       setErrors(RegistroController.clearFieldError(errors, "genero"));
     }
     closeGeneroPicker();
   };
 
-  // Función para seleccionar documento
   const pickFile = async (field) => {
     try {
       const result = await DocumentPicker.getDocumentAsync({
@@ -82,7 +81,6 @@ export default function RegistroScreen({ navigation }) {
 
       if (result.type === "success") {
         setForm({ ...form, [field]: result });
-        // Limpiar error del campo cuando se selecciona un archivo
         if (errors[field]) {
           setErrors(RegistroController.clearFieldError(errors, field));
         }
@@ -92,7 +90,6 @@ export default function RegistroScreen({ navigation }) {
     }
   };
 
-  // Manejar cambios en los inputs
   const handleInputChange = (field, value) => {
     setForm({ ...form, [field]: value });
     // Limpiar error del campo cuando el usuario interactúe
@@ -101,10 +98,8 @@ export default function RegistroScreen({ navigation }) {
     }
   };
 
-  // Manejar cambio de perfil
   const handlePerfilChange = (value) => {
     setPerfil(value);
-    // Si cambia el perfil, limpiar especialidad y archivos
     if (value !== "prestador") {
       setEspecialidad("");
       setForm({
@@ -113,13 +108,11 @@ export default function RegistroScreen({ navigation }) {
         certificadosFile: null
       });
     }
-    // Limpiar error del campo
     if (errors.perfil) {
       setErrors(RegistroController.clearFieldError(errors, "perfil"));
     }
   };
 
-  // Manejar cambio de especialidad
   const handleEspecialidadChange = (value) => {
     setEspecialidad(value);
     // Limpiar error del campo
@@ -128,22 +121,27 @@ export default function RegistroScreen({ navigation }) {
     }
   };
 
-  // Validar el formulario
   const validateForm = () => {
     const newErrors = RegistroController.validateForm(form, perfil, especialidad);
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = () => {
-    if (!validateForm()) return;
+  const handleSubmit = async () => {
+    if (!validateForm() || submitting) return;
 
-    const navigationData = RegistroController.prepareDataForNavigation(form, perfil);
-    navigation.navigate('Suscripciones', {
-      ...navigationData,
-      perfil,
-      especialidad,
-    });
+    try {
+      setSubmitting(true);
+      await registrarUsuario(form, perfil, especialidad);
+
+      const message = perfil === "prestador" ? SUCCESS_MESSAGE_PRESTADOR : SUCCESS_MESSAGE_DUEÑO;
+      setSuccessMessage(message);
+      setTimeout(() => navigation.navigate("Inicio"), NAVIGATE_DELAY_MS);
+    } catch (error) {
+      alert(error?.message || "No se pudo completar el registro");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const handleHideMessage = () => {
@@ -170,7 +168,6 @@ export default function RegistroScreen({ navigation }) {
       >
       <Text style={styles.title}>Registrarse</Text>
 
-      {/* Campos básicos */}
       <TextInput
         placeholder="Nombre"
         style={[styles.input, errors.nombre && styles.inputError]}
@@ -306,7 +303,6 @@ export default function RegistroScreen({ navigation }) {
       />
       {errors.documento && <Text style={styles.errorText}>{errors.documento}</Text>}
 
-      {/* Perfil */}
       <Text style={styles.subtitle}>Defina su rol</Text>
       <Picker
         selectedValue={perfil}
@@ -323,7 +319,6 @@ export default function RegistroScreen({ navigation }) {
       </Picker>
       {errors.perfil && <Text style={styles.errorText}>{errors.perfil}</Text>}
 
-      {/* Mostrar solo si es prestador */}
       {perfil === "prestador" && (
         <>
           <Text style={styles.subtitle}>Defina su especialidad</Text>
@@ -342,7 +337,6 @@ export default function RegistroScreen({ navigation }) {
           </Picker>
           {errors.especialidad && <Text style={styles.errorText}>{errors.especialidad}</Text>}
 
-          {/* Documentación - Adjuntar archivo */}
           <Text style={styles.reminderText}>Adjuntar documento de identidad y antecedentes penales no menor a 3 meses.</Text>
           <TouchableOpacity
             style={[styles.clipButton, errors.documentosFile && styles.clipButtonError]}
@@ -354,7 +348,6 @@ export default function RegistroScreen({ navigation }) {
           </TouchableOpacity>
           {errors.documentosFile && <Text style={styles.errorText}>{errors.documentosFile}</Text>}
 
-          {/* Certificados - Adjuntar archivo */}
           <Text style={styles.reminderText}>Adjuntar certificados de logros obtenidos y/o constancia de estudios.</Text>
           <TouchableOpacity
             style={[styles.clipButton, errors.certificadosFile && styles.clipButtonError]}
@@ -368,7 +361,6 @@ export default function RegistroScreen({ navigation }) {
         </>
       )}
 
-      {/* Botones */}
       <View style={styles.buttonRow}>
         <TouchableOpacity
           style={[styles.button, styles.cancel]}
@@ -377,11 +369,12 @@ export default function RegistroScreen({ navigation }) {
           <Text style={styles.cancelText}>Cancelar</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity 
+        <TouchableOpacity
           style={[styles.button, styles.continue]}
           onPress={handleSubmit}
+          disabled={submitting}
         >
-          <Text style={styles.continueText}>Continuar</Text>
+          <Text style={styles.continueText}>{submitting ? "Confirmando" : "Confirmar"}</Text>
         </TouchableOpacity>
       </View>
 
