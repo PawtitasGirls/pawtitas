@@ -1,5 +1,5 @@
 const API_BASE =
-  process.env.EXPO_PUBLIC_API_BASE_URL || 'http://192.168.1.5:3001';
+  process.env.EXPO_PUBLIC_API_BASE_URL;
 
 let authToken = null;
 
