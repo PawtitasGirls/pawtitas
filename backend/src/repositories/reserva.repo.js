@@ -16,6 +16,7 @@ async function findManyByDuenioId(duenioId) {
       },
       servicio: true,
       mascota: true,
+      resena: true,
     },
     orderBy: { fechaReserva: 'desc' },
   });

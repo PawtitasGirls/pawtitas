@@ -17,17 +17,39 @@ export const useConexionDetalles = (provider, misConexiones, visible = true, onC
     handleChat: () => handlers.onChat?.(provider),
     handlePago: () => handlers.onPago?.(provider),
     handleFinalizarServicio: () => handlers.onFinalizarServicio?.(provider),
-    handleAgregarResena: () => handlers.onAgregarResena?.(provider),
+    handleAgregarResena: () => handlers.AgregarResena?.(provider),
     handleRechazar: () => handlers.onRechazar?.(provider),
   });
 
   const getMenuItems = (actionHandlers) =>
     ConexionDetallesController.getMenuItems(provider?.estado, misConexiones, actionHandlers);
 
-  const buttonConfig = useMemo(() =>
-    ConexionDetallesController.getButtonConfig(provider?.estado, misConexiones, esVistaPrestador),
-    [provider?.estado, misConexiones, esVistaPrestador]
+ const buttonConfig = useMemo(() => {
+  if (provider?.puedeResenar) {
+    return {
+      primary: {
+        label: 'Agregar reseña',
+        action: 'handleAgregarResena',
+        variant: 'primary',
+      },
+      secondary: null,
+    };
+  }
+
+ 
+  return ConexionDetallesController.getButtonConfig(
+    provider?.estado,
+    misConexiones,
+    esVistaPrestador
   );
+
+}, [
+  provider?.estado,
+  provider?.puedeResenar,   
+  misConexiones,
+  esVistaPrestador
+]);
+
 
   const ratingStars = useMemo(() =>
     ConexionDetallesController.getRatingStars(provider?.rating || 0),
