@@ -73,18 +73,18 @@ model genero {
 }
 
 model mascota {
-  id          BigInt    @id @default(autoincrement())
-  nombre      String
-  tipo        String
-  raza        String?
-  edad        Int
-  edadUnidad  String    @default("años")
-  condiciones String?
+  id            BigInt    @id @default(autoincrement())
+  nombre        String
+  tipo          String
+  raza          String?
+  edad          Int
+  edadUnidad    String    @default("años")
+  condiciones   String?
   infoAdicional String?
-  genero      String
-  duenioId    BigInt
-  duenio      duenio    @relation(fields: [duenioId], references: [id], map: "Mascota_duenioId_fkey")
-  reserva     reserva[]
+  genero        String
+  duenioId      BigInt
+  duenio        duenio    @relation(fields: [duenioId], references: [id], map: "Mascota_duenioId_fkey")
+  reserva       reserva[]
 
   @@index([duenioId], map: "Mascota_duenioId_fkey")
   @@map("Mascota")
@@ -180,6 +180,7 @@ model reserva {
   mascota                mascota        @relation(fields: [mascotaId], references: [id], map: "Reserva_mascotaId_fkey")
   prestador              prestador      @relation(fields: [prestadorId], references: [id], map: "Reserva_prestadorId_fkey")
   servicio               servicio       @relation(fields: [servicioId], references: [id], map: "Reserva_servicioId_fkey")
+  resena                 resena[]
 
   @@index([duenioId], map: "Reserva_duenioId_fkey")
   @@index([mascotaId], map: "Reserva_mascotaId_fkey")
@@ -258,4 +259,19 @@ enum prestador_estado {
   PENDIENTE
   ACTIVO
   RECHAZADO
+}
+
+model resena {
+  id           BigInt      @id @default(autoincrement())
+  reservaId    BigInt
+  emisorRol    usuario_rol
+  calificacion Int
+  comentario   String?
+  fecha        DateTime    @default(now())
+
+  reserva reserva @relation(fields: [reservaId], references: [id], map: "Resena_reservaId_fkey")
+
+  @@unique([reservaId, emisorRol], map: "Resena_reservaId_emisorRol_key")
+  @@index([reservaId], map: "Resena_reservaId_fkey")
+  @@map("Resena")
 }
