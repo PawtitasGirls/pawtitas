@@ -11,6 +11,8 @@ const testRoutes = require('./routes/test.routes');
 const mascotaRoutes = require('./routes/mascota.routes');
 const reservaRoutes = require('./routes/reserva.routes');
 const mercadopagoRoutes = require('./routes/mercadopago.routes');
+const resenaRoutes = require('./routes/resena.routes');
+
 
 const app = express();
 
@@ -27,6 +29,7 @@ app.use(testRoutes);
 app.use(mascotaRoutes);
 app.use(reservaRoutes);
 app.use(mercadopagoRoutes);
+app.use(resenaRoutes);
 
 module.exports = app;
 

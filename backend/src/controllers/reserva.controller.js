@@ -141,41 +141,53 @@ async function getReservasByDuenioController(req, res) {
     }
 
     const reservas = await reservaRepo.findManyByDuenioId(id);
-    const serialized = reservas.map((r) => {
-      const base = serializeReserva(r);
-      const prestador = r.prestador;
-      const usuario = prestador?.usuario;
-      const domicilio = usuario?.domicilio;
-      const servicio = r.servicio || prestador?.prestadorservicio?.[0]?.servicio;
-      const mascota = r.mascota;
-      return {
-        ...base,
-        prestador: prestador && {
-          id: String(prestador.id),
-          nombreCompleto: [usuario?.nombre, usuario?.apellido].filter(Boolean).join(' ') || 'Sin nombre',
-          domicilio: domicilio && {
-            ubicacion: [domicilio.calle, domicilio.numero, domicilio.ciudad].filter(Boolean).join(', '),
-            latitude: domicilio.latitude ?? null,
-            longitude: domicilio.longitude ?? null,
-          },
-          servicio: servicio && {
-            descripcion: servicio.descripcion ?? '',
-            precio: servicio.precio != null ? Number(servicio.precio) : 0,
-            horarios: servicio.horarios ?? '',
-            tipoMascota: servicio.tipoMascota ?? '',
-            duracion: servicio.duracion ?? '',
-          },
-          perfil: prestador.perfil ?? '',
-        },
-        mascota: mascota
-          ? {
-              nombre: mascota.nombre ?? '',
-              tipo: mascota.tipo ?? '',
-              raza: mascota.raza ?? '',
-            }
-          : null,
-      };
-    });
+
+const serialized = reservas.map((r) => {
+  const base = serializeReserva(r);
+
+  const puedeResenar = (
+    r.estado === 'FINALIZADO' &&
+    r.confirmadoPorDuenio &&
+    r.confirmadoPorPrestador &&
+    (!r.resena || r.resena.length === 0)
+  );
+
+  const prestador = r.prestador;
+  const usuario = prestador?.usuario;
+  const domicilio = usuario?.domicilio;
+  const servicio = r.servicio || prestador?.prestadorservicio?.[0]?.servicio;
+  const mascota = r.mascota;
+
+  return {
+    ...base,
+    puedeResenar, 
+    prestador: prestador && {
+      id: String(prestador.id),
+      nombreCompleto: [usuario?.nombre, usuario?.apellido].filter(Boolean).join(' ') || 'Sin nombre',
+      domicilio: domicilio && {
+        ubicacion: [domicilio.calle, domicilio.numero, domicilio.ciudad].filter(Boolean).join(', '),
+        latitude: domicilio.latitude ?? null,
+        longitude: domicilio.longitude ?? null,
+      },
+      servicio: servicio && {
+        descripcion: servicio.descripcion ?? '',
+        precio: servicio.precio != null ? Number(servicio.precio) : 0,
+        horarios: servicio.horarios ?? '',
+        tipoMascota: servicio.tipoMascota ?? '',
+        duracion: servicio.duracion ?? '',
+      },
+      perfil: prestador.perfil ?? '',
+    },
+    mascota: mascota
+      ? {
+          nombre: mascota.nombre ?? '',
+          tipo: mascota.tipo ?? '',
+          raza: mascota.raza ?? '',
+        }
+      : null,
+  };
+});
+
 
     return res.json({ success: true, reservas: serialized });
   } catch (err) {
@@ -246,7 +258,7 @@ async function getReservasByPrestadorController(req, res) {
       };
     });
 
-    return res.json({ success: true, reservas: serialized });
+    return res.json({ success: true, reservas: serialized });    
   } catch (err) {
     console.error('Error al obtener reservas del prestador:', err);
     return res.status(500).json({
