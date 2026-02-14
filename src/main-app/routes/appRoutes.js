@@ -2,6 +2,8 @@ import SplashScreen from "../screens/splash/splash";
 import BienvenidaScreen from "../screens/bienvenida/bienvenida";
 import RegistroScreen from "../screens/registro/registro";
 import InicioScreen from "../screens/inicio/inicio";
+import OlvideContrasenaScreen from "../screens/olvideContrasena/olvideContrasena";
+import NuevaContrasenaScreen from "../screens/nuevaContrasena/nuevaContrasena";
 import HomeScreen from "../screens/home/home";
 import CuidadoresScreen from "../screens/cuidadores/Cuidadores";
 import PaseadoresScreen from "../screens/paseadores/Paseadores";
@@ -23,6 +25,8 @@ export const publicScreens = [
   { name: "Bienvenida", component: BienvenidaScreen },
   { name: "Registro", component: RegistroScreen },
   { name: "Inicio", component: InicioScreen },
+  { name: "OlvideContrasena", component: OlvideContrasenaScreen },
+  { name: "NuevaContrasena", component: NuevaContrasenaScreen },
   { name: "Home", component: HomeScreen },
   { name: "Perfil", component: PerfilScreen },
   { name: "EditarPerfil", component: EditarPerfil },

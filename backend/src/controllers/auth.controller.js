@@ -1,9 +1,11 @@
 const bcrypt = require('bcryptjs');
+const crypto = require('crypto');
 const prisma = require('../config/prisma');
 const usuarioRepo = require('../repositories/usuario.repo');
 const prestadorRepo = require('../repositories/prestador.repo');
 const mascotaRepo = require('../repositories/mascota.repo');
 const { registerUser } = require('../services/registro.service');
+const { sendRecoveryCodeEmail } = require('../services/email.service');
 
 // Login
 async function loginController(req, res) {
@@ -119,7 +121,92 @@ async function registroController(req, res) {
   }
 }
 
+/** Genera un código de 6 dígitos para recuperación */
+function generarCodigoRecuperacion() {
+  return crypto.randomInt(100000, 999999).toString();
+}
+
+/**
+ * Solicitar código de recuperación: recibe email, genera código, guarda en usuario y envía email.
+ */
+async function solicitarCodigoRecuperacion(req, res) {
+  try {
+    const { email } = req.body || {};
+    if (!email || typeof email !== 'string') {
+      return res.status(400).json({ success: false, message: 'Email es requerido' });
+    }
+    const usuario = await usuarioRepo.findByEmail(email.trim());
+    if (!usuario) {
+      return res.status(404).json({ success: false, message: 'No existe una cuenta con ese email' });
+    }
+    const codigo = generarCodigoRecuperacion();
+    await usuarioRepo.update(usuario.id, { codigoRecuperarContrasena: codigo });
+    await sendRecoveryCodeEmail({ email: usuario.email, codigo });
+    return res.json({ success: true, message: 'Se envió un código a tu email' });
+  } catch (err) {
+    console.error('solicitarCodigoRecuperacion error:', err);
+    return res.status(500).json({
+      success: false,
+      message: err.message || 'No se pudo enviar el código',
+    });
+  }
+}
+
+/**
+ * Verificar código: recibe email y codigo. Si coinciden, permite continuar al cambio de clave.
+ */
+async function verificarCodigoRecuperacion(req, res) {
+  try {
+    const { email, codigo } = req.body || {};
+    if (!email || !codigo) {
+      return res.status(400).json({ success: false, message: 'Email y código son requeridos' });
+    }
+    const usuario = await usuarioRepo.findByEmail(email.trim());
+    if (!usuario || !usuario.codigoRecuperarContrasena) {
+      return res.status(400).json({ success: false, message: 'Código inválido o expirado' });
+    }
+    if (usuario.codigoRecuperarContrasena !== String(codigo).trim()) {
+      return res.status(400).json({ success: false, message: 'Código incorrecto' });
+    }
+    return res.json({ success: true, message: 'Código correcto' });
+  } catch (err) {
+    console.error('verificarCodigoRecuperacion error:', err);
+    return res.status(500).json({ success: false, message: 'Error al verificar' });
+  }
+}
+
+/**
+ * Actualizar clave tras recuperación: email, codigo, nuevaClave. Verifica código y actualiza.
+ */
+async function actualizarClaveRecuperacion(req, res) {
+  try {
+    const { email, codigo, nuevaClave } = req.body || {};
+    if (!email || !codigo || !nuevaClave) {
+      return res.status(400).json({ success: false, message: 'Faltan email, código o nueva contraseña' });
+    }
+    if (nuevaClave.length < 6) {
+      return res.status(400).json({ success: false, message: 'La contraseña debe tener al menos 6 caracteres' });
+    }
+    const usuario = await usuarioRepo.findByEmail(email.trim());
+    if (!usuario || usuario.codigoRecuperarContrasena !== String(codigo).trim()) {
+      return res.status(400).json({ success: false, message: 'Código inválido o expirado' });
+    }
+    const claveHash = await bcrypt.hash(nuevaClave, 10);
+    await usuarioRepo.update(usuario.id, {
+      clave: claveHash,
+      codigoRecuperarContrasena: null,
+    });
+    return res.json({ success: true, message: 'Contraseña actualizada. Ya podés iniciar sesión.' });
+  } catch (err) {
+    console.error('actualizarClaveRecuperacion error:', err);
+    return res.status(500).json({ success: false, message: 'Error al actualizar la contraseña' });
+  }
+}
+
 module.exports = {
   loginController,
   registroController,
+  solicitarCodigoRecuperacion,
+  verificarCodigoRecuperacion,
+  actualizarClaveRecuperacion,
 };

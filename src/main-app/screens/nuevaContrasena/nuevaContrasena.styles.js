@@ -7,23 +7,17 @@ export const styles = StyleSheet.create({
     backgroundColor: "#FDFDFD",
   },
   container: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
+  },
+  scrollContainer: {
     flexGrow: 1,
     padding: 20,
     paddingBottom: 40,
     justifyContent: "center",
     alignItems: "center",
-  },
-  logoContainer: {
-    alignItems: "center",
-    marginBottom: 5,
-  },
-  logoImage: {
-    width: 140,
-    height: 140,
-    shadowColor: "#000",
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 2,
   },
   formContainer: {
     backgroundColor: "#FFFFFF",
@@ -53,41 +47,25 @@ export const styles = StyleSheet.create({
     marginBottom: 20,
     textAlign: "center",
   },
-  forgotLink: {
-    alignSelf: "center",
-    marginTop: 14,
+  inputContainer: {
+    width: "100%",
+    marginBottom: 4,
   },
-  forgotLinkText: {
-    fontSize: 13,
-    color: colors.text.secondary,
-    textDecorationLine: "underline",
+  errorText: {
+    fontSize: 12,
+    color: "#E74C3C",
+    marginTop: -8,
+    marginBottom: 12,
+    marginLeft: 4,
   },
   registerContainer: {
-    flexDirection: "row",
-    justifyContent: "center",
     marginTop: 22,
-    flexWrap: "wrap",
-  },
-  registerText: {
-    fontSize: 13,
-    color: "#8C8C8C",
+    alignItems: "center",
   },
   registerLink: {
     fontSize: 13,
     fontWeight: "600",
     color: "#f5a3c1ff",
     textDecorationLine: "underline",
-  },
-  errorText: {
-    fontSize: 12,
-    color: "#E74C3C",
-    marginTop: -16,
-    marginBottom: 20,
-    marginLeft: 4,
-    minHeight: 16,
-  },
-  inputContainer: {
-    width: "100%",
-    marginBottom: 4,
   },
 });

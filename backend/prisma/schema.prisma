@@ -205,24 +205,25 @@ model servicio {
 }
 
 model usuario {
-  id              BigInt      @id @default(autoincrement())
-  usuario         String      @unique(map: "Usuario_usuario_key")
-  clave           String
-  nombre          String
-  apellido        String
-  dni             String      @unique(map: "Usuario_dni_key")
-  fechaNacimiento DateTime
-  celular         String
-  email           String      @unique(map: "Usuario_email_key")
-  activo          Boolean     @default(true)
-  rol             usuario_rol
-  domicilioId     BigInt
-  generoId        BigInt
-  creadoEn        DateTime    @default(now())
-  duenio          duenio?
-  prestador       prestador?
-  domicilio       domicilio   @relation(fields: [domicilioId], references: [id], map: "Usuario_domicilioId_fkey")
-  genero          genero      @relation(fields: [generoId], references: [id], map: "Usuario_generoId_fkey")
+  id                         BigInt      @id @default(autoincrement())
+  usuario                    String      @unique(map: "Usuario_usuario_key")
+  clave                      String
+  nombre                     String
+  apellido                   String
+  dni                        String      @unique(map: "Usuario_dni_key")
+  fechaNacimiento            DateTime
+  celular                    String
+  email                      String      @unique(map: "Usuario_email_key")
+  activo                     Boolean     @default(true)
+  rol                        usuario_rol
+  domicilioId                BigInt
+  generoId                   BigInt
+  creadoEn                   DateTime    @default(now())
+  codigoRecuperarContrasena  String?
+  duenio                     duenio?
+  prestador                  prestador?
+  domicilio                  domicilio   @relation(fields: [domicilioId], references: [id], map: "Usuario_domicilioId_fkey")
+  genero                     genero      @relation(fields: [generoId], references: [id], map: "Usuario_generoId_fkey")
 
   @@index([domicilioId], map: "Usuario_domicilioId_fkey")
   @@index([generoId], map: "Usuario_generoId_fkey")
