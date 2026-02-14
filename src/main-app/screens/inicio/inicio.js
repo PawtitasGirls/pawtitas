@@ -239,6 +239,13 @@ export default function InicioScreen({ navigation }) {
               onPress={handleLogin}
             />
 
+            <TouchableOpacity
+              style={styles.forgotLink}
+              onPress={() => navigation.navigate("OlvideContrasena")}
+            >
+              <Text style={styles.forgotLinkText}>Olvidé mi contraseña</Text>
+            </TouchableOpacity>
+
             <View style={styles.registerContainer}>
               <Text style={styles.registerText}>¿No tenés cuenta? </Text>
               <TouchableOpacity onPress={() => navigation.navigate("Registro")}>

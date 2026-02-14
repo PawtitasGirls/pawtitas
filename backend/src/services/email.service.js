@@ -48,6 +48,42 @@ async function sendContactEmail({ nombre, email, mensaje }) {
   return info;
 }
 
+/**
+ * Envía email con código de recuperación de contraseña
+ */
+async function sendRecoveryCodeEmail({ email, codigo }) {
+  if (!email || !codigo) {
+    throw new Error('Email y código son requeridos');
+  }
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    throw new Error('El email no es válido');
+  }
+  if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
+    console.error('SMTP no configurado: faltan SMTP_USER o SMTP_PASS');
+    throw new Error('Error de configuración del servidor');
+  }
+
+  const mailOptions = {
+    from: process.env.SMTP_USER,
+    to: email,
+    subject: 'Pawtitas - Código para recuperar tu contraseña',
+    html: `
+      <h2>Recuperación de contraseña</h2>
+      <p>Tu código de verificación es:</p>
+      <p style="font-size:24px;font-weight:bold;letter-spacing:4px;">${codigo}</p>
+      <p>Ingresalo en la app para continuar. Si no solicitaste este código, podés ignorar este mensaje.</p>
+      <p>— Equipo Pawtitas</p>
+    `,
+    text: `Recuperación de contraseña - Tu código: ${codigo}. Ingresalo en la app para continuar.`,
+  };
+
+  const info = await transporter.sendMail(mailOptions);
+  console.log('Email recuperación enviado:', info.messageId);
+  return info;
+}
+
 module.exports = {
   sendContactEmail,
+  sendRecoveryCodeEmail,
 };
