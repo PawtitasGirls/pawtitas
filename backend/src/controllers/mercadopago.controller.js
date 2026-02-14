@@ -1,6 +1,44 @@
+const crypto = require('crypto');
 const prisma = require('../config/prisma');
 const pagoRepo = require('../repositories/pago.repo');
 const { preference: mpPreference, payment: mpPayment } = require('../config/mercadopago');
+
+function validateWebhookSignature(req) {
+  const secret = process.env.MERCADOPAGO_WEBHOOK_SECRET;
+  if (!secret) return true;
+
+  const xSignature = req.headers['x-signature'];
+  const xRequestId = req.headers['x-request-id'];
+
+  if (!xSignature) return false;
+
+  let ts = null;
+  let v1 = null;
+  for (const part of xSignature.split(',')) {
+    const [key, value] = part.split('=');
+    if (key === 'ts') ts = value;
+    if (key === 'v1') v1 = value;
+  }
+
+  if (!ts || !v1) return false;
+
+  const dataId = req.query?.['data.id'] ?? req.body?.data?.id;
+  if (!dataId) return false;
+
+  const manifestParts = [`id:${dataId}`];
+  if (xRequestId) manifestParts.push(`request-id:${xRequestId}`);
+  manifestParts.push(`ts:${ts}`);
+  const manifest = manifestParts.join(';') + ';';
+
+  const hash = crypto.createHmac('sha256', secret).update(manifest).digest('hex');
+
+  if (hash.length !== v1.length) return false;
+  try {
+    return crypto.timingSafeEqual(Buffer.from(hash, 'hex'), Buffer.from(v1, 'hex'));
+  } catch {
+    return false;
+  }
+}
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
 const APP_URL = process.env.APP_URL || 'pawtitas://';
@@ -11,7 +49,7 @@ function buildPreferenceBody(reserva, userEmail) {
   return {
     items: [
       {
-        title: reserva.servicio?.descripcion || 'Servicio Pawtitas',
+        title: [reserva.prestador?.usuario?.nombre, reserva.prestador?.usuario?.apellido].filter(Boolean).join(' ') || 'Servicio Pawtitas',
         description: `Reserva #${reserva.id}`,
         quantity: 1,
         unit_price: montoTotal,
@@ -125,6 +163,10 @@ async function createPreferenceController(req, res) {
 
 async function webhookController(req, res) {
   try {
+    if (!validateWebhookSignature(req)) {
+      return res.status(401).json({ error: 'Invalid signature' });
+    }
+
     const { type, data } = req.body || {};
 
     if (type !== 'payment') {
@@ -136,29 +178,20 @@ async function webhookController(req, res) {
 
     const mp = await mpPayment.get({ id: paymentId });
     const externalRef = mp.external_reference || '';
-    const reservaIdStr = mp.metadata?.reserva_id || externalRef.replace(/^pawtitas-(\d+)-.+/, '$1');
+    const reservaIdStr = mp.metadata?.reserva_id || (externalRef.match(/^pawtitas-(\d+)-/) || [])[1];
 
-    const pago = await pagoRepo.findByMpPreferenceId(mp.additional_info?.items?.[0]?.id)
-      || await prisma.pago.findFirst({
-          where: { mpPreferenceId: mp.preference_id || reservaIdStr },
-        });
-
-    if (!pago) {
-      const pagoByReserva = await prisma.pago.findFirst({
+    let pago = null;
+    if (mp.preference_id) {
+      pago = await pagoRepo.findByMpPreferenceId(mp.preference_id);
+    }
+    if (!pago && reservaIdStr) {
+      pago = await prisma.pago.findFirst({
         where: { reservaId: BigInt(reservaIdStr) },
+        include: { reserva: true },
       });
-      if (pagoByReserva) {
-        await pagoRepo.updateByReservaId(pagoByReserva.reservaId, {
-          mpPaymentId: String(paymentId),
-          estadoPago: mp.status === 'approved' ? 'PAGADO' : 'PENDIENTE',
-          fechaPago: mp.status === 'approved' ? new Date() : null,
-        });
-        await prisma.reserva.update({
-          where: { id: pagoByReserva.reservaId },
-          data: { estado: mp.status === 'approved' ? 'PAGADO' : 'PENDIENTE_PAGO' },
-        });
-      }
-    } else {
+    }
+
+    if (pago) {
       await pagoRepo.updateByReservaId(pago.reservaId, {
         mpPaymentId: String(paymentId),
         estadoPago: mp.status === 'approved' ? 'PAGADO' : 'PENDIENTE',
@@ -229,7 +262,7 @@ async function confirmarFinalizacionController(req, res) {
     if (ambosConfirmaron) {
       await prisma.reserva.update({
         where: { id: reservaIdB },
-        data: { estado: 'FINALIZADO' },
+        data: { estado: 'FINALIZADO', efectuado: true },
       });
       if (reserva.pago) {
         await prisma.pago.update({
