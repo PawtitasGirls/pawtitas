@@ -188,7 +188,15 @@ export const useMisConexiones = () => {
       return;
     }
 
-    setState(prev => ({ ...prev, showCalendarioModal: false }));
+    setState(prev => ({
+      ...prev,
+      showCalendarioModal: false,
+      showMensajeFlotante: true,
+      mensajeFlotante: {
+        type: 'info',
+        text: 'Redirigiendo a Mercado Pago para que completes tu pago de forma segura',
+      },
+    }));
 
     try {
       const res = await createPaymentPreference({
