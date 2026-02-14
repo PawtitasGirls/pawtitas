@@ -1,11 +1,10 @@
 // Estados para conexiones entre usuarios y prestadores de servicios
 export const ESTADOS_CONEXION = {
   PAGO_CONFIRMADO: 'confirmado',
-  PAGO_RETENIDO: 'confirmado', // alias para escrow
+  PAGO_RETENIDO: 'confirmado',
   PENDIENTE_DE_PAGO: 'pendiente',
   SOLICITUD_RECHAZADA: 'rechazado',
   SERVICIO_FINALIZADO: 'finalizado',
-  PAGO_LIBERADO: 'pago_liberado',
 };
 
 export const RESERVA_ESTADO_A_CONEXION = {
@@ -18,8 +17,8 @@ export const RESERVA_ESTADO_A_CONEXION = {
 
 export function mapReservaEstadoToConexion(reservaEstado, pagoEstado) {
   if (!reservaEstado) return ESTADOS_CONEXION.PENDIENTE_DE_PAGO;
-  if (reservaEstado === 'FINALIZADO' && pagoEstado === 'LIBERADO') {
-    return ESTADOS_CONEXION.PAGO_LIBERADO;
+  if (reservaEstado === 'FINALIZADO') {
+    return ESTADOS_CONEXION.SERVICIO_FINALIZADO;
   }
   const key = String(reservaEstado).toUpperCase().replace(/-/g, '_');
   return RESERVA_ESTADO_A_CONEXION[key] ?? ESTADOS_CONEXION.PENDIENTE_DE_PAGO;
@@ -27,10 +26,10 @@ export function mapReservaEstadoToConexion(reservaEstado, pagoEstado) {
 
 export const ESTADOS_CONEXION_CONFIG = {
   [ESTADOS_CONEXION.PAGO_CONFIRMADO]: {
-    label: 'Pago retenido',
-    icon: 'lock-closed',
+    label: 'Pago confirmado',
+    icon: 'checkmark-circle',
     colorType: 'info',
-    description: 'Pago retenido hasta finalizar servicio',
+    description: 'Pago confirmado',
   },
   [ESTADOS_CONEXION.PENDIENTE_DE_PAGO]: {
     label: 'Pendiente',
@@ -49,11 +48,5 @@ export const ESTADOS_CONEXION_CONFIG = {
     icon: 'checkmark-done-circle',
     colorType: 'success',
     description: 'Servicio finalizado',
-  },
-  [ESTADOS_CONEXION.PAGO_LIBERADO]: {
-    label: 'Pago liberado',
-    icon: 'checkmark-circle',
-    colorType: 'success',
-    description: 'Pago transferido al prestador',
   },
 };
