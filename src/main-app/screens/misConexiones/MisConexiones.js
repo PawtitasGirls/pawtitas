@@ -18,6 +18,7 @@ import { useMisConexiones } from '../../hooks/useMisConexiones';
 import { usePaginacion } from '../../hooks/usePaginacion';
 import { styles } from './MisConexiones.styles';
 
+// Pantalla de Mis Conexiones
 const MisConexiones = () => {
   const navigation = useNavigation();
   const {
@@ -100,7 +101,7 @@ const MisConexiones = () => {
       {loadingConexiones ? (
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" />
-          <Text style={styles.loadingText}>Cargando conexiones...</Text>
+          <Text style={styles.loadingText}>Cargando conexiones</Text>
         </View>
       ) : providers.length === 0 ? (
         <View style={styles.emptyContainer}>
