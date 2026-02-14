@@ -3,13 +3,14 @@ import { View, Text, Image } from "react-native";
 import styles from "./Nosotros.styles";
 import avatarMariaToro from "../../../assets/avatar/avatar-maria-toro.jpg";
 import avatarMariaElisa from "../../../assets/avatar/avatar-maria.elisa.jpg";
+import avatarAndreaPaez from "../../../assets/avatar/avatar-andrea-paez.jpg";
 
 export default function Nosotros() {
   const equipo = [
     {
       nombre: "Andrea Paez",
       descripcion: "Fundadora",
-      avatar: { uri: "https://em-content.zobj.net/thumbs/240/apple/354/man-raising-hand_1f64b-200d-2642-fe0f.png" },
+      avatar: avatarAndreaPaez,
     },
     {
       nombre: "María José Toro",
