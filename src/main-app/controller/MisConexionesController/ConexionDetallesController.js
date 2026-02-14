@@ -122,7 +122,7 @@ export class ConexionDetallesController {
         'Al completar el pago, la solicitud pasará a estado "Confirmado" y el servicio quedará validado.',
         'El pago se libera al prestador únicamente cuando ambas partes (el cliente y el prestador) marquen el servicio como "Finalizado".',
         'Si tenés dudas o querés coordinar algo, podés comunicarte con el usuario a través del chat cuando el estado esté "Pendiente" o "Confirmado".',
-        '* Pawtitas aplica un 10% de comisión sobre el servicio para seguir mejorando.',
+        '* Pawtitas aplica un 12% de comisión sobre el servicio para seguir mejorando.',
       ]
     };
   }
