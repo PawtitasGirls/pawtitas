@@ -107,29 +107,22 @@ const buildFormDataFromUser = (role, userData) => {
   return next;
 };
 
-// Componente principal para la pantalla de editar perfil
 export default function EditarPerfil({ navigation, route }) {
   const { user, role: authRole, updateUser } = useAuth();
 
-  // Obtener el rol del usuario
   const userRole = route?.params?.role || authRole || ROLES.DUENIO;
 
-  // Estado del formulario inicializado según el rol
   const [formData, setFormData] = useState(() => buildFormDataFromUser(userRole, user));
-
-  // Estado de la aplicación
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [errors, setErrors] = useState({});
   const [message, setMessage] = useState({ type: "", text: "" });
   const [showMensajeFlotante, setShowMensajeFlotante] = useState(false);
 
-  // Cargar datos del perfil al montar el componente
   useEffect(() => {
     loadProfileData();
   }, [userRole, user]);
 
-  // Cargar los datos del perfil del usuario
   const loadProfileData = async () => {
     setLoading(true);
     try {
@@ -149,24 +142,20 @@ export default function EditarPerfil({ navigation, route }) {
     }
   };
 
-  // Manejar el cambio en los campos del formulario
   const handleInputChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     
-    // Limpiar error del campo cuando el usuario empiece a escribir
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: "" }));
     }
   };
 
-  // Validar los datos del formulario
   const validateForm = () => {
     const newErrors = PerfilFactory.validateForm(formData, userRole);
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  // Manejar el guardado del perfil
   const handleSave = async () => {
     if (!validateForm()) {
       setMessage({ type: "error", text: "Por favor, corrige los errores en el formulario" });
@@ -226,21 +215,17 @@ export default function EditarPerfil({ navigation, route }) {
     }
   };
 
-  // Manejar la navegación hacia atrás
   const handleBackPress = () => {
     navigation.goBack();
   };
 
-  // Manejar el ocultamiento del mensaje flotante
   const handleHideMensajeFlotante = () => {
     setShowMensajeFlotante(false);
     setMessage({ type: "", text: "" });
   };
 
-  // Título
   const getTitleByRole = () => "Editar Perfil";
 
-  // Mostrar loading mientras se cargan los datos
   if (loading) {
     return (
       <SafeAreaView style={styles.loadingContainer}>
@@ -251,7 +236,6 @@ export default function EditarPerfil({ navigation, route }) {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Mensaje flotante */}
       <MensajeFlotante
         message={message.text}
         type={message.type}
@@ -275,7 +259,6 @@ export default function EditarPerfil({ navigation, route }) {
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
-          {/* Información importante */}
           {userRole !== ROLES.ADMIN && (
             <View style={styles.additionalInfoContainer}>
               <View style={styles.infoHeader}>
@@ -305,11 +288,9 @@ export default function EditarPerfil({ navigation, route }) {
             </View>
           )}
 
-          {/* Renderizar el formulario según el rol utilizando Factory Pattern*/}
           {PerfilFactory.createProfileForm(userRole, { formData, handleInputChange, errors })}
         </ScrollView>
 
-        {/* Botones de cancelar y guardar */}
         <View style={styles.buttonContainer}>
           <GuardarCancelarBtn
             label="Guardar"
@@ -323,7 +304,6 @@ export default function EditarPerfil({ navigation, route }) {
         </View>
       </KeyboardAvoidingView>
       
-      {/* Barra de navegación inferior */}
       <MenuInferior />
     </SafeAreaView>
   );

@@ -172,6 +172,7 @@ export default function PrestadorServicioPerfilForm({ formData, handleInputChang
             placeholder="Reptiles, peces, etc."
             multiline={false}
             error={errors.petTypesCustom}
+            required={true}
           />
         )}
       </View>
