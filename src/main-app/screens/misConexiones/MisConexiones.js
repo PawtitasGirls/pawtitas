@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { ScrollView, View, Text, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
+import { ROLES } from '../../constants/roles';
 import ScreenHeader from '../../components/ScreenHeader';
 import MenuInferior from '../../components/MenuInferior/MenuInferior';
 import BarraBuscador from '../../components/BarraBuscador/BarraBuscador';
@@ -26,6 +27,7 @@ const MisConexiones = () => {
     providers,
     loadingConexiones,
     isPrestadorView,
+    role,
     handleSearch,
     handleFilterChange,
     handleProviderPress,
@@ -151,6 +153,7 @@ const MisConexiones = () => {
         onFinalizarServicio={handleFinalizarServicio}
         onAgregarResena={handleAgregarResena}
         onRechazar={handleRechazar}
+        isAdmin={role === ROLES.ADMIN}
       />
 
       <ResenaFormModal

@@ -505,6 +505,7 @@ export const useMisConexiones = () => {
     providers: filteredProviders,
     loadingConexiones,
     isPrestadorView,
+    role,
     handleSearch,
     handleFilterChange,
     handleProviderPress,

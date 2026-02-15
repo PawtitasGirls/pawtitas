@@ -15,8 +15,7 @@ export class ConexionDetallesController {
     return [];
   }
 
-  // Configuración de botones. esVistaPrestador = true oculta "Realizar Pago".
-  static getButtonConfig(estado, misConexiones, esVistaPrestador = false) {
+  static getButtonConfig(estado, misConexiones, esVistaPrestador = false, isAdmin = false) {
     if (misConexiones && estado === ESTADOS_CONEXION.PAGO_CONFIRMADO) {
       return {
         primary: { 
@@ -48,6 +47,17 @@ export class ConexionDetallesController {
         primary: { 
           label: 'Chat', 
           action: 'handleChat',
+          variant: 'primary'
+        },
+        secondary: null
+      };
+    }
+
+    if (isAdmin) {
+      return {
+        primary: { 
+          label: 'Reseñas', 
+          action: 'handleResenas',
           variant: 'primary'
         },
         secondary: null

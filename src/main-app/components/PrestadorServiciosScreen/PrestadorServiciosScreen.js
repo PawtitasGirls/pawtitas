@@ -3,6 +3,7 @@ import { ScrollView, View, Text, Modal, TouchableOpacity, Alert, ActivityIndicat
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { colors } from '../../../shared/styles';
+import { ROLES } from '../../constants/roles';
 import ScreenHeader from '../ScreenHeader';
 import BarraBuscador from '../BarraBuscador/BarraBuscador';
 import Filtros from '../Filtros/Filtros';
@@ -35,7 +36,7 @@ const PrestadorServiciosScreen = ({
   screenSubtitle
 }) => {
   const { userLocation, getDistanceFromUser, isLocationEnabled } = useLocation();
-  const { user } = useAuth();
+  const { user, role } = useAuth();
   
   // Filtro por defecto: 'cercania' si hay ubicación activada, sino 'mejor-calificacion'
   const defaultFilter = isLocationEnabled && userLocation ? 'cercania' : 'mejor-calificacion';
@@ -347,6 +348,7 @@ const PrestadorServiciosScreen = ({
         onResenas={handleResenas}
         onConectar={handleConectar}
         loadingPrimary={loadingMascotas || loadingReserva}
+        isAdmin={role === ROLES.ADMIN}
       />
 
       <Modal

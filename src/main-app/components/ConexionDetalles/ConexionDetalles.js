@@ -30,6 +30,7 @@ const ConexionDetalles = ({
   onAgregarResena,
   onRechazar,
   loadingPrimary = false,
+  isAdmin = false,
 }) => {
   const { formatDistance } = useLocation();
   const {
@@ -44,7 +45,7 @@ const ConexionDetalles = ({
     steps,
     createActionHandlers,
     getMenuItems
-  } = useConexionDetalles(provider, misConexiones, visible, onClose, esVistaPrestador, onModalHide);
+  } = useConexionDetalles(provider, misConexiones, visible, onClose, esVistaPrestador, onModalHide, isAdmin);
 
   const actionHandlers = createActionHandlers({
     onResenas,
