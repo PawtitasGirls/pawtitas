@@ -42,6 +42,7 @@ export const useMisConexiones = () => {
     const load = async () => {
       try {
         if (role === ROLES.DUENIO && duenioId) {
+          
           const res = await getReservasByDuenio(duenioId);
           const reservas = res?.reservas || [];
           const list = reservas.map((r) => {
@@ -56,6 +57,7 @@ export const useMisConexiones = () => {
             return {
               id: r.id,
               reservaId: r.id,
+              prestadorUsuarioId: p.usuarioId ?? null,
               nombre: p.nombreCompleto || 'Sin nombre',
               descripcion: serv.descripcion || 'Sin descripción',
               precio: serv.precio != null ? `$${Number(serv.precio).toLocaleString('es-AR')}` : 'A convenir',
@@ -96,6 +98,7 @@ export const useMisConexiones = () => {
             return {
               id: r.id,
               reservaId: r.id,
+              duenioUsuarioId: d.usuarioId ?? null,
               nombre: d.nombreCompleto || 'Sin nombre',
               descripcion,
               descripcionDuenio: descripcionDuenio || null,
@@ -468,8 +471,30 @@ export const useMisConexiones = () => {
 
   const handleChat = useCallback((provider, navigation) => {
     handleCloseDetalles();
-    navigation.navigate('Chat', { providerId: provider.id });
-  }, [handleCloseDetalles]);
+  
+    let targetUserId = null;
+  
+    if (isPrestadorView) {
+      targetUserId = provider.duenioUsuarioId;
+    } else {
+      targetUserId = provider.prestadorUsuarioId;
+    }
+  
+    if (!targetUserId) {
+      console.warn('No se encontró usuarioId para abrir chat');
+      return;
+    }
+  
+    navigation.navigate('Chat', {
+      targetUser: {
+        id: String(targetUserId),
+        name: provider.nombre,
+        image: null, // puedes agregar avatar si lo incluyes luego
+      },
+    });
+  
+  }, [handleCloseDetalles, isPrestadorView]);
+  
 
   return {
     state,

@@ -1,33 +1,44 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, TouchableOpacity, ActivityIndicator, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useNavigation } from '@react-navigation/native';
-import { ScreenHeader, MenuInferior, Paginador } from '../../components';
+import { useNavigation, useRoute } from '@react-navigation/native';import { ScreenHeader, MenuInferior, Paginador } from '../../components';
 import { useStreamChat } from '../../contexts';
 import { ChatController } from '../../controller';
 import { usePaginacion } from '../../hooks/usePaginacion';
 import { colors } from '../../../shared/styles';
 import { styles } from './Chat.styles';
+import { useAuth } from '../../contexts/AuthContext';
+import { ensureChatUser } from '../../services/api/apiChat';
+
+
+
 
 const Chat = () => {
+    const route = useRoute();
+    const targetUser = route?.params?.targetUser ?? null;
     const navigation = useNavigation();
     const { chatClient, isReady, currentUser, createOrGetChannel, initializeChat } = useStreamChat();
     const [channels, setChannels] = useState([]);
     const [loading, setLoading] = useState(true);
     const [mockUsersVisible, setMockUsersVisible] = useState(true);
+    const { user, tokenStream, role } = useAuth();
+
 
     useEffect(() => {
-        if (!isReady) {
-            const autoLoginData = ChatController.getAutoLoginData();
-            initializeChat(
-                autoLoginData.userId,
-                autoLoginData.userName,
-                autoLoginData.userToken,
-                autoLoginData.userImage,
-                autoLoginData.userRole
-            ).catch(err => console.error("Error auto-login chat:", err));
-        }
-    }, [isReady]);
+        if (isReady) return;
+    
+        if (!user || !tokenStream) return;
+    
+        initializeChat(
+            user.id,
+            user.nombre || user.name,
+            tokenStream,              
+            user.avatar || user.image,
+            role
+        ).catch(err => console.error("Error initializing chat:", err));
+    
+    }, [isReady, user, tokenStream]);
+    
 
     useEffect(() => {
         if (!isReady || !chatClient || !currentUser) return;
@@ -66,6 +77,44 @@ const Chat = () => {
             chatClient.off(handleEvent);
         };
     }, [isReady, chatClient, currentUser]);
+
+    useEffect(() => {
+        if (!targetUser) return;
+        if (!isReady || !chatClient || !currentUser) return;
+      
+        let cancelled = false;
+      
+        const startChatWithTarget = async () => {
+          try {
+            setLoading(true);
+      
+            // 1. Asegurar que el otro usuario exista en Stream
+            await ensureChatUser({ userId: targetUser.id, name: targetUser.name, image: targetUser.image ?? null });
+      
+            // 2. Crear u obtener canal 1–1
+            const channel = await createOrGetChannel(
+              targetUser.id,
+              targetUser.name,
+              targetUser.image
+            );
+      
+            if (!cancelled && channel) {
+              navigation.replace('Conversacion', { channelId: channel.id });
+            }
+          } catch (err) {
+            console.error('Error iniciando chat con targetUser:', err);
+          } finally {
+            if (!cancelled) setLoading(false);
+          }
+        };
+      
+        startChatWithTarget();
+      
+        return () => {
+          cancelled = true;
+        };
+      }, [targetUser, isReady, chatClient, currentUser]);
+      
 
     const handleChannelPress = (channel) => {
         navigation.navigate('Conversacion', { channelId: channel.id });
@@ -158,7 +207,24 @@ const Chat = () => {
             </View>
         </TouchableOpacity>
     );
-
+    if (!user || !tokenStream) {
+        return (
+            <SafeAreaView style={styles.container}>
+                <ScreenHeader
+                    title="Chat"
+                    showBackButton={true}
+                    onBackPress={() => navigation.goBack()}
+                />
+                <View style={styles.emptyContainer}>
+                    <Text style={styles.emptySubtext}>
+                        Iniciá sesión para usar el chat.
+                    </Text>
+                </View>
+                <MenuInferior />
+            </SafeAreaView>
+        );
+    }
+    
     if (!isReady) {
         return (
             <SafeAreaView style={styles.container}>
@@ -182,32 +248,27 @@ const Chat = () => {
             ) : (
                 <>
                     {channels.length > 0 ? (
-                        <FlatList
-                            data={canalesActuales}
-                            keyExtractor={(item) => item.id}
-                            renderItem={renderChannelItem}
-                            ListFooterComponent={() => (
-                                <Paginador
-                                    paginaActual={paginaActual}
-                                    totalPaginas={totalPaginas}
-                                    onCambioPagina={manejarCambioPagina}
-                                />
-                            )}
+                    <FlatList
+                        data={canalesActuales}
+                        keyExtractor={(item) => item.id}
+                        renderItem={renderChannelItem}
+                        ListFooterComponent={() => (
+                        <Paginador
+                            paginaActual={paginaActual}
+                            totalPaginas={totalPaginas}
+                            onCambioPagina={manejarCambioPagina}
                         />
+                        )}
+                    />
                     ) : (
-                         <View style={{flex: 1}}>
-                            <FlatList
-                                data={ChatController.getMockUsers()}
-                                keyExtractor={(item) => item.id}
-                                renderItem={renderMockUserItem}
-                            />
-                             <View style={styles.emptyContainer}>
-                                <Text style={styles.emptySubtext}>
-                                    Iniciá la conversación con un usuario.
-                                </Text>
-                            </View>
-                        </View>
+                    <View style={styles.emptyContainer}>
+                        <Text style={styles.emptySubtext}>
+                        No tenés conversaciones.
+                        {"\n"}Iniciá un chat desde Mis conexiones.
+                        </Text>
+                    </View>
                     )}
+
                 </>
             )}
             <MenuInferior />
