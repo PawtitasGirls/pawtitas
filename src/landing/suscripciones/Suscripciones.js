@@ -18,9 +18,9 @@ const prestadorPlans = [
 ];
 
 const duenioBullets = [
-  "Sin suscripción",
-  "Registrate gratis",
-  "Pagás solo por cada reserva que hagas",
+  "Sin suscripción mensual",
+  "Registro gratuito",
+  "Comisión por cada reserva",
 ];
 
 export default function Suscripciones({ scrollToSection }) {
@@ -29,21 +29,19 @@ export default function Suscripciones({ scrollToSection }) {
       <View style={styles.header}>
         <Text style={styles.title}>Suscripciones</Text>
         <Text style={styles.subtitle}>
-          Planes para prestadores de servicios. Si sos dueño de mascota, accedé
-          gratis y pagá solo cuando uses un servicio.
+          Elegí cómo querés usar Pawtitas y encontrá la opción ideal para vos
         </Text>
       </View>
 
       <View style={styles.plansWrapper}>
-        {/* Tarjeta informativa para dueños */}
         <View style={styles.duenioInfoSection}>
           <View style={styles.duenioInfoCard}>
             <View style={styles.categoryHeader}>
               <Text style={styles.categoryIcon}>🐾</Text>
-              <Text style={styles.categoryTitle}>¿Sos dueño de mascotas?</Text>
+              <Text style={styles.categoryTitle}>¿Sos dueño de una mascota?</Text>
             </View>
             <Text style={styles.duenioInfoSubtitle}>
-              Accedé gratis. Pagá solo una comisión cuando uses un servicio.
+            Accedé a Pawtitas gratis y pagá solo cuando hacés una reserva
             </Text>
             <View style={styles.duenioBullets}>
               {duenioBullets.map((bullet, idx) => (
@@ -57,64 +55,68 @@ export default function Suscripciones({ scrollToSection }) {
               style={styles.duenioCta}
               onPress={() => scrollToSection?.("contacto")}
             >
-              <Text style={styles.duenioCtaText}>Registrarme gratis</Text>
+              <Text style={styles.duenioCtaText}>Accedé gratis</Text>
             </TouchableOpacity>
           </View>
         </View>
 
-        <View style={styles.categorySection}>
-          <View style={styles.categoryHeader}>
-            <Text style={styles.categoryIcon}>💼</Text>
-            <Text style={styles.categoryTitle}>¿Sos prestador de servicios?</Text>
-          </View>
-
-          <View style={styles.cardsRow}>
-            {prestadorPlans.map((plan, planIdx) => (
-              <View
-                key={planIdx}
-                style={[
-                  styles.planCard,
-                  plan.recommended && styles.planCardRecommendedPrestador,
-                ]}
-              >
-                {plan.recommended && (
-                  <View style={styles.recommendedBadgePrestador}>
-                    <Text style={styles.recommendedText}>Recomendado</Text>
-                  </View>
-                )}
-
-                <View style={styles.planHeader}>
-                  <Text style={styles.planName}>{plan.name}</Text>
-                  <View style={styles.priceContainer}>
-                    <Text style={[styles.planPrice, styles.planPricePrestador]}>
-                      {plan.price}
-                    </Text>
-                    {plan.period && (
-                      <Text style={styles.planPeriod}>{plan.period}</Text>
-                    )}
-                  </View>
-                </View>
-
-                <TouchableOpacity
+        <View style={styles.prestadorInfoSection}>
+          <View style={styles.prestadorInfoCard}>
+            <View style={styles.categoryHeader}>
+              <Text style={styles.categoryIcon}>💼</Text>
+              <Text style={styles.categoryTitle}>¿Sos prestador de servicios?</Text>
+            </View>
+            <Text style={styles.prestadorSubtitle}>
+              Elegí el plan que mejor se adapte a tu actividad y potenciá tu crecimiento
+            </Text>
+            <View style={styles.cardsRow}>
+              {prestadorPlans.map((plan, planIdx) => (
+                <View
+                  key={planIdx}
                   style={[
-                    styles.ctaButton,
-                    styles.ctaButtonPrestador,
-                    plan.recommended && styles.ctaButtonRecommendedPrestador,
+                    styles.planCard,
+                    plan.recommended && styles.planCardRecommendedPrestador,
                   ]}
-                  onPress={() => scrollToSection?.("contacto")}
                 >
-                  <Text
+                  {plan.recommended && (
+                    <View style={styles.recommendedBadgePrestador}>
+                      <Text style={styles.recommendedText}>Recomendado</Text>
+                    </View>
+                  )}
+
+                  <View style={styles.planHeader}>
+                    <Text style={styles.planName}>{plan.name}</Text>
+                    <View style={styles.priceContainer}>
+                      <Text style={[styles.planPrice, styles.planPricePrestador]}>
+                        {plan.price}
+                      </Text>
+                      {plan.period && (
+                        <Text style={styles.planPeriod}>{plan.period}</Text>
+                      )}
+                    </View>
+                  </View>
+
+                  <TouchableOpacity
                     style={[
-                      styles.ctaButtonText,
-                      styles.ctaButtonTextPrestador,
-                      plan.recommended && styles.ctaButtonTextRecommended,
+                      styles.ctaButton,
+                      styles.ctaButtonPrestador,
+                      plan.recommended && styles.ctaButtonRecommendedPrestador,
                     ]}
+                    onPress={() => scrollToSection?.("contacto")}
                   >
-                    Consultar plan
-                  </Text>
-                </TouchableOpacity>
-              </View>
-            ))}
+                    <Text
+                      style={[
+                        styles.ctaButtonText,
+                        styles.ctaButtonTextPrestador,
+                        plan.recommended && styles.ctaButtonTextRecommended,
+                      ]}
+                    >
+                      Consultar plan
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              ))}
+            </View>
           </View>
         </View>
       </View>

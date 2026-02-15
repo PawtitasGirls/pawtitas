@@ -86,6 +86,24 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: colors.text.inverse,
   },
+  prestadorInfoSection: {
+    marginBottom: 40,
+    alignItems: "center",
+  },
+  prestadorInfoCard: {
+    backgroundColor: colors.surface,
+    borderRadius: 16,
+    padding: 28,
+    maxWidth: 560,
+    width: "100%",
+    borderWidth: 1,
+    borderColor: colors.border.light,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.02,
+    shadowRadius: 8,
+    elevation: 1,
+  },
   categorySection: {
     marginBottom: 40,
   },
@@ -103,6 +121,12 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
     color: colors.text.primary,
+  },
+  prestadorSubtitle: {
+    fontSize: 15,
+    color: colors.text.secondary,
+    textAlign: "center",
+    marginBottom: 24,
   },
   cardsRow: {
     flexDirection: "row",
