@@ -17,7 +17,7 @@ export const useConexionDetalles = (provider, misConexiones, visible = true, onC
     handleChat: () => handlers.onChat?.(provider),
     handlePago: () => handlers.onPago?.(provider),
     handleFinalizarServicio: () => handlers.onFinalizarServicio?.(provider),
-    handleAgregarResena: () => handlers.AgregarResena?.(provider),
+    handleAgregarResena: () => handlers.onAgregarResena?.(provider),
     handleRechazar: () => handlers.onRechazar?.(provider),
   });
 
