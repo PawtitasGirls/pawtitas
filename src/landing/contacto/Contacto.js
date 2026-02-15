@@ -10,7 +10,7 @@ import {
 } from "react-native";
 import styles from "./Contacto.styles";
 
-const API_BASE = process.env.EXPO_PUBLIC_API_BASE_URL || "http://192.168.1.91:3001";
+const API_BASE = process.env.EXPO_PUBLIC_API_BASE_URL;
 
 export default function Contacto() {
   const [formData, setFormData] = useState({
