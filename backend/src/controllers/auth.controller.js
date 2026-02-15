@@ -6,6 +6,7 @@ const prestadorRepo = require('../repositories/prestador.repo');
 const mascotaRepo = require('../repositories/mascota.repo');
 const { registerUser } = require('../services/registro.service');
 const { sendRecoveryCodeEmail } = require('../services/email.service');
+const streamChatService = require('../services/streamChat.service');
 
 // Login
 async function loginController(req, res) {
@@ -92,9 +93,14 @@ async function loginController(req, res) {
       motivoRechazo: prestador?.motivoRechazo ?? null,
     });
   }
+  let tokenStream = null;
+  try {
+    tokenStream = await streamChatService.createUserToken(String(userData.id));
+  } catch (err) {
+    console.error('Stream token error:', err);
+  }
 
-    return res.json({ success: true, admin: false, user: true, userData });
-  } catch (e) {
+  return res.json({ success: true, admin: false, user: true, userData, tokenStream });  } catch (e) {
     console.error('Login error:', e);
     res.status(500).json({ success: false, message: 'Error en el servidor' });
   }

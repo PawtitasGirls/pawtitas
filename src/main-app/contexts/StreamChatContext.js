@@ -51,14 +51,14 @@ export const StreamChatProvider = ({ children }) => {
         userData.role = userRole;
       }
 
-      // Conectar el usuario
-      if (userToken) {
-          await client.connectUser(userData, userToken);
-       } else {
-           // MODO DESARROLLO: Generar devToken automáticamente. Cambiar a userToken en producción.
-           const devToken = client.devToken(userId);
-           await client.connectUser(userData, devToken);
-       }
+  if (!userToken) {
+    console.warn('Token de Stream no disponible. No se conecta el usuario.');
+    setIsReady(false);
+    return;
+  }
+
+  await client.connectUser(userData, userToken);
+
 
       setChatClient(client);
       setCurrentUser({ id: userId, name: userName, image: userImage, role: userRole });
@@ -93,19 +93,8 @@ export const StreamChatProvider = ({ children }) => {
       return null;
     }
 
-    try {
-      const otherUserData = {
-        id: otherUserId,
-        name: otherUserName,
-        image: otherUserImage || `https://ui-avatars.com/api/?name=${encodeURIComponent(otherUserName)}`
-      };
-      
-      if (otherUserRole) {
-        otherUserData.role = otherUserRole;
-      }
-      
-      await chatClient.upsertUser(otherUserData);
-
+    try {          
+           
       const channel = chatClient.channel('messaging', {
         members: [currentUser.id, otherUserId],
       });

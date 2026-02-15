@@ -12,7 +12,7 @@ const mascotaRoutes = require('./routes/mascota.routes');
 const reservaRoutes = require('./routes/reserva.routes');
 const mercadopagoRoutes = require('./routes/mercadopago.routes');
 const resenaRoutes = require('./routes/resena.routes');
-
+const chatRoutes = require('./routes/chat.routes');
 
 const app = express();
 
@@ -30,6 +30,7 @@ app.use(mascotaRoutes);
 app.use(reservaRoutes);
 app.use(mercadopagoRoutes);
 app.use(resenaRoutes);
+app.use('/api/chat', chatRoutes);
 
 module.exports = app;
 

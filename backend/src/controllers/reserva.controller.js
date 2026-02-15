@@ -163,6 +163,7 @@ const serialized = reservas.map((r) => {
     puedeResenar, 
     prestador: prestador && {
       id: String(prestador.id),
+      usuarioId: usuario?.id != null ? String(usuario.id) : null,
       nombreCompleto: [usuario?.nombre, usuario?.apellido].filter(Boolean).join(' ') || 'Sin nombre',
       domicilio: domicilio && {
         ubicacion: [domicilio.calle, domicilio.numero, domicilio.ciudad].filter(Boolean).join(', '),
@@ -227,6 +228,7 @@ async function getReservasByPrestadorController(req, res) {
         ...base,
         duenio: duenio && {
           id: String(duenio.id),
+          usuarioId: usuario?.id != null ? String(usuario.id) : null,
           nombreCompleto: [usuario?.nombre, usuario?.apellido].filter(Boolean).join(' ') || 'Sin nombre',
           descripcion: duenio.comentarios ?? '',
           domicilio: domicilio && {
