@@ -180,15 +180,21 @@ async function webhookController(req, res) {
     const externalRef = mp.external_reference || '';
     const reservaIdStr = mp.metadata?.reserva_id || (externalRef.match(/^pawtitas-(\d+)-/) || [])[1];
 
-    let pago = null;
-    if (mp.preference_id) {
-      pago = await pagoRepo.findByMpPreferenceId(mp.preference_id);
-    }
-    if (!pago && reservaIdStr) {
-      pago = await prisma.pago.findFirst({
-        where: { reservaId: BigInt(reservaIdStr) },
-        include: { reserva: true },
+    if (!reservaIdStr) {
+      console.warn('Pago no procesado: no se encontró la reserva asociada. Revisar webhook', {
+        paymentId,
+        preferenceId: mp.preference_id,
+        externalRef,
       });
+      return res.status(200).json({ received: true });
+    }
+
+    let pago = await prisma.pago.findFirst({
+      where: { reservaId: BigInt(reservaIdStr) },
+      include: { reserva: true },
+    });
+    if (!pago && mp.preference_id) {
+      pago = await pagoRepo.findByMpPreferenceId(mp.preference_id);
     }
 
     if (pago) {
@@ -200,6 +206,13 @@ async function webhookController(req, res) {
       await prisma.reserva.update({
         where: { id: pago.reservaId },
         data: { estado: mp.status === 'approved' ? 'PAGADO' : 'PENDIENTE_PAGO' },
+      });
+    } else {
+      console.warn('Pago no vinculable, requiere revisión manual: webhook', {
+        paymentId,
+        preferenceId: mp.preference_id,
+        externalRef,
+        reservaIdStr: reservaIdStr || '(no disponible)',
       });
     }
 

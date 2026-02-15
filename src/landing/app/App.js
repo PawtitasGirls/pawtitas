@@ -10,6 +10,7 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   useWindowDimensions,
+  Linking,
 } from "react-native";
 
 import styles from "./App.styles";
@@ -151,12 +152,18 @@ export default function LandingApp() {
 
             {/* Botones responsive */}
             <View style={[styles.buttonRow, isMobile && styles.buttonRowMobile]}>
-              <TouchableOpacity style={[styles.button, styles.playStore]}>
+              <TouchableOpacity
+                style={[styles.button, styles.playStore]}
+                onPress={() => Linking.openURL('https://play.google.com/store/apps')}
+              >
                 <Text style={styles.buttonText}>Play Store</Text>
               </TouchableOpacity>
 
               <View style={styles.appStoreContainer}>
-                <TouchableOpacity style={[styles.button, styles.appStore]}>
+                <TouchableOpacity
+                  style={[styles.button, styles.appStore]}
+                  onPress={() => Linking.openURL('https://www.apple.com/la/app-store/')}
+                >
                   <Text style={styles.buttonText}>App Store</Text>
                 </TouchableOpacity>
 

@@ -19,7 +19,7 @@ export const colors = {
   // Colores de texto
   text: {
     primary: '#1A1A1A',      // Texto principal (negro más suave)
-    secondary: '#757575',    // Texto secundario (gris más neutro)
+    secondary: '#1A1A1A',    // Texto secundario (gris más neutro)
     disabled: '#BDBDBD',     // Texto deshabilitado
     inverse: '#FFFFFF',      // Texto sobre fondos oscuros
   },

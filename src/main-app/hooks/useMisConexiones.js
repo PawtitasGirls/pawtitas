@@ -293,19 +293,23 @@ export const useMisConexiones = () => {
           : prev
       );
     }
+
+    let mensajeFlotante;
+    if (result === 'success' || result === 'pending') {
+      mensajeFlotante = id
+        ? { type: 'success', text: '¡Pago realizado! El dinero queda retenido hasta que ambos confirmen la finalización del servicio.' }
+        : { type: 'warning', text: 'No se encontró la reserva asociada al pago. Volvé a intentar o contactá soporte si el problema persiste.' };
+    } else {
+      mensajeFlotante = { type: 'error', text: 'El pago no pudo completarse. Intentá de nuevo.' };
+    }
+
     setState(prev => ({
       ...prev,
       showPaymentWebView: false,
       paymentUrl: null,
       selectedProvider: null,
       showMensajeFlotante: true,
-      mensajeFlotante:
-        result === 'success' || result === 'pending'
-          ? {
-              type: 'success',
-              text: '¡Pago realizado! El dinero queda retenido hasta que ambos confirmen la finalización del servicio.',
-            }
-          : { type: 'error', text: 'El pago no pudo completarse. Intentá de nuevo.' },
+      mensajeFlotante,
     }));
   }, []);
 
