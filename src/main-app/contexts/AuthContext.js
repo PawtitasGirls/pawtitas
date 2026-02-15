@@ -4,20 +4,34 @@ import { normalizeRole, ROLES } from '../constants/roles';
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
-  const [auth, setAuth] = useState({ user: null, role: null, token: null });
+  const [auth, setAuth] = useState({
+    user: null,
+    role: null,
+    token: null,
+    tokenStream: null, 
+  });
 
   const setAuthFromLogin = (loginResponse) => {
     const role = normalizeRole(loginResponse?.userData?.rol, loginResponse?.admin);
     const token = loginResponse?.token || null;
+    const tokenStream = loginResponse?.tokenStream ?? null; // 👈 leído del backend
 
     if (loginResponse?.admin) {
-      setAuth({ 
-        user: loginResponse?.userData || { id: null }, 
-        role: ROLES.ADMIN, token });
+      setAuth({
+        user: loginResponse?.userData || { id: null },
+        role: ROLES.ADMIN,
+        token,
+        tokenStream,
+      });
       return;
     }
 
-    setAuth({ user: loginResponse?.userData || null, role, token });
+    setAuth({
+      user: loginResponse?.userData || null,
+      role,
+      token,
+      tokenStream,
+    });
   };
 
   const updateUser = (nextUser) => {
@@ -27,10 +41,21 @@ export const AuthProvider = ({ children }) => {
     }));
   };
 
-  const clearAuth = () => setAuth({ user: null, role: null, token: null });
+  const clearAuth = () =>
+    setAuth({
+      user: null,
+      role: null,
+      token: null,
+      tokenStream: null, // 👈 importante limpiar
+    });
 
   const value = useMemo(
-    () => ({ ...auth, setAuthFromLogin, clearAuth, updateUser }),
+    () => ({
+      ...auth,              // 👈 expone user, role, token y tokenStream
+      setAuthFromLogin,
+      clearAuth,
+      updateUser,
+    }),
     [auth]
   );
 
@@ -44,4 +69,3 @@ export const useAuth = () => {
   }
   return context;
 };
-
