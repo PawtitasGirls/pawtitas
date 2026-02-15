@@ -19,7 +19,6 @@ export default class PerfilFactory {
         return <PetOwnerProfileForm {...props} />;
     }
   }
-
   // Obtener la configuración inicial del formulario según el rol
   static getInitialFormState(role) {
     const baseFormState = {
@@ -130,6 +129,10 @@ export default class PerfilFactory {
             if (!hasAvailability) {
               errors.availability = "Debes seleccionar al menos un día de disponibilidad";
             }
+          }
+
+          if (formData.petTypes?.otro && !formData.petTypesCustom?.trim()) {
+            errors.petTypesCustom = "Especificá el tipo de mascota";
           }
         }
         break;
