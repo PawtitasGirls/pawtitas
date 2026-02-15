@@ -1,7 +1,7 @@
 import { useRef, useMemo } from 'react';
 import { ConexionDetallesController } from '../controller';
 
-export const useConexionDetalles = (provider, misConexiones, visible = true, onClose, esVistaPrestador = false, onModalHide) => {
+export const useConexionDetalles = (provider, misConexiones, visible = true, onClose, esVistaPrestador = false, onModalHide, isAdmin = false) => {
   const scrollViewRef = useRef(null);
 
   const isValidProvider = ConexionDetallesController.validateProvider(provider);
@@ -40,14 +40,16 @@ export const useConexionDetalles = (provider, misConexiones, visible = true, onC
   return ConexionDetallesController.getButtonConfig(
     provider?.estado,
     misConexiones,
-    esVistaPrestador
+    esVistaPrestador,
+    isAdmin
   );
 
 }, [
   provider?.estado,
   provider?.puedeResenar,   
   misConexiones,
-  esVistaPrestador
+  esVistaPrestador,
+  isAdmin
 ]);
 
 
