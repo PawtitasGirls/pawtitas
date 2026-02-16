@@ -1,4 +1,7 @@
-const transporter = require('../config/mailer');
+const { Resend } = require('resend');
+
+// Inicializar Resend
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 // Enviar email de contacto
 async function sendContactEmail({ nombre, email, mensaje }) {
@@ -13,17 +16,17 @@ async function sendContactEmail({ nombre, email, mensaje }) {
     throw new Error('El email no es válido');
   }
 
-  // Verificar que las credenciales SMTP estén configuradas
-  if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
-    console.error('SMTP no configurado: faltan SMTP_USER o SMTP_PASS');
+  // Verificar que la API key de Resend esté configurada
+  if (!process.env.RESEND_API_KEY) {
+    console.error('Resend no configurado: falta RESEND_API_KEY');
     throw new Error('Error de configuración del servidor');
   }
 
-  // Configurar el email
-  const mailOptions = {
-    from: process.env.SMTP_FROM || process.env.SMTP_USER,
-    to: process.env.CONTACTO_EMAIL || process.env.SMTP_USER,
-    replyTo: email,
+  // Configurar y enviar el email con Resend
+  const { data, error } = await resend.emails.send({
+    from: process.env.EMAIL_FROM || 'onboarding@resend.dev',
+    to: process.env.CONTACTO_EMAIL || 'pawtitas.app@gmail.com',
+    reply_to: email,
     subject: `Contacto desde Pawtitas - ${nombre}`,
     html: `
       <h2>Nuevo mensaje de contacto</h2>
@@ -32,20 +35,15 @@ async function sendContactEmail({ nombre, email, mensaje }) {
       <p><strong>Mensaje:</strong></p>
       <p>${mensaje.replace(/\n/g, '<br>')}</p>
     `,
-    text: `
-      Nuevo mensaje de contacto
-      
-      Nombre: ${nombre}
-      Email: ${email}
-      Mensaje: ${mensaje}
-    `,
-  };
+  });
 
-  // Enviar email
-  const info = await transporter.sendMail(mailOptions);
-  console.log('Email enviado:', info.messageId);
+  if (error) {
+    console.error('Error al enviar email:', error);
+    throw new Error(error.message || 'Error al enviar el email');
+  }
 
-  return info;
+  console.log('Email enviado:', data.id);
+  return data;
 }
 
 /**
@@ -55,17 +53,19 @@ async function sendRecoveryCodeEmail({ email, codigo }) {
   if (!email || !codigo) {
     throw new Error('Email y código son requeridos');
   }
+  
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!emailRegex.test(email)) {
     throw new Error('El email no es válido');
   }
-  if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
-    console.error('SMTP no configurado: faltan SMTP_USER o SMTP_PASS');
+  
+  if (!process.env.RESEND_API_KEY) {
+    console.error('Resend no configurado: falta RESEND_API_KEY');
     throw new Error('Error de configuración del servidor');
   }
 
-  const mailOptions = {
-    from: process.env.SMTP_FROM || process.env.SMTP_USER,
+  const { data, error } = await resend.emails.send({
+    from: process.env.EMAIL_FROM || 'onboarding@resend.dev',
     to: email,
     subject: 'Pawtitas - Código para recuperar tu contraseña',
     html: `
@@ -75,12 +75,15 @@ async function sendRecoveryCodeEmail({ email, codigo }) {
       <p>Ingresalo en la app para continuar. Si no solicitaste este código, podés ignorar este mensaje.</p>
       <p>— Equipo Pawtitas</p>
     `,
-    text: `Recuperación de contraseña - Tu código: ${codigo}. Ingresalo en la app para continuar.`,
-  };
+  });
 
-  const info = await transporter.sendMail(mailOptions);
-  console.log('Email recuperación enviado:', info.messageId);
-  return info;
+  if (error) {
+    console.error('Error al enviar email de recuperación:', error);
+    throw new Error(error.message || 'Error al enviar el email');
+  }
+
+  console.log('Email recuperación enviado:', data.id);
+  return data;
 }
 
 module.exports = {
