@@ -1,10 +1,21 @@
+// Formatos permitidos para adjuntos de prestadores (debe coincidir con backend)
+export const ALLOWED_ATTACHMENT_MIMES = [
+  "application/pdf",
+  "image/jpeg",
+  "image/jpg",
+  "image/png",
+];
+export const ALLOWED_ATTACHMENT_EXTENSIONS = [".pdf", ".jpg", ".jpeg", ".png"];
+export const ATTACHMENT_FORMAT_ERROR =
+  "Formato incorrecto, solo puede ser jpg, jpeg, png o pdf";
+
 // Configuración del registro
 export const REGISTRO_CONFIG = {
   FLOATING_MESSAGE_DURATION: 5000,
   MIN_PASSWORD_LENGTH: 6,
   MAX_AGE: 120,
   MIN_DATE: new Date(1900, 0, 1),
-  DOCUMENT_FILE_TYPES: "*/*",
+  DOCUMENT_FILE_TYPES: ["image/jpeg", "image/jpg", "image/png", "application/pdf"],
   SCROLL_PADDING_TO_BOTTOM: 20
 };
 
@@ -69,6 +80,14 @@ export const VALIDATION_RULES = {
     message: "Debe adjuntar los certificados (PDF, JPG, PNG, JPEG)"
   }
 };
+
+function isAllowedAttachmentFile(file) {
+  if (!file) return false;
+  const mime = (file.mimeType || file.type || "").toLowerCase();
+  const name = (file.name || "").toLowerCase();
+  if (ALLOWED_ATTACHMENT_MIMES.some((allowed) => mime === allowed)) return true;
+  return ALLOWED_ATTACHMENT_EXTENSIONS.some((ext) => name.endsWith(ext));
+}
 
 // Opciones de especialidades para prestadores
 export const ESPECIALIDADES_OPTIONS = [
@@ -219,13 +238,17 @@ export class RegistroController {
       }
     });
 
-    // Prestador: documentos y certificados son obligatorios
+    // Prestador: documentos y certificados obligatorios y formato válido (pdf, jpg, jpeg, png)
     if (perfil === "prestador") {
       if (!formData.documentosFile?.uri) {
         errors.documentosFile = VALIDATION_RULES.documentosFile.message;
+      } else if (!isAllowedAttachmentFile(formData.documentosFile)) {
+        errors.documentosFile = ATTACHMENT_FORMAT_ERROR;
       }
       if (!formData.certificadosFile?.uri) {
         errors.certificadosFile = VALIDATION_RULES.certificadosFile.message;
+      } else if (!isAllowedAttachmentFile(formData.certificadosFile)) {
+        errors.certificadosFile = ATTACHMENT_FORMAT_ERROR;
       }
     }
 
