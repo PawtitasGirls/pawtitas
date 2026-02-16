@@ -9,7 +9,8 @@ export const SeccionComentario = ({
   comentario, 
   onChangeText, 
   placeholder, 
-  error 
+  error,
+  onFocus,
 }) => (
   <View style={styles.inputGroup}>
     <Text style={styles.inputLabel}>Comentario </Text>
@@ -27,6 +28,7 @@ export const SeccionComentario = ({
       maxLength={FORM_CONFIG.MAX_COMMENT_LENGTH}
       textAlignVertical="top"
       scrollEnabled={true}
+      onFocus={onFocus}
     />
     <Text style={styles.characterCount}>
       {comentario.length}/{FORM_CONFIG.MAX_COMMENT_LENGTH}

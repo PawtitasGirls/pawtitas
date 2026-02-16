@@ -1,10 +1,10 @@
-import React from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { 
   View, 
   Text, 
   Modal, 
   ScrollView,
-  KeyboardAvoidingView,
+  Keyboard,
   Platform,
   TouchableOpacity
 } from 'react-native';
@@ -27,6 +27,10 @@ const ResenaFormModal = ({
   onSave,
   tipoUsuario = 'prestador'
 }) => {
+  const scrollRef = useRef(null);
+  const [keyboardOpen, setKeyboardOpen] = useState(false);
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
+
   const {
     formData,
     errors,
@@ -41,6 +45,37 @@ const ResenaFormModal = ({
 
   const texts = ResenaController.getTexts(tipoUsuario, usuario);
 
+  useEffect(() => {
+    const showEvent = Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow';
+    const hideEvent = Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide';
+
+    const onShow = (event) => {
+      const nextHeight = event?.endCoordinates?.height || 0;
+      setKeyboardHeight(nextHeight);
+      setKeyboardOpen(true);
+    };
+
+    const onHide = () => {
+      setKeyboardOpen(false);
+      setKeyboardHeight(0);
+    };
+
+    const showSub = Keyboard.addListener(showEvent, onShow);
+    const hideSub = Keyboard.addListener(hideEvent, onHide);
+
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, []);
+
+  const handleComentarioFocus = useCallback(() => {
+    // Espera a que abra el teclado y lleva el comentario al área visible.
+    setTimeout(() => {
+      scrollRef.current?.scrollToEnd({ animated: true });
+    }, 140);
+  }, []);
+
   return (
     <>
       <Modal
@@ -49,13 +84,8 @@ const ResenaFormModal = ({
         animationType="fade"
         onRequestClose={handleClose}
       >
-        <KeyboardAvoidingView
-          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-          keyboardVerticalOffset={Platform.OS === 'ios' ? 24 : 0}
-          style={styles.keyboardAvoidingView}
-        >
-          <View style={styles.centeredView}>
-            <View style={styles.modalView}>
+        <View style={styles.centeredView}>
+          <View style={styles.modalView}>
             {/* Header */}
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>{texts.title}</Text>
@@ -71,10 +101,15 @@ const ResenaFormModal = ({
             <SeccionInfoUsuario usuario={usuario} tipoUsuario={tipoUsuario} />
 
             <ScrollView 
+              ref={scrollRef}
               style={styles.formContainer}
-              contentContainerStyle={styles.formContent}
+              contentContainerStyle={[
+                styles.formContent,
+                keyboardOpen && styles.formContentKeyboardOpen,
+              ]}
               showsVerticalScrollIndicator={false}
               keyboardShouldPersistTaps="handled"
+              keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'}
             >
               {/* Mensaje de error */}
               {errors.general && (
@@ -96,6 +131,7 @@ const ResenaFormModal = ({
                 onChangeText={(value) => handleInputChange('comentario', value)}
                 placeholder={texts.placeholder}
                 error={errors.comentario}
+                onFocus={handleComentarioFocus}
               />
             </ScrollView>
 
@@ -110,9 +146,8 @@ const ResenaFormModal = ({
               cancelLabel="Cancelar"
               onCancel={handleClose}
             />
-            </View>
           </View>
-        </KeyboardAvoidingView>
+        </View>
       </Modal>
 
       {/* Mensaje flotante */}
