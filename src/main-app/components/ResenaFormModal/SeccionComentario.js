@@ -26,6 +26,7 @@ export const SeccionComentario = ({
       numberOfLines={FORM_CONFIG.TEXTAREA_LINES}
       maxLength={FORM_CONFIG.MAX_COMMENT_LENGTH}
       textAlignVertical="top"
+      scrollEnabled={true}
     />
     <Text style={styles.characterCount}>
       {comentario.length}/{FORM_CONFIG.MAX_COMMENT_LENGTH}
