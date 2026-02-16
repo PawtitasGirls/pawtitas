@@ -93,11 +93,11 @@ const buildFormDataFromUser = (role, userData) => {
         conejo: selectedTypes.includes('Conejo'),
         ave: selectedTypes.includes('Ave'),
         roedor: selectedTypes.includes('Roedor'),
-        otro: selectedTypes.some((t) => !['Perro', 'Gato', 'Conejo', 'Ave', 'Roedor'].includes(t)),
+        otro: selectedTypes.some((t) => !['Perro', 'Gato', 'Conejo', 'Ave', 'Roedor', 'General'].includes(t)),
       };
       if (next.petTypes.otro) {
         const custom = selectedTypes.find(
-          (t) => !['Perro', 'Gato', 'Conejo', 'Ave', 'Roedor'].includes(t)
+          (t) => !['Perro', 'Gato', 'Conejo', 'Ave', 'Roedor', 'General'].includes(t)
         );
         next.petTypesCustom = custom || next.petTypesCustom;
       }
