@@ -12,8 +12,12 @@ export async function registrarUsuario(form, perfil, especialidad) {
   const hasDocumentos = !!form.documentosFile?.uri;
   const hasCertificados = !!form.certificadosFile?.uri;
 
-  // Para prestadores con documentos adjuntos usamos FormData (multipart/form-data)
-  if (isPrestador && (hasDocumentos || hasCertificados)) {
+  if (isPrestador && (!hasDocumentos || !hasCertificados)) {
+    throw new Error('Para registrarte como prestador debes adjuntar documento de identidad y certificados.');
+  }
+
+  // Para prestadores usamos FormData (multipart/form-data) con ambos archivos
+  if (isPrestador && hasDocumentos && hasCertificados) {
     const API_BASE = process.env.EXPO_PUBLIC_API_BASE_URL;
     const url = `${API_BASE}/api/registro`;
 

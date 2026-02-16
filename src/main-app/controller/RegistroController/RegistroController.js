@@ -61,10 +61,12 @@ export const VALIDATION_RULES = {
     message: "Debe seleccionar una especialidad"
   },
   documentosFile: {
-    required: false
+    required: false,
+    message: "Debe adjuntar el documento de identidad y antecedentes (PDF, JPG, PNG, JPEG)"
   },
   certificadosFile: {
-    required: false
+    required: false,
+    message: "Debe adjuntar los certificados (PDF, JPG, PNG, JPEG)"
   }
 };
 
@@ -192,13 +194,7 @@ export class RegistroController {
       if (field === "especialidad" && perfil !== "prestador") {
         return;
       }
-      if (
-        (field === "documentosFile" || field === "certificadosFile") &&
-        perfil !== "prestador"
-      ) {
-        return;
-      }
-      if (field === "certificadosFile") {
+      if (field === "documentosFile" || field === "certificadosFile") {
         return;
       }
 
@@ -223,12 +219,22 @@ export class RegistroController {
       }
     });
 
+    // Prestador: documentos y certificados son obligatorios
+    if (perfil === "prestador") {
+      if (!formData.documentosFile?.uri) {
+        errors.documentosFile = VALIDATION_RULES.documentosFile.message;
+      }
+      if (!formData.certificadosFile?.uri) {
+        errors.certificadosFile = VALIDATION_RULES.certificadosFile.message;
+      }
+    }
+
     return errors;
   }
 
   // Verificar si el formulario es válido
   static isFormValid(formData, perfil, especialidad, errors) {
-    return (
+    const baseValid =
       Object.keys(errors).length === 0 &&
       formData.nombre.trim() !== "" &&
       formData.fechaNacimiento !== null &&
@@ -238,7 +244,13 @@ export class RegistroController {
       formData.ubicacion.trim() !== "" &&
       formData.documento.trim() !== "" &&
       perfil !== "" &&
-      (perfil !== "prestador" || especialidad !== "")
+      (perfil !== "prestador" || especialidad !== "");
+
+    if (perfil !== "prestador") return baseValid;
+    return (
+      baseValid &&
+      !!formData.documentosFile?.uri &&
+      !!formData.certificadosFile?.uri
     );
   }
 
