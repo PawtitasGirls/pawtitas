@@ -170,9 +170,9 @@ locationButtonActive: {
   borderColor: '#f5a3c1ff',
 },
 backText: {
-  marginLeft: 6,
-  color: "#4f0d01ff",
-  fontWeight: "500",
+  marginLeft: 8,
+  color: "#6f0d01ff",
+  fontWeight: "700",
 },
 locationActiveText: {
   color: '#f5a3c1ff',
@@ -304,15 +304,21 @@ closeButtonText: {
   extraContainer: {
     marginTop: 5,
     paddingHorizontal: 16,
-    paddingBottom:100
+    paddingBottom:100,
+    alignItems: "center",
   },
   option: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#f2f2f2",
+    alignSelf: "center",           
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    backgroundColor: "##fff",
     padding: 16,
-    borderRadius: 10,
+    borderRadius: 20,
     marginBottom: 12,
+    borderWidth: 3,
+    borderColor: colors.border.light,
   },
  
 

@@ -1,19 +1,16 @@
-import React from "react";
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image} from "react-native";
-import Logo from "../../assets/icon.png";
-import { colors, typography } from "../../../shared/styles";
+import React from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image } from 'react-native';
+import Logo from '../../assets/icon.png';
+import { colors, typography } from '../../../shared/styles';
 
 export default function BienvenidaScreen({ navigation }) {
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.logo}>PAWTITAS</Text>
+      <View style={styles.logoContainer}>
+        <Image source={Logo} style={styles.heroImage} resizeMode="contain" />
+        <Text style={styles.logo}>PAWTITAS</Text>
         <Text style={styles.subtitle}>Encontrá el servicio ideal para tu mascota</Text>
-
-      <Image
-        source={Logo}
-        style={styles.heroImage}
-        resizeMode="contain"
-      />
+      </View>
 
       {/* Opciones */}
       <View style={styles.card}>
@@ -34,15 +31,13 @@ export default function BienvenidaScreen({ navigation }) {
       </View>
 
       {/* Botones */}
-      <TouchableOpacity style={styles.button}
-        onPress={() => navigation.navigate("Inicio")}
-        >
+      <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Inicio')}>
         <Text style={styles.buttonText}>Iniciar Sesión</Text>
       </TouchableOpacity>
 
       <TouchableOpacity
         style={[styles.button, styles.secondaryButton]}
-        onPress={() => navigation.navigate("Registro")}
+        onPress={() => navigation.navigate('Registro')}
       >
         <Text style={styles.secondaryText}>Registrarse</Text>
       </TouchableOpacity>
@@ -51,69 +46,85 @@ export default function BienvenidaScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  container: { 
-    flexGrow: 1, 
-    justifyContent: "center", 
-    alignItems: "center", 
-    backgroundColor: colors.background, 
-    padding: 20 
+  container: {
+    flexGrow: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: colors.background,
+    paddingHorizontal: 20,
+    paddingVertical: 28,
   },
-  logo: { 
-    fontSize: 28, 
-    fontFamily: typography.fontFamily.title,
-    color: colors.brand.highlight, 
+  logoContainer: {
+    alignItems: 'center',
+    marginBottom: 14,
+    width: '100%',
+  },
+  logo: {
+    ...typography.styles.h1,
+    fontSize: 28,
+    color: colors.brand.logo,
+    fontWeight: 'bold',
     marginBottom: 10,
-    letterSpacing: 1,
+    letterSpacing: 0.5,
   },
   card: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: colors.primaryLight,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.surface,
     padding: 15,
     borderRadius: 12,
-    width: "100%",
+    width: '100%',
     marginBottom: 15,
+    borderWidth: 1,
+    borderColor: colors.border.light,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+    elevation: 2,
   },
   emoji: { fontSize: 28, marginRight: 15 },
-  cardText: { 
-    fontSize: 16, 
-    fontFamily: typography.fontFamily.bodyMedium,
-    color: colors.text.primary 
+  cardText: {
+    ...typography.styles.bodyBold,
+    fontSize: 16,
+    color: colors.text.primary,
   },
-  subtitle: { 
-    fontSize: 18, 
-    fontFamily: typography.fontFamily.body,
-    color: colors.brand.highlight 
+  subtitle: {
+    ...typography.styles.body,
+    color: colors.text.secondary,
+    textAlign: 'center',
+    marginBottom: 8,
   },
 
   button: {
-    backgroundColor: colors.button.primary,
+    backgroundColor: colors.brand.logo,
     paddingVertical: 12,
     paddingHorizontal: 40,
     borderRadius: 20,
     marginTop: 20,
-    width: "100%",
-    alignItems: "center",
+    width: '100%',
+    alignItems: 'center',
   },
-  buttonText: { 
-    color: colors.text.inverse, 
+  buttonText: {
+    ...typography.styles.bodyBold,
+    color: colors.text.inverse,
     fontSize: 16,
-    fontFamily: typography.fontFamily.bodySemiBold,
   },
   secondaryButton: {
     backgroundColor: colors.surface,
     borderWidth: 1,
-    borderColor: colors.button.primary,
+    borderColor: colors.brand.logo,
   },
-  secondaryText: { 
-    color: colors.button.primary, 
+  secondaryText: {
+    ...typography.styles.bodyBold,
+    color: colors.brand.logo,
     fontSize: 16,
-    fontFamily: typography.fontFamily.bodySemiBold,
   },
 
-   heroImage: {
-    width: "100%",
-    height: 150,
-    marginTop: 10,
-  }
+  heroImage: {
+    width: 120,
+    height: 120,
+    marginTop: 8,
+    marginBottom: 8,
+  },
 });
