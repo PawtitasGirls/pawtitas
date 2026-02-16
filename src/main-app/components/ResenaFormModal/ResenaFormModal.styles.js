@@ -2,20 +2,15 @@ import { StyleSheet } from 'react-native';
 import { colors, typography } from '../../../shared/styles';
 
 export const styles = StyleSheet.create({
-  keyboardAvoidingView: {
-    flex: 1,
-  },
   centeredView: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: 'rgba(0, 0, 0, 0.4)',
-    paddingHorizontal: 16,
   },
   modalView: {
-    width: '100%',
-    maxHeight: '82%',
-    minHeight: '62%',
+    width: '90%',
+    maxHeight: '80%',
     backgroundColor: colors.surface,
     borderRadius: 20,
     padding: 20,
@@ -61,11 +56,13 @@ export const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   formContainer: {
-    flex: 1,
     marginBottom: 20,
   },
   formContent: {
-    paddingBottom: 8,
+    paddingBottom: 24,
+  },
+  formContentKeyboardOpen: {
+    paddingBottom: 56,
   },
   userInfoContainer: {
     alignItems: 'center',
