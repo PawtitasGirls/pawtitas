@@ -40,6 +40,11 @@ const Conversacion = () => {
 
             // Cargar mensajes existentes del estado local del canal
             setMessages(ChatController.getChannelMessages(chan));
+
+            // Marcar canal como leído para que el badge se actualice
+            if (chan?.markRead) {
+              chan.markRead().catch(() => {});
+            }
             
             // Obtener el otro usuario del canal (para chats 1 a 1)
             const otherUser = ChatController.getOtherUser(chan, currentUser.id);

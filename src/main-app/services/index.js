@@ -6,4 +6,5 @@ export * from './api/apiUsuario';
 export * from './api/apiMascota';
 export * from './api/apiReserva';
 export * from './api/apiMercadoPago';
+export * from './api/apiResena';
 export * from './registroService';

@@ -4,6 +4,12 @@ async function create(data) {
   return prisma.reserva.create({ data });
 }
 
+async function findById(id) {
+  return prisma.reserva.findUnique({
+    where: { id },
+  });
+}
+
 async function findManyByDuenioId(duenioId) {
   return prisma.reserva.findMany({
     where: { duenioId },
@@ -33,6 +39,7 @@ async function findManyByPrestadorId(prestadorId) {
       },
       mascota: true,
       servicio: true,
+      resena: true,
     },
     orderBy: { fechaReserva: 'desc' },
   });
@@ -52,6 +59,7 @@ async function findExistingPendienteOrConfirmado(duenioId, prestadorId, mascotaI
 
 module.exports = {
   create,
+  findById,
   findManyByDuenioId,
   findManyByPrestadorId,
   findExistingPendienteOrConfirmado,

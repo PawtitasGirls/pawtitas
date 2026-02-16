@@ -1,8 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
 import { ResenaController } from '../controller/ResenasController/ResenaController';
+import { useAuth } from '../contexts';
 
 // Mnejar el formulario de reseñas
 export const useResenaForm = (visible, onSave, onClose, usuario, tipoUsuario) => {
+  const { role } = useAuth();
   // Estados de React
   const [formData, setFormData] = useState(() => ResenaController.getInitialFormData());
   const [errors, setErrors] = useState({});
@@ -50,7 +52,11 @@ export const useResenaForm = (visible, onSave, onClose, usuario, tipoUsuario) =>
     setMessage({ type: '', text: '' });
 
     try {
-      const result = await ResenaController.saveResena(formData, tipoUsuario);
+      const reservaId = usuario?.reservaId || usuario?.id;
+      const result = await ResenaController.saveResena(formData, tipoUsuario, {
+        reservaId,
+        role,
+      });
       
       if (result.success) {
         setLoading(false);
@@ -71,10 +77,10 @@ export const useResenaForm = (visible, onSave, onClose, usuario, tipoUsuario) =>
       setLoading(false);
       setMessage({ 
         type: 'error', 
-        text: 'Error al enviar la reseña. Intenta nuevamente.' 
+        text: error?.message || 'Error al enviar la reseña. Intenta nuevamente.' 
       });
     }
-  }, [formData, validateForm, tipoUsuario, onSave, onClose]);
+  }, [formData, validateForm, tipoUsuario, onSave, onClose, usuario, role]);
 
   // Cerrar modal
   const handleClose = useCallback(() => {

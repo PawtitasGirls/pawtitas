@@ -12,7 +12,8 @@ export const styles = StyleSheet.create({
     flexDirection: 'column',
     alignItems: 'center',
     width: '100%',
-    paddingBottom: 10,
+    paddingTop: 25,
+    paddingBottom: 0,
     backgroundColor: colors.background,
   },
   statusBarSpace: {
@@ -23,7 +24,7 @@ export const styles = StyleSheet.create({
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 24,
+    marginTop: 0,
     marginBottom: 5,
   },
   logo: {
@@ -301,7 +302,7 @@ closeButtonText: {
     backgroundColor: "#fff",
   },
   extraContainer: {
-    marginTop: 20,
+    marginTop: 5,
     paddingHorizontal: 16,
     paddingBottom:100
   },

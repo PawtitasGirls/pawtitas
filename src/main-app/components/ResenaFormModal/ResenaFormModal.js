@@ -50,10 +50,12 @@ const ResenaFormModal = ({
         onRequestClose={handleClose}
       >
         <KeyboardAvoidingView
-          behavior={Platform.OS === "ios" ? "padding" : "height"}
-          style={styles.centeredView}
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          keyboardVerticalOffset={Platform.OS === 'ios' ? 24 : 0}
+          style={styles.keyboardAvoidingView}
         >
-          <View style={styles.modalView}>
+          <View style={styles.centeredView}>
+            <View style={styles.modalView}>
             {/* Header */}
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>{texts.title}</Text>
@@ -70,7 +72,9 @@ const ResenaFormModal = ({
 
             <ScrollView 
               style={styles.formContainer}
+              contentContainerStyle={styles.formContent}
               showsVerticalScrollIndicator={false}
+              keyboardShouldPersistTaps="handled"
             >
               {/* Mensaje de error */}
               {errors.general && (
@@ -106,6 +110,7 @@ const ResenaFormModal = ({
               cancelLabel="Cancelar"
               onCancel={handleClose}
             />
+            </View>
           </View>
         </KeyboardAvoidingView>
       </Modal>

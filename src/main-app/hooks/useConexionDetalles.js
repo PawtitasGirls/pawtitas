@@ -36,6 +36,17 @@ export const useConexionDetalles = (provider, misConexiones, visible = true, onC
     };
   }
 
+  if (misConexiones && provider?.estado === 'finalizado' && provider?.puedeResenar === false) {
+    return {
+      primary: {
+        label: 'Chat',
+        action: 'handleChat',
+        variant: 'primary',
+      },
+      secondary: null,
+    };
+  }
+
  
   return ConexionDetallesController.getButtonConfig(
     provider?.estado,

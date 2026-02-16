@@ -61,27 +61,7 @@ const HomeHeader = ({ hidePendingControls, hideForAdmin }) => {
     {/* Primer bloque: buscador, notificaciones, modal */}
     <View style={styles.header}>
       {/* Fila superior */}
-      {!hidePendingControls && !hideForAdmin && (
-        <View style={styles.topRow}>
-          {/* Buscador */}
-          <View style={styles.searchContainer}>
-            <Ionicons name="search" size={18} color="#888" style={styles.searchIcon} />
-            <TextInput
-              style={styles.searchInput}
-              placeholder="Buscar servicios, veterinarias..."
-              placeholderTextColor="#999"
-            />
-          </View>
-
-          {/* Notificaciones */}
-          <TouchableOpacity style={styles.notificationButton}>
-            <Ionicons name="notifications-outline" size={24} color="#333" />
-            <View style={styles.badge}>
-              <Text style={styles.badgeText}>3</Text>
-            </View>
-          </TouchableOpacity>
-        </View>
-      )}
+     
 
       {/* Fila inferior - Botón de ubicación */}
       {!hidePendingControls && !hideForAdmin && (
@@ -191,7 +171,7 @@ const HomeHeader = ({ hidePendingControls, hideForAdmin }) => {
           resizeMode="contain"
         />
         <Text style={styles.logoText}>PAWTITAS</Text>
-        <Text style={styles.taglineText}>Todo lo que tu mascota necesita, cerca tuyo</Text>
+        <Text style={styles.taglineText}>Todo lo que tu mascota necesita, cerca tuyo.</Text>
       </View>
     </View>
   </>
@@ -213,7 +193,7 @@ const HomeScreen = () => {
       id: "1",
       emoji: "🏠",
       title: "Cuidadores",
-      description: "Encontrá el cuidador ideal",
+      description: "Encontrá el cuidador ideal.",
       route: "Cuidadores",
       onPress: () => navigation.navigate("Cuidadores"),
     },
@@ -221,7 +201,7 @@ const HomeScreen = () => {
       id: "2",
       emoji: "🦮",
       title: "Paseadores",
-      description: "Caminatas seguras cerca de tu zona",
+      description: "Caminatas seguras por tu zona.",
       route: "Paseadores",
       onPress: () => navigation.navigate("Paseadores"),
     },
@@ -229,16 +209,16 @@ const HomeScreen = () => {
       id: "3",
       emoji: "🚑",
       title: "Salud y Bienestar",
-      description: "Médicos veterinarios y clínicas cercanas",
+      description: "Veterinarios y clínicas cercanas.",
       route: "Salud",
       onPress: () => navigation.navigate("Salud"),
     },
 
     {
       id: "4",
-      emoji: "👥",
+      emoji: "💌",
       title: "Mis conexiones",
-      description: "Tu red de confianza en un solo lugar",
+      description: "Tu red de confianza en un solo lugar.",
       route: "MisConexiones",
       onPress: () => navigation.navigate("MisConexiones"),
     },

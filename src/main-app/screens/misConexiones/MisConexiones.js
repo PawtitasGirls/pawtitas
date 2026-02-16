@@ -43,6 +43,8 @@ const MisConexiones = () => {
     handleConfirmarRechazo,
     handleCancelarRechazo,
     handleAgregarResena,
+    handleDetallesModalHide,
+    handleResenaGuardada,
     handleCloseResenaModal,
     handleHideMensajeFlotante,
     toggleFilters,
@@ -153,13 +155,15 @@ const MisConexiones = () => {
         onFinalizarServicio={handleFinalizarServicio}
         onAgregarResena={handleAgregarResena}
         onRechazar={handleRechazar}
+        onModalHide={handleDetallesModalHide}
         isAdmin={role === ROLES.ADMIN}
       />
 
       <ResenaFormModal
         visible={state.showResenaModal}
         usuario={state.selectedProvider}
-        tipoUsuario="prestador"
+        tipoUsuario={isPrestadorView ? 'cliente' : 'prestador'}
+        onSave={handleResenaGuardada}
         onClose={handleCloseResenaModal}
       />
 

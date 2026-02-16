@@ -4,13 +4,14 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { styles } from './MenuInferior.styles';
 import { colors } from '../../../shared/styles';
-import { useAuth } from '../../contexts';
+import { useAuth, useStreamChat } from '../../contexts';
 import { isRouteAllowed, ROLES } from '../../constants/roles';
 
 const MenuInferior = () => {
   const navigation = useNavigation();
   const route = useRoute();
   const { role, user } = useAuth();
+  const { totalUnreadCount = 0 } = useStreamChat();
   const estadoPrestador = String(user?.estadoPrestador || '').toUpperCase();
   const isPrestadorPendiente =
     role === ROLES.PRESTADOR && estadoPrestador === 'PENDIENTE';
@@ -41,6 +42,9 @@ const MenuInferior = () => {
       <View style={styles.navBar}>
         {visibleItems.map((item) => {
           const isActive = route.name === item.route;
+          const isChat = item.route === 'Chat';
+          const showBadge = isChat && totalUnreadCount > 0 && !isActive;
+          const badgeLabel = totalUnreadCount > 99 ? '99+' : String(totalUnreadCount);
           return (
             <TouchableOpacity
               key={item.name}
@@ -49,11 +53,18 @@ const MenuInferior = () => {
               accessibilityLabel={item.name}
               accessibilityRole="button"
             >
-              <Ionicons
-                name={isActive ? item.activeIcon : item.icon}
-                size={24}
-                color={isActive ? colors.navigation.active : colors.navigation.inactive}
-              />
+              <View style={isChat ? styles.chatIconWrapper : undefined}>
+                <Ionicons
+                  name={isActive ? item.activeIcon : item.icon}
+                  size={24}
+                  color={isActive ? colors.navigation.active : colors.navigation.inactive}
+                />
+                {showBadge && (
+                  <View style={styles.badge}>
+                    <Text style={styles.badgeText}>{badgeLabel}</Text>
+                  </View>
+                )}
+              </View>
               {isActive && (
                 <Text style={[styles.navText, styles.activeText]}>
                   {item.name}

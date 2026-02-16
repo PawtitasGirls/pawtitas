@@ -55,6 +55,10 @@ const Chat = () => {
                 if (isMounted) {
                     setChannels(fetchedChannels);
                     setLoading(false);
+                    // Marcar todos los canales como leídos al ver la lista (actualiza el badge)
+                    fetchedChannels.forEach((ch) => {
+                      if (ch?.markRead) ch.markRead().catch(() => {});
+                    });
                 }
             } catch (error) {
                 console.error("Error fetching channels:", error);

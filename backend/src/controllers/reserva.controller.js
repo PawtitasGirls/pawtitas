@@ -22,6 +22,17 @@ function serializeReserva(r) {
   };
 }
 
+function serializeResena(resena) {
+  return {
+    id: resena.id?.toString?.() ?? resena.id,
+    reservaId: resena.reservaId?.toString?.() ?? resena.reservaId,
+    emisorRol: resena.emisorRol,
+    calificacion: resena.calificacion,
+    comentario: resena.comentario ?? '',
+    fecha: resena.fecha,
+  };
+}
+
 async function createReservaController(req, res) {
   try {
     const { duenioId, prestadorId, mascotaId, servicioId, fechaServicio } = req.body || {};
@@ -144,12 +155,14 @@ async function getReservasByDuenioController(req, res) {
 
 const serialized = reservas.map((r) => {
   const base = serializeReserva(r);
+  const resenas = Array.isArray(r.resena) ? r.resena : [];
+  const yaResenoDuenio = resenas.some((resena) => resena.emisorRol === 'DUENIO');
 
   const puedeResenar = (
     r.estado === 'FINALIZADO' &&
     r.confirmadoPorDuenio &&
     r.confirmadoPorPrestador &&
-    (!r.resena || r.resena.length === 0)
+    !yaResenoDuenio
   );
 
   const prestador = r.prestador;
@@ -161,6 +174,7 @@ const serialized = reservas.map((r) => {
   return {
     ...base,
     puedeResenar, 
+    resenas: resenas.map(serializeResena),
     prestador: prestador && {
       id: String(prestador.id),
       usuarioId: usuario?.id != null ? String(usuario.id) : null,
@@ -216,6 +230,14 @@ async function getReservasByPrestadorController(req, res) {
     const reservas = await reservaRepo.findManyByPrestadorId(id);
     const serialized = reservas.map((r) => {
       const base = serializeReserva(r);
+      const resenas = Array.isArray(r.resena) ? r.resena : [];
+      const yaResenoPrestador = resenas.some((resena) => resena.emisorRol === 'PRESTADOR');
+      const puedeResenar = (
+        r.estado === 'FINALIZADO' &&
+        r.confirmadoPorDuenio &&
+        r.confirmadoPorPrestador &&
+        !yaResenoPrestador
+      );
       const duenio = r.duenio;
       const usuario = duenio?.usuario;
       const domicilio = usuario?.domicilio;
@@ -226,6 +248,8 @@ async function getReservasByPrestadorController(req, res) {
         : '';
       return {
         ...base,
+        puedeResenar,
+        resenas: resenas.map(serializeResena),
         duenio: duenio && {
           id: String(duenio.id),
           usuarioId: usuario?.id != null ? String(usuario.id) : null,

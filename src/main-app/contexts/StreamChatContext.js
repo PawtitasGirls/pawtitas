@@ -7,6 +7,7 @@ export const StreamChatProvider = ({ children }) => {
   const [chatClient, setChatClient] = useState(null);
   const [isReady, setIsReady] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
+  const [totalUnreadCount, setTotalUnreadCount] = useState(0);
   const apiKey = process.env.EXPO_PUBLIC_STREAM_API_KEY;
 
   const initializeChat = async (userId, userName, userToken, userImage = null, userRole = null) => {
@@ -59,7 +60,8 @@ export const StreamChatProvider = ({ children }) => {
 
   await client.connectUser(userData, userToken);
 
-
+      const unread = client.user?.total_unread_count;
+      setTotalUnreadCount(typeof unread === 'number' ? unread : 0);
       setChatClient(client);
       setCurrentUser({ id: userId, name: userName, image: userImage, role: userRole });
       setIsReady(true);
@@ -72,6 +74,30 @@ export const StreamChatProvider = ({ children }) => {
     }
   };
 
+  // Sincronizar totalUnreadCount con eventos del cliente
+  useEffect(() => {
+    if (!chatClient || !chatClient.userID) {
+      setTotalUnreadCount(0);
+      return;
+    }
+    const syncUnread = () => {
+      const n = chatClient.user?.total_unread_count;
+      setTotalUnreadCount(typeof n === 'number' ? n : 0);
+    };
+    syncUnread();
+    const handleEvent = (event) => {
+      if (event.total_unread_count !== undefined) {
+        setTotalUnreadCount(event.total_unread_count);
+      } else {
+        syncUnread();
+      }
+    };
+    chatClient.on(handleEvent);
+    return () => {
+      chatClient.off(handleEvent);
+    };
+  }, [chatClient]);
+
   // Desconectar usuario
   const disconnectChat = async () => {
     if (chatClient) {
@@ -79,6 +105,7 @@ export const StreamChatProvider = ({ children }) => {
         await chatClient.disconnectUser();
         setChatClient(null);
         setCurrentUser(null);
+        setTotalUnreadCount(0);
         setIsReady(false);
       } catch (error) {
         console.error('❌ Error al desconectar:', error);
@@ -112,6 +139,7 @@ export const StreamChatProvider = ({ children }) => {
     chatClient,
     isReady,
     currentUser,
+    totalUnreadCount,
     initializeChat,
     disconnectChat,
     createOrGetChannel,

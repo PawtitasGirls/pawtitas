@@ -1,3 +1,5 @@
+import { createResena } from '../../services';
+
 // Configuración del formulario
 export const FORM_CONFIG = {
   FLOATING_MESSAGE_DURATION: 4000,
@@ -98,6 +100,14 @@ export class ResenaController {
            Object.keys(errors).length === 0;
   }
 
+  static mapRoleToBackend(role) {
+    const normalized = String(role || '').toLowerCase();
+    if (normalized === 'duenio') return 'DUENIO';
+    if (normalized === 'prestador') return 'PRESTADOR';
+    if (normalized === 'admin') return 'ADMIN';
+    return null;
+  }
+
   static prepareDataForSave(formData, tipoUsuario) {
     return {
       ...formData,
@@ -106,17 +116,40 @@ export class ResenaController {
     };
   }
 
-  static async saveResena(formData, tipoUsuario) {
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    // Llamar a la API/backend para guardar la reseña
+  static async saveResena(formData, tipoUsuario, options = {}) {
+    const reservaId = options?.reservaId;
+    const emisorRol = this.mapRoleToBackend(options?.role);
+
+    if (!reservaId) {
+      throw new Error('No se encontró la reserva a reseñar.');
+    }
+
+    if (!emisorRol) {
+      throw new Error('No se pudo identificar tu rol para guardar la reseña.');
+    }
+
+    const comentario = (formData.comentario || '').trim();
+    const payload = {
+      reservaId,
+      emisorRol,
+      calificacion: formData.rating,
+      comentario,
+    };
+
+    const response = await createResena(payload);
     const dataToSave = this.prepareDataForSave(formData, tipoUsuario);
-    
-    // Retornar éxito
+    const calificacion = response?.resena?.calificacion ?? formData.rating;
+
     return {
       success: true,
-      message: 'Reseña enviada correctamente',
-      data: dataToSave
+      message: response?.message || 'Reseña enviada correctamente',
+      data: {
+        ...dataToSave,
+        reservaId: String(reservaId),
+        emisorRol,
+        calificacion,
+        comentario,
+      },
     };
   }
 
