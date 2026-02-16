@@ -3,7 +3,7 @@ import { colors, typography } from "../../shared/styles";
 
 const styles = StyleSheet.create({
   section: {
-    paddingVertical: 40,
+    paddingVertical: 20,
     paddingHorizontal: 20,
     alignItems: "center",
     backgroundColor: colors.backgroundLanding,

@@ -57,6 +57,12 @@ navMenuMobile: {
   alignItems: "center",  
   justifyContent: "center",
   gap: 14,
+  width: "100%",
+  flexWrap: "nowrap",
+  backgroundColor: colors.backgroundLanding,
+  paddingVertical: 16,
+  borderRadius: 8,
+  marginTop: 12,
 },
 
 
@@ -74,6 +80,26 @@ navItem: {
 navItemMobile: {
   textAlign: "center",
   paddingHorizontal: 0,
+  width: "100%",
+},
+
+navButtonMobile: {
+  width: "100%",
+  alignItems: "center",
+},
+
+hamburger: {
+  padding: 10,
+  alignSelf: "flex-start",
+  zIndex: 10,
+},
+
+hamburgerLine: {
+  width: 25,
+  height: 3,
+  backgroundColor: colors.text.primary,
+  marginVertical: 2,
+  borderRadius: 2,
 },
 
 logo: {

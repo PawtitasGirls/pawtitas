@@ -32,10 +32,10 @@ export default function Footer({ scrollToSection, scrollToTop }) {
             <Image source={iconImage} style={styles.logo} resizeMode="contain" />
 
             <View style={styles.brandText}>
-              <Text style={styles.appName}>Pawtitas</Text>
+              <Text style={styles.appName}>PAWTITAS</Text>
 
               <Text style={styles.tagline}>
-                Conectando necesidades con servicios verificados ❤️
+                Conectando necesidades con servicios verificados.
               </Text>
             </View>
           </TouchableOpacity>
@@ -80,7 +80,7 @@ export default function Footer({ scrollToSection, scrollToTop }) {
         </View>
 
         <Text style={styles.copyright}>
-          © 2025 Pawtitas • Hecho con 🐾 para tu mejor amigo
+          © 2026 PAWTITAS
         </Text>
       </View>
     </View>

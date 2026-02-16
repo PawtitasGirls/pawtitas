@@ -233,15 +233,7 @@ export default function Contacto() {
           )}
         </TouchableOpacity>
       </View>
-
-      {/* Emojis / íconos de mascotas */}
-      <View style={styles.emojiRow}>
-        <Text style={styles.emoji}>🐶</Text>
-        <Text style={styles.emoji}>🐩</Text>
-        <Text style={styles.emoji}>🐱</Text>
-        <Text style={styles.emoji}>🐈</Text>
-      </View>
-
+      
       {/* Mensaje flotante de éxito */}
       {showSuccessMessage && (
         <Animated.View

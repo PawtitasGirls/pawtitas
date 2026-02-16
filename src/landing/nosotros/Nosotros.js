@@ -1,11 +1,14 @@
 import React from "react";
-import { View, Text, Image } from "react-native";
+import { View, Text, Image, useWindowDimensions } from "react-native";
 import styles from "./Nosotros.styles";
 import avatarMariaToro from "../../../assets/avatar/avatar-maria-toro.jpg";
 import avatarMariaElisa from "../../../assets/avatar/avatar-maria.elisa.jpg";
 import avatarAndreaPaez from "../../../assets/avatar/avatar-andrea-paez.jpg";
 
 export default function Nosotros() {
+  const { width } = useWindowDimensions();
+  const isMobile = width < 768;
+
   const equipo = [
     {
       nombre: "Andrea Paez",
@@ -29,7 +32,7 @@ export default function Nosotros() {
       <Text style={styles.title}>Nosotros</Text>
       <Text style={styles.subtitle}>
         Somos estudiantes de la carrera Analista en Sistemas y amamos a los animales.{"\n"}
-        Buscamos brindarte soluciones y ayudarte con tus mascotas
+        Buscamos brindarte soluciones y ayudarte con tus mascotas.
       </Text>
 
       <View style={styles.missionBox}>
@@ -39,7 +42,7 @@ export default function Nosotros() {
         </Text>
       </View>
 
-      <View style={styles.teamRow}>
+      <View style={[styles.teamRow, isMobile && styles.teamRowMobile]}>
         {equipo.map((persona, idx) => (
           <View key={idx} style={styles.card}>
             <Image 

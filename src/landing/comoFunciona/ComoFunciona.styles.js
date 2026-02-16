@@ -30,10 +30,21 @@ const styles = StyleSheet.create({
     gap: 20,
     maxWidth: 1000,
   },
+  stepsContainerMobile: {
+    flexDirection: "column",
+    gap: 0,
+    width: "100%",
+    alignItems: "center",
+  },
   stepCard: {
     alignItems: "center",
     maxWidth: 160,
     minWidth: 140,
+  },
+  stepCardMobile: {
+    width: "100%",
+    maxWidth: "100%",
+    minWidth: "auto",
   },
   stepNumber: {
     width: 56,
@@ -68,6 +79,11 @@ const styles = StyleSheet.create({
     fontSize: 24,
     color: colors.border.dark,
     marginHorizontal: 8,
+  },
+  stepArrowMobile: {
+    marginHorizontal: 0,
+    marginVertical: 20,
+    fontSize: 28,
   },
 });
 
