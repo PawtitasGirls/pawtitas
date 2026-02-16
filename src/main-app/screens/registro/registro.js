@@ -18,6 +18,39 @@ import { styles } from "./registro.styles";
 const SUCCESS_MESSAGE_DUEÑO = "¡Bienvenido/a! Tu registro fue exitoso, ya podés usar la app.";
 const SUCCESS_MESSAGE_PRESTADOR = "¡Listo! Tu registro fue exitoso. Revisaremos tus datos y te notificaremos por correo cuando tu cuenta esté habilitada.";
 const NAVIGATE_DELAY_MS = 3000;
+const TERMINOS_PAGINAS = [
+  {
+    titulo: "1. Compromiso con el bienestar animal y la comunidad",
+    contenido:
+      "Pawtitas es una plataforma orientada al cuidado responsable de las mascotas y al fortalecimiento de una comunidad basada en el respeto, la empatia y la confianza. Al crear una cuenta aceptas utilizar el servicio de forma etica, priorizando siempre el bienestar animal y el trato digno entre las personas.",
+  },
+  {
+    titulo: "2. Uso responsable de la cuenta",
+    contenido:
+      "Eres responsable de la actividad realizada con tu cuenta y de mantener la confidencialidad de tus credenciales. Debes brindar informacion verdadera, actualizada y verificable. No esta permitido suplantar identidades ni generar perfiles con fines engañosos o discriminatorios. Pawtitas podra suspender cuentas que vulneren estos principios.",
+  },
+  {
+    titulo: "3. Conducta y contenido dentro de la plataforma",
+    contenido:
+      "Todo el contenido publicado debe ser legitimo, respetuoso y acorde a la normativa vigente. No se permite material ofensivo, discriminatorio, violento, ilegal ni que promueva el maltrato animal. Se espera un trato cordial, inclusivo y profesional entre usuarios. Pawtitas podra moderar o eliminar publicaciones que incumplan el codigo de etica. ",
+  },
+  {
+    titulo: "4. Transparencia en los servicios y relaciones entre usuarios",
+    contenido:
+      "Los prestadores deben describir sus servicios de forma clara, honesta y completa. Los dueños de mascotas deben proporcionar informacion veraz sobre las necesidades y condiciones de sus animales. Las reservas, pagos y cancelaciones deben gestionarse con responsabilidad promoviendo acuerdos justos para ambas partes. Aceptar los términos y condiciones implica aceptar pagar un 12% de comision por parte de los dueños.",
+  },
+  {
+    titulo: "5. Privacidad, seguridad y uso de datos",
+    contenido:
+      "Nos comprometemos a proteger la informacion personal de los usuarios y a utilizarla exclusivamente para el funcionamiento y mejora de la plataforma. Los datos se tratan bajo principios de confidencialidad, seguridad y respeto por la privacidad. Los usuarios tambien deben hacer un uso responsable de la informacion a la que accedan dentro de Pawtitas.",
+  },
+  {
+    titulo: "6. Integridad, cumplimiento y mejora continua",
+    contenido:
+      "Pawtitas promueve un entorno basado en la integridad, la legalidad y el respeto mutuo. No se permiten acuerdos por fuera de la plataforma que busquen evadir sus normas de seguridad y confianza. Nos reservamos el derecho de actualizar estos terminos para mejorar la experiencia y reforzar nuestros principios eticos. No nos hacemos responsables de pagos/reservas realizadas fuera de la app. Se eliminarán perfiles que no respeten las condiciones. El uso continuo de la app implica la aceptacion de estas condiciones.",
+  },
+];
+
 
 export default function RegistroScreen({ navigation }) {
   const [perfil, setPerfil] = useState("");
@@ -29,6 +62,9 @@ export default function RegistroScreen({ navigation }) {
   const [successMessage, setSuccessMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [isScrollAtBottom, setIsScrollAtBottom] = useState(false);
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [showTermsModal, setShowTermsModal] = useState(false);
+  const [termsPage, setTermsPage] = useState(0);
   const scrollViewRef = useRef(null);
 
   const handleDateChange = (event, selectedDate) => {
@@ -130,9 +166,52 @@ export default function RegistroScreen({ navigation }) {
   };
 
   const validateForm = () => {
-    const newErrors = RegistroController.validateForm(form, perfil, especialidad);
+    const validationErrors = RegistroController.validateForm(form, perfil, especialidad);
+    const newErrors = { ...validationErrors };
+
+    if (!acceptedTerms) {
+      newErrors.acceptedTerms = "Debes aceptar terminos y condiciones para continuar.";
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
+  };
+
+  const openTermsModal = () => {
+    setTermsPage(0);
+    setShowTermsModal(true);
+  };
+
+  const closeTermsModal = () => {
+    setShowTermsModal(false);
+  };
+
+  const goToNextTermsPage = () => {
+    setTermsPage((prevPage) => Math.min(prevPage + 1, TERMINOS_PAGINAS.length - 1));
+  };
+
+  const goToPreviousTermsPage = () => {
+    setTermsPage((prevPage) => Math.max(prevPage - 1, 0));
+  };
+
+  const clearTermsError = () => {
+    setErrors((prevErrors) => RegistroController.clearFieldError(prevErrors, "acceptedTerms"));
+  };
+
+  const toggleTermsAcceptance = () => {
+    setAcceptedTerms((prevAccepted) => {
+      const nextAccepted = !prevAccepted;
+      if (nextAccepted) {
+        clearTermsError();
+      }
+      return nextAccepted;
+    });
+  };
+
+  const acceptTermsFromModal = () => {
+    setAcceptedTerms(true);
+    clearTermsError();
+    closeTermsModal();
   };
 
   const handleSubmit = async () => {
@@ -374,6 +453,28 @@ export default function RegistroScreen({ navigation }) {
         </>
       )}
 
+      <View style={styles.termsSection}>
+        <View style={styles.termsAcceptanceRow}>
+          <TouchableOpacity
+            style={[
+              styles.checkbox,
+              acceptedTerms && styles.checkboxChecked,
+              errors.acceptedTerms && styles.checkboxError,
+            ]}
+            onPress={toggleTermsAcceptance}
+            activeOpacity={0.8}
+          >
+            {acceptedTerms ? <Text style={styles.checkboxMark}>✓</Text> : null}
+          </TouchableOpacity>
+
+          <Text style={styles.termsText}>Aceptar </Text>
+          <TouchableOpacity onPress={openTermsModal}>
+            <Text style={styles.termsLink}>Terminos y condiciones</Text>
+          </TouchableOpacity>
+        </View>
+        {errors.acceptedTerms ? <Text style={styles.errorText}>{errors.acceptedTerms}</Text> : null}
+      </View>
+
       <View style={styles.buttonRow}>
         <TouchableOpacity
           style={[styles.button, styles.cancel]}
@@ -402,6 +503,59 @@ export default function RegistroScreen({ navigation }) {
         duration={REGISTRO_CONFIG.FLOATING_MESSAGE_DURATION}
         position="top"
       />
+
+      <Modal
+        transparent
+        animationType="slide"
+        visible={showTermsModal}
+        onRequestClose={closeTermsModal}
+      >
+        <View style={styles.termsModalOverlay}>
+          <View style={styles.termsModalContent}>
+            <View style={styles.termsModalHeader}>
+              <Text style={styles.termsModalTitle}>Terminos y condiciones</Text>
+              <TouchableOpacity onPress={closeTermsModal}>
+                <Text style={styles.modalCloseButton}>Cerrar</Text>
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView
+              style={styles.termsModalBody}
+              contentContainerStyle={styles.termsModalBodyContent}
+              showsVerticalScrollIndicator={false}
+            >
+              <Text style={styles.termsPageIndicator}>
+                Pagina {termsPage + 1} de {TERMINOS_PAGINAS.length}
+              </Text>
+              <Text style={styles.termsPageTitle}>{TERMINOS_PAGINAS[termsPage].titulo}</Text>
+              <Text style={styles.termsPageText}>{TERMINOS_PAGINAS[termsPage].contenido}</Text>
+            </ScrollView>
+
+            <View style={styles.termsModalFooter}>
+              <TouchableOpacity
+                style={[
+                  styles.termsNavButton,
+                  termsPage === 0 && styles.termsNavButtonDisabled,
+                ]}
+                onPress={goToPreviousTermsPage}
+                disabled={termsPage === 0}
+              >
+                <Text style={styles.termsNavButtonText}>Anterior</Text>
+              </TouchableOpacity>
+
+              {termsPage < TERMINOS_PAGINAS.length - 1 ? (
+                <TouchableOpacity style={styles.termsNavButton} onPress={goToNextTermsPage}>
+                  <Text style={styles.termsNavButtonText}>Siguiente</Text>
+                </TouchableOpacity>
+              ) : (
+                <TouchableOpacity style={styles.termsAcceptButton} onPress={acceptTermsFromModal}>
+                  <Text style={styles.termsAcceptButtonText}>Aceptar y cerrar</Text>
+                </TouchableOpacity>
+              )}
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
