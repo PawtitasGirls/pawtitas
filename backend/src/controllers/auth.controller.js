@@ -119,6 +119,20 @@ async function registroController(req, res) {
       });
     }
 
+    const perfil = (req.body && req.body.perfil) ? String(req.body.perfil).toLowerCase() : '';
+    const isPrestador = perfil === 'prestador';
+
+    if (isPrestador) {
+      const hasDocumentos = req.files?.documentosFile?.[0];
+      const hasCertificados = req.files?.certificadosFile?.[0];
+      if (!hasDocumentos) {
+        return res.status(400).json({ success: false, message: 'documentosFile es requerido' });
+      }
+      if (!hasCertificados) {
+        return res.status(400).json({ success: false, message: 'certificadosFile es requerido' });
+      }
+    }
+
     const documentosFile =
       (req.files && req.files.documentosFile && req.files.documentosFile[0]) ||
       req.body?.documentosFile ||
