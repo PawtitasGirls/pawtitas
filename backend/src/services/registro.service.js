@@ -5,6 +5,27 @@ const usuarioRepo = require('../repositories/usuario.repo');
 const { descomponerUbicacion } = require('../utils/ubicacion');
 const { updateDomicilioWithCoordinates } = require('./geocoding.service');
 
+function normalizeFileField(file) {
+  if (!file) return null;
+
+  if (typeof file === 'string') return file;
+
+  // Multer: guardar siempre como /uploads/<filename> para servir vía express.static
+  if (file.filename) {
+    return `/uploads/${file.filename}`;
+  }
+  if (file.path) {
+    const normalized = String(file.path).replace(/\\/g, '/');
+    const uploadsIndex = normalized.lastIndexOf('/uploads/');
+    if (uploadsIndex !== -1) return normalized.slice(uploadsIndex);
+    const base = normalized.split('/').pop() || normalized;
+    return `/uploads/${base}`;
+  }
+
+  if (file.name) return file.name;
+  return null;
+}
+
 async function registerUser({
   nombre,
   apellido,
@@ -90,8 +111,8 @@ async function registerUser({
       const prestador = await tx.prestador.create({
         data: {
           usuarioId: usuarioRow.id,
-          certificaciones: certificadosFile?.name || null,
-          documentos: documentosFile?.name || null,
+          certificaciones: normalizeFileField(certificadosFile),
+          documentos: normalizeFileField(documentosFile),
           perfil: especialidad || null,
           estado: 'PENDIENTE',
         },
@@ -114,16 +135,23 @@ async function registerUser({
       await tx.duenio.create({ data: { usuarioId: usuarioRow.id } });
     }
 
-    return usuarioRow;
+    return { usuarioRow, documentosFile, certificadosFile };
   });
 
   try {
-    await updateDomicilioWithCoordinates(result.domicilioId, { calle, numero, ciudad });
+    await updateDomicilioWithCoordinates(result.usuarioRow.domicilioId, { calle, numero, ciudad });
   } catch (err) {
     console.warn('Geocoding domicilio en registro falló:', err?.message ?? err);
   }
 
-  return result;
+  if (process.env.DEBUG_UPLOADS) {
+    console.log('[DEBUG_UPLOADS] registerUser saved', {
+      documentos: normalizeFileField(result.documentosFile),
+      certificaciones: normalizeFileField(result.certificadosFile),
+    });
+  }
+
+  return result.usuarioRow;
 }
 
 module.exports = {

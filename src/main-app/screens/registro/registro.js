@@ -79,8 +79,16 @@ export default function RegistroScreen({ navigation }) {
         copyToCacheDirectory: true,
       });
 
-      if (result.type === "success") {
-        setForm({ ...form, [field]: result });
+      // Compatible con API legacy (type === 'success') y nueva (canceled + assets)
+      const canceled = result.canceled === true;
+      const file = result.assets?.[0] ?? (result.type === 'success' ? result : null);
+      if (!canceled && file?.uri) {
+        const normalized = {
+          uri: file.uri,
+          name: file.name || 'documento.pdf',
+          mimeType: file.mimeType || 'application/pdf',
+        };
+        setForm({ ...form, [field]: normalized });
         if (errors[field]) {
           setErrors(RegistroController.clearFieldError(errors, field));
         }
@@ -129,6 +137,11 @@ export default function RegistroScreen({ navigation }) {
 
   const handleSubmit = async () => {
     if (!validateForm() || submitting) return;
+
+    if (typeof __DEV__ !== 'undefined' && __DEV__ && perfil === 'prestador') {
+      console.log('[DEBUG_UPLOADS] form.documentosFile', form.documentosFile ? { uri: form.documentosFile.uri, name: form.documentosFile.name, mimeType: form.documentosFile.mimeType } : null);
+      console.log('[DEBUG_UPLOADS] form.certificadosFile', form.certificadosFile ? { uri: form.certificadosFile.uri, name: form.certificadosFile.name, mimeType: form.certificadosFile.mimeType } : null);
+    }
 
     try {
       setSubmitting(true);

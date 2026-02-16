@@ -45,6 +45,8 @@ async function listPrestadores(req, res) {
         estadoBackend: p.estado,
         motivoRechazo: p.motivoRechazo ?? null,
         fechaRegistro: u?.creadoEn ?? p.fechaIngreso,
+        documentosUrl: p.documentos || null,
+        certificacionesUrl: p.certificaciones || null,
       };
     });
 

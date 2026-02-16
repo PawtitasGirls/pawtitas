@@ -109,7 +109,31 @@ async function loginController(req, res) {
 // Registro
 async function registroController(req, res) {
   try {
-    const result = await registerUser(req.body);
+    if (process.env.DEBUG_UPLOADS) {
+      console.log('[DEBUG_UPLOADS] POST /api/registro', {
+        contentType: req.headers['content-type'],
+        bodyKeys: Object.keys(req.body || {}),
+        fileFields: req.files ? Object.keys(req.files) : [],
+        documentosPath: req.files?.documentosFile?.[0]?.path,
+        certificadosPath: req.files?.certificadosFile?.[0]?.path,
+      });
+    }
+
+    const documentosFile =
+      (req.files && req.files.documentosFile && req.files.documentosFile[0]) ||
+      req.body?.documentosFile ||
+      null;
+    const certificadosFile =
+      (req.files && req.files.certificadosFile && req.files.certificadosFile[0]) ||
+      req.body?.certificadosFile ||
+      null;
+
+    const result = await registerUser({
+      ...(req.body || {}),
+      documentosFile,
+      certificadosFile,
+    });
+
     return res.status(201).json({ success: true, user: result });
   } catch (err) {
     if (err.code === 'P2002') {
