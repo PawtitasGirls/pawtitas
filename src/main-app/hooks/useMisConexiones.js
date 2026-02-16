@@ -12,6 +12,18 @@ import {
   confirmarFinalizacionServicio,
 } from '../services';
 
+const getResenasArray = (reserva) => {
+  if (Array.isArray(reserva?.resenas)) return reserva.resenas;
+  if (Array.isArray(reserva?.resena)) return reserva.resena;
+  return [];
+};
+
+const getCalificacionPropia = (reserva, emisorRol) => {
+  const resenas = getResenasArray(reserva);
+  const propia = resenas.find((resena) => String(resena?.emisorRol || '').toUpperCase() === emisorRol);
+  return propia?.calificacion ?? 0;
+};
+
 export const useMisConexiones = () => {
   const { userLocation, getDistanceFromUser } = useLocation();
   const { user, role } = useAuth();
@@ -22,6 +34,7 @@ export const useMisConexiones = () => {
     selectedDates: [],
     showPaymentWebView: false,
     paymentUrl: null,
+    pendingResenaProvider: null,
   }));
   const [providers, setProviders] = useState([]);
   const [loadingConexiones, setLoadingConexiones] = useState(true);
@@ -54,6 +67,7 @@ export const useMisConexiones = () => {
             const mascota = mascotaRaw
               ? { nombre: mascotaRaw.nombre ?? '', tipo: mascotaRaw.tipo ?? '', raza: mascotaRaw.raza ?? '' }
               : null;
+            const rating = getCalificacionPropia(r, 'DUENIO');
             return {
               id: r.id,
               reservaId: r.id,
@@ -68,7 +82,8 @@ export const useMisConexiones = () => {
               longitude: dom.longitude ?? null,
               tipo: p.perfil || '',
               estado: estadoConexion,
-              rating: 0,
+              rating,
+              puedeResenar: Boolean(r.puedeResenar),
               mascota,
             };
           });
@@ -95,6 +110,7 @@ export const useMisConexiones = () => {
             const descripcion = descripcionDuenio
               ? (tieneDatosMascota ? `${descripcionDuenio.slice(0, 80)}${descripcionDuenio.length > 80 ? '…' : ''} · Mascota: ${mascota.nombre || '—'}` : descripcionDuenio)
               : (tieneDatosMascota ? `Mascota: ${mascota.nombre || '—'}${mascota.tipo ? ` (${mascota.tipo})` : ''}` : 'Sin descripción');
+            const rating = getCalificacionPropia(r, 'PRESTADOR');
             return {
               id: r.id,
               reservaId: r.id,
@@ -111,7 +127,8 @@ export const useMisConexiones = () => {
               longitude: dom.longitude ?? null,
               tipo: 'dueño',
               estado: estadoConexion,
-              rating: 0,
+              rating,
+              puedeResenar: Boolean(r.puedeResenar),
             };
           });
           if (!cancelled) setProviders(list);
@@ -162,6 +179,7 @@ export const useMisConexiones = () => {
   const handleProviderPress = useCallback((provider) => {
     setState(prev => ({ 
       ...prev, 
+      pendingResenaProvider: null,
       selectedProvider: provider, 
       showDetalles: true 
     }));
@@ -179,11 +197,11 @@ export const useMisConexiones = () => {
     paymentProviderRef.current = provider;
     setState(prev => ({
       ...prev,
+      showDetalles: false,
       selectedProvider: provider,
       showCalendarioModal: true,
     }));
-    handleCloseDetalles();
-  }, [handleCloseDetalles]);
+  }, []);
 
   const handleConfirmarPago = useCallback(async () => {
     const provider = state.selectedProvider || paymentProviderRef.current;
@@ -401,11 +419,11 @@ export const useMisConexiones = () => {
   const handleRechazar = useCallback((provider) => {
     setState(prev => ({ 
       ...prev, 
+      showDetalles: false,
       selectedProvider: provider, 
       showRechazarModal: true 
     }));
-    handleCloseDetalles();
-  }, [handleCloseDetalles]);
+  }, []);
 
   const handleConfirmarRechazo = useCallback(() => {
     if (!state.selectedProvider) return;
@@ -439,18 +457,54 @@ export const useMisConexiones = () => {
   const handleAgregarResena = useCallback((provider) => {
     setState(prev => ({ 
       ...prev, 
-      selectedProvider: provider, 
-      showResenaModal: true 
+      showDetalles: false,
+      selectedProvider: provider,
+      pendingResenaProvider: provider,
+      showResenaModal: false,
     }));
-    handleCloseDetalles();
-  }, [handleCloseDetalles]);
+  }, []);
+
+  const handleDetallesModalHide = useCallback(() => {
+    setState((prev) => {
+      if (!prev.pendingResenaProvider) {
+        return prev;
+      }
+      return {
+        ...prev,
+        selectedProvider: prev.pendingResenaProvider,
+        pendingResenaProvider: null,
+        showResenaModal: true,
+      };
+    });
+  }, []);
 
   const handleCloseResenaModal = useCallback(() => {
     setState(prev => ({ 
       ...prev, 
       showResenaModal: false, 
-      selectedProvider: null 
+      selectedProvider: null,
+      pendingResenaProvider: null,
     }));
+  }, []);
+
+  const handleResenaGuardada = useCallback((resenaData) => {
+    const reservaId = String(resenaData?.reservaId || '');
+    const calificacion = Number(resenaData?.calificacion || 0);
+    if (!reservaId || calificacion <= 0) return;
+
+    setProviders((prev) =>
+      prev.map((provider) => {
+        const providerReservaId = String(provider?.reservaId || provider?.id || '');
+        if (providerReservaId !== reservaId) {
+          return provider;
+        }
+        return {
+          ...provider,
+          rating: calificacion,
+          puedeResenar: false,
+        };
+      })
+    );
   }, []);
 
   const handleHideMensajeFlotante = useCallback(() => {
@@ -521,6 +575,8 @@ export const useMisConexiones = () => {
     handleConfirmarRechazo,
     handleCancelarRechazo,
     handleAgregarResena,
+    handleDetallesModalHide,
+    handleResenaGuardada,
     handleCloseResenaModal,
     handleHideMensajeFlotante,
     toggleFilters,
