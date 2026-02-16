@@ -30,11 +30,11 @@ export default function Servicios() {
     <View style={styles.section}>
       <Text style={styles.title}>Servicios disponibles</Text>
       <Text style={styles.subtitle}>
-        Contamos con todas las opciones para el cuidado de tu mascota
+        Contamos con todas las opciones para el cuidado de tu mascota.  
         {"\n\n"}
         ¿Te vas de viaje y necesitas cuidador? ¿Buscás paseador? ¿Necesitás veterinaria cercana o a domicilio? ¿Tenés una emergencia?
         {"\n\n"}
-        Todo y más lo podés encontrar acá
+        Todo y más lo podés encontrar acá.
       </Text>
 
       <View style={styles.cardContainer}>

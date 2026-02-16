@@ -1,5 +1,4 @@
-// Componente principal de la Landing Page
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import Logo from "../../../assets/icon.png";
 
 import {
@@ -46,32 +45,26 @@ import { useFonts } from "expo-font";
 export default function LandingApp() {
   const scrollRef = useRef(null);
   const sectionPositions = useRef({});
+  const [menuOpen, setMenuOpen] = useState(false);
 
-  /* =========================
-     RESPONSIVE BREAKPOINT
-  ========================== */
   const { width } = useWindowDimensions();
   const isMobile = width < 768;
 
-  /* =========================
-     SCROLL HELPERS
-  ========================== */
   const onSectionLayout = (key, event) => {
     sectionPositions.current[key] = event.nativeEvent.layout.y;
   };
 
   const scrollToSection = (key) => {
     if (sectionPositions.current[key] !== undefined) {
+      const offset = isMobile ? 250 : 0;
       scrollRef.current.scrollTo({
-        y: sectionPositions.current[key],
+        y: Math.max(0, sectionPositions.current[key] - offset),
         animated: true,
       });
     }
+    setMenuOpen(false);
   };
 
-  /* =========================
-     FONTS
-  ========================== */
   const [fontsLoaded, fontError] = useFonts({
     Quicksand_400Regular,
     Quicksand_500Medium,
@@ -94,39 +87,51 @@ export default function LandingApp() {
     );
   }
 
-  /* =========================
-     RENDER
-  ========================== */
   return (
     <SafeAreaProvider>
       <SafeAreaView style={styles.container}>
         <ScrollView ref={scrollRef} contentContainerStyle={{ flexGrow: 1 }}>
 
-{/* ================= HEADER ================= */}
 <View style={styles.header}>
   <View style={styles.navContainer}>
-    <View style={[styles.navMenu, isMobile && styles.navMenuMobile]}>
+    
+    {isMobile && (
+      <TouchableOpacity 
+        style={styles.hamburger} 
+        onPress={() => setMenuOpen(!menuOpen)}
+      >
+        <View style={styles.hamburgerLine} />
+        <View style={styles.hamburgerLine} />
+        <View style={styles.hamburgerLine} />
+      </TouchableOpacity>
+    )}
 
-      {[
-        { label: "Inicio", action: () => scrollRef.current.scrollTo({ y: 0, animated: true }) },
-        { label: "Servicios", action: () => scrollToSection("servicios") },
-        { label: "Cómo Funciona", action: () => scrollToSection("comoFunciona") },
-        { label: "Suscripciones", action: () => scrollToSection("suscripciones") },
-        { label: "Nosotros", action: () => scrollToSection("nosotros") },
-        { label: "Contacto", action: () => scrollToSection("contacto") },
-      ].map((item, i) => (
-        <TouchableOpacity
-          key={i}
-          onPress={item.action}
-            
-        >
-          <Text style={[styles.navItem, isMobile && styles.navItemMobile]}>
-            {item.label}
-          </Text>
-        </TouchableOpacity>
-      ))}
+    {(!isMobile || menuOpen) && (
+      <View style={[styles.navMenu, isMobile && styles.navMenuMobile]}>
+        {[
+          { label: "Inicio", action: () => {
+            scrollRef.current.scrollTo({ y: 0, animated: true });
+            setMenuOpen(false);
+          }},
+          { label: "Servicios", action: () => scrollToSection("servicios") },
+          { label: "Cómo Funciona", action: () => scrollToSection("comoFunciona") },
+          { label: "Suscripciones", action: () => scrollToSection("suscripciones") },
+          { label: "Nosotros", action: () => scrollToSection("nosotros") },
+          { label: "Contacto", action: () => scrollToSection("contacto") },
+        ].map((item, i) => (
+          <TouchableOpacity
+            key={i}
+            onPress={item.action}
+            style={isMobile && styles.navButtonMobile}
+          >
+            <Text style={[styles.navItem, isMobile && styles.navItemMobile]}>
+              {item.label}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+    )}
 
-    </View>
   </View>
 </View>
 

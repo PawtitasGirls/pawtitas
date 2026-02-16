@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text } from "react-native";
+import { View, Text, useWindowDimensions } from "react-native";
 import styles from "./ComoFunciona.styles";
 
 const steps = [
@@ -10,6 +10,9 @@ const steps = [
 ];
 
 export default function ComoFunciona() {
+  const { width } = useWindowDimensions();
+  const isMobile = width < 768;
+
   return (
     <View style={styles.section}>
       <Text style={styles.title}>¿Cómo funciona?</Text>
@@ -17,10 +20,10 @@ export default function ComoFunciona() {
         En 4 simples pasos podés comenzar a disfrutar de nuestros servicios
       </Text>
 
-      <View style={styles.stepsContainer}>
+      <View style={[styles.stepsContainer, isMobile && styles.stepsContainerMobile]}>
         {steps.map((step, idx) => (
           <React.Fragment key={idx}>
-            <View style={styles.stepCard}>
+            <View style={[styles.stepCard, isMobile && styles.stepCardMobile]}>
               <View style={styles.stepNumber}>
                 <Text style={styles.stepNumberText}>{step.number}</Text>
               </View>
@@ -28,7 +31,9 @@ export default function ComoFunciona() {
               <Text style={styles.stepDescription}>{step.description}</Text>
             </View>
             {idx < steps.length - 1 && (
-              <Text style={styles.stepArrow}>→</Text>
+              <Text style={[styles.stepArrow, isMobile && styles.stepArrowMobile]}>
+                {isMobile ? "↓" : "→"}
+              </Text>
             )}
           </React.Fragment>
         ))}

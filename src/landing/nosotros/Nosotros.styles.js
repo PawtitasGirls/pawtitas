@@ -48,6 +48,11 @@ const styles = StyleSheet.create({
     flexWrap: "wrap",
     gap: 20,
   },
+  teamRowMobile: {
+    flexDirection: "column",
+    alignItems: "center",
+    gap: 30,
+  },
   card: {
     width: 120,
     alignItems: "center",
