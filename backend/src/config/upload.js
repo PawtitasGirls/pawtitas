@@ -21,21 +21,32 @@ const storage = multer.diskStorage({
   },
 });
 
-function isPdf(file) {
+const ALLOWED_MIMETYPES = [
+  'application/pdf',
+  'application/x-pdf',
+  'image/jpeg',
+  'image/jpg',
+  'image/png',
+];
+const ALLOWED_EXTENSIONS = ['.pdf', '.jpg', '.jpeg', '.png'];
+const FORMAT_ERROR_MESSAGE = 'Formato incorrecto, solo puede ser jpg, jpeg, png o pdf';
+
+function isAllowedAttachment(file) {
   const mimetype = (file.mimetype || '').toLowerCase();
   const originalname = (file.originalname || '').toLowerCase();
-  return mimetype === 'application/pdf'
-    || mimetype === 'application/x-pdf'
-    || (mimetype === 'application/octet-stream' && originalname.endsWith('.pdf'))
-    || originalname.endsWith('.pdf');
+  if (ALLOWED_MIMETYPES.some((m) => mimetype === m)) return true;
+  if (mimetype === 'application/octet-stream') {
+    return ALLOWED_EXTENSIONS.some((ext) => originalname.toLowerCase().endsWith(ext));
+  }
+  return ALLOWED_EXTENSIONS.some((ext) => originalname.toLowerCase().endsWith(ext));
 }
 
 const fileFilter = (req, file, cb) => {
   if (process.env.DEBUG_UPLOADS) {
-    console.log('[DEBUG_UPLOADS] multer fileFilter', file.mimetype, file.originalname, isPdf(file));
+    console.log('[DEBUG_UPLOADS] multer fileFilter', file.mimetype, file.originalname, isAllowedAttachment(file));
   }
-  if (!isPdf(file)) {
-    return cb(new Error('Solo se permiten archivos PDF'), false);
+  if (!isAllowedAttachment(file)) {
+    return cb(new Error(FORMAT_ERROR_MESSAGE), false);
   }
   cb(null, true);
 };
