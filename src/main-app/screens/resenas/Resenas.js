@@ -1,350 +1,163 @@
-import React, { useState, useMemo, useEffect } from 'react';
-import { ScrollView, View, Text } from 'react-native';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
+import { ScrollView, View, Text, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { ScreenHeader, MenuInferior, BarraBuscador, Filtros, Paginador } from '../../components';
 import ResenaCard from '../../components/ResenaCard';
 import { usePaginacion } from '../../hooks/usePaginacion';
+import { useAuth } from '../../contexts';
+import { ROLES } from '../../constants/roles';
+import { getMisResenas } from '../../services';
 import { styles } from './Resenas.styles';
 
 // Pantalla de Mis Reseñas
 const Resenas = () => {
-    const navigation = useNavigation();
+  const navigation = useNavigation();
+  const { user, role } = useAuth();
 
-    // Estados para filtros y búsqueda
-    const [searchQuery, setSearchQuery] = useState('');
-    const [selectedFilter, setSelectedFilter] = useState('todos');
-    const [showFilters, setShowFilters] = useState(false);
-    
-    // Implementar la llamada a la API. Estos datos son de ejemplo.
-    const [resenas, setResenas] = useState([
-        {
-            id: '1',
-            usuario: {
-                nombre: 'María González',
-                avatar: null
-            },
-            rating: 4.5,
-            texto: 'Excelente servicio de cuidado. María fue muy profesional con mi perro Max, lo cuidó como si fuera suyo. Muy recomendada.',
-            fecha: '2024-01-15',
-            tipo: 'cuidador'
-        },
-        {
-            id: '2',
-            usuario: {
-                nombre: 'Carlos Gómez',
-                avatar: null
-            },
-            rating: 3.5,
-            texto: 'Buen servicio de paseo. Carlos fue puntual y responsable, aunque podría mejorar en la comunicación durante el paseo.',
-            fecha: '2024-01-10',
-            tipo: 'paseador'
-        },
-        {
-            id: '3',
-            usuario: {
-                nombre: 'Dr. Martínez',
-                avatar: null
-            },
-            rating: 5.0,
-            texto: 'Increíble atención veterinaria. El doctor fue muy profesional, explicó todo detalladamente y mi gato se recuperó perfectamente.',
-            fecha: '2024-01-08',
-            tipo: 'veterinario'
-        },
-        {
-            id: '4',
-            usuario: {
-                nombre: 'Laura Fernández',
-                avatar: null
-            },
-            rating: 4.0,
-            texto: 'Muy buena cuidadora. Laura fue muy cariñosa con mis mascotas y me envió fotos durante todo el día. Servicio confiable.',
-            fecha: '2024-01-05',
-            tipo: 'cuidador'
-        },
-        {
-            id: '5',
-            usuario: {
-                nombre: 'Roberto Silva',
-                avatar: null
-            },
-            rating: 4.5,
-            texto: 'Excelente paseador. Roberto fue muy atento con mi perro, me mantuvo informado durante todo el paseo. Definitivamente lo volveré a contratar.',
-            fecha: '2024-01-03',
-            tipo: 'paseador'
-        },
-        {
-          id: '6',
-          usuario: {
-              nombre: 'María González',
-              avatar: null
-          },
-          rating: 4.5,
-          texto: 'Excelente servicio de cuidado. María fue muy profesional con mi perro Max, lo cuidó como si fuera suyo. Muy recomendada.',
-          fecha: '2024-01-15',
-          tipo: 'cuidador'
-      },
-      {
-          id: '7',
-          usuario: {
-              nombre: 'Carlos Gómez',
-              avatar: null
-          },
-          rating: 3.5,
-          texto: 'Buen servicio de paseo. Carlos fue puntual y responsable, aunque podría mejorar en la comunicación durante el paseo.',
-          fecha: '2024-01-10',
-          tipo: 'paseador'
-      },
-      {
-          id: '8',
-          usuario: {
-              nombre: 'Dr. Martínez',
-              avatar: null
-          },
-          rating: 5.0,
-          texto: 'Increíble atención veterinaria. El doctor fue muy profesional, explicó todo detalladamente y mi gato se recuperó perfectamente.',
-          fecha: '2024-01-08',
-          tipo: 'veterinario'
-      },
-      {
-          id: '9',
-          usuario: {
-              nombre: 'Laura Fernández',
-              avatar: null
-          },
-          rating: 4.0,
-          texto: 'Muy buena cuidadora. Laura fue muy cariñosa con mis mascotas y me envió fotos durante todo el día. Servicio confiable.',
-          fecha: '2024-01-05',
-          tipo: 'cuidador'
-      },
-      {
-          id: '10',
-          usuario: {
-              nombre: 'Roberto Silva',
-              avatar: null
-          },
-          rating: 4.5,
-          texto: 'Excelente paseador. Roberto fue muy atento con mi perro, me mantuvo informado durante todo el paseo. Definitivamente lo volveré a contratar.',
-          fecha: '2024-01-03',
-          tipo: 'paseador'
-      },
-      {
-        id: '11',
-        usuario: {
-            nombre: 'María González',
-            avatar: null
-        },
-        rating: 4.5,
-        texto: 'Excelente servicio de cuidado. María fue muy profesional con mi perro Max, lo cuidó como si fuera suyo. Muy recomendada.',
-        fecha: '2024-01-15',
-        tipo: 'cuidador'
-    },
-    {
-        id: '12',
-        usuario: {
-            nombre: 'Carlos Gómez',
-            avatar: null
-        },
-        rating: 3.5,
-        texto: 'Buen servicio de paseo. Carlos fue puntual y responsable, aunque podría mejorar en la comunicación durante el paseo.',
-        fecha: '2024-01-10',
-        tipo: 'paseador'
-    },
-    {
-        id: '13',
-        usuario: {
-            nombre: 'Dr. Martínez',
-            avatar: null
-        },
-        rating: 5.0,
-        texto: 'Increíble atención veterinaria. El doctor fue muy profesional, explicó todo detalladamente y mi gato se recuperó perfectamente.',
-        fecha: '2024-01-08',
-        tipo: 'veterinario'
-    },
-    {
-        id: '14',
-        usuario: {
-            nombre: 'Laura Fernández',
-            avatar: null
-        },
-        rating: 4.0,
-        texto: 'Muy buena cuidadora. Laura fue muy cariñosa con mis mascotas y me envió fotos durante todo el día. Servicio confiable.',
-        fecha: '2024-01-05',
-        tipo: 'cuidador'
-    },
-    {
-        id: '15',
-        usuario: {
-            nombre: 'Roberto Silva',
-            avatar: null
-        },
-        rating: 4.5,
-        texto: 'Excelente paseador. Roberto fue muy atento con mi perro, me mantuvo informado durante todo el paseo. Definitivamente lo volveré a contratar.',
-        fecha: '2024-01-03',
-        tipo: 'paseador'
-    },
-    {
-      id: '16',
-      usuario: {
-          nombre: 'María González',
-          avatar: null
-      },
-      rating: 4.5,
-      texto: 'Excelente servicio de cuidado. María fue muy profesional con mi perro Max, lo cuidó como si fuera suyo. Muy recomendada.',
-      fecha: '2024-01-15',
-      tipo: 'cuidador'
-  },
-  {
-      id: '17',
-      usuario: {
-          nombre: 'Carlos Gómez',
-          avatar: null
-      },
-      rating: 3.5,
-      texto: 'Buen servicio de paseo. Carlos fue puntual y responsable, aunque podría mejorar en la comunicación durante el paseo.',
-      fecha: '2024-01-10',
-      tipo: 'paseador'
-  },
-  {
-      id: '18',
-      usuario: {
-          nombre: 'Dr. Martínez',
-          avatar: null
-      },
-      rating: 5.0,
-      texto: 'Increíble atención veterinaria. El doctor fue muy profesional, explicó todo detalladamente y mi gato se recuperó perfectamente.',
-      fecha: '2024-01-08',
-      tipo: 'veterinario'
-  },
-  {
-      id: '19',
-      usuario: {
-          nombre: 'Laura Fernández',
-          avatar: null
-      },
-      rating: 4.0,
-      texto: 'Muy buena cuidadora. Laura fue muy cariñosa con mis mascotas y me envió fotos durante todo el día. Servicio confiable.',
-      fecha: '2024-01-05',
-      tipo: 'cuidador'
-  },
-  {
-      id: '20',
-      usuario: {
-          nombre: 'Roberto Silva',
-          avatar: null
-      },
-      rating: 4.5,
-      texto: 'Excelente paseador. Roberto fue muy atento con mi perro, me mantuvo informado durante todo el paseo. Definitivamente lo volveré a contratar.',
-      fecha: '2024-01-03',
-      tipo: 'paseador'
-  },
-    ]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedFilter, setSelectedFilter] = useState('todos');
+  const [showFilters, setShowFilters] = useState(false);
+  const [resenas, setResenas] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
-    const filteredResenas = useMemo(() => {
-    let filtered = resenas;
+  const roleApi = useMemo(() => {
+    if (role === ROLES.DUENIO) return 'DUENIO';
+    if (role === ROLES.PRESTADOR) return 'PRESTADOR';
+    return null;
+  }, [role]);
+
+  const roleEntityId = useMemo(() => {
+    if (role === ROLES.DUENIO) return user?.duenioId || null;
+    if (role === ROLES.PRESTADOR) return user?.prestadorId || null;
+    return null;
+  }, [role, user]);
+
+  const filters = useMemo(() => {
+    if (role === ROLES.PRESTADOR) {
+      return [
+        { key: 'todos', label: 'Todos' },
+        { key: 'mejor-calificacion', label: 'Mejor calificación' },
+        { key: 'dueño', label: 'Dueños' },
+      ];
+    }
+    return [
+      { key: 'todos', label: 'Todos' },
+      { key: 'mejor-calificacion', label: 'Mejor calificación' },
+      { key: 'cuidador', label: 'Cuidadores' },
+      { key: 'paseador', label: 'Paseadores' },
+      { key: 'veterinario', label: 'Veterinarios' },
+    ];
+  }, [role]);
+
+  const loadMisResenas = useCallback(async () => {
+    if (!roleApi || !roleEntityId) {
+      setResenas([]);
+      setLoading(false);
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setError('');
+      const response = await getMisResenas({
+        role: roleApi,
+        userId: roleEntityId,
+      });
+      setResenas(Array.isArray(response?.resenas) ? response.resenas : []);
+    } catch (err) {
+      setResenas([]);
+      setError(err?.message || 'No pudimos cargar tus reseñas.');
+    } finally {
+      setLoading(false);
+    }
+  }, [roleApi, roleEntityId]);
+
+  useEffect(() => {
+    loadMisResenas();
+  }, [loadMisResenas]);
+
+  const filteredResenas = useMemo(() => {
+    let filtered = [...resenas];
 
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(resena => 
-        resena.usuario.nombre.toLowerCase().includes(query) ||
-        resena.texto.toLowerCase().includes(query)
+      filtered = filtered.filter((resena) =>
+        (resena?.usuario?.nombre || '').toLowerCase().includes(query) ||
+        (resena?.texto || '').toLowerCase().includes(query)
       );
     }
 
+    if (selectedFilter === 'mejor-calificacion') {
+      return filtered.sort((a, b) => Number(b.rating || 0) - Number(a.rating || 0));
+    }
+
     if (selectedFilter !== 'todos') {
-      if (selectedFilter === 'mejor-calificacion') {
-        filtered = filtered.sort((a, b) => b.rating - a.rating);
-      } else {
-        filtered = filtered.filter(resena => {
-          const texto = resena.texto.toLowerCase();
-          switch(selectedFilter) {
-            case 'cuidador':
-              return texto.includes('cuidador') || texto.includes('cuidado');
-            case 'paseador':
-              return texto.includes('paseador') || texto.includes('paseo');
-            case 'veterinario':
-              return texto.includes('veterinario') || texto.includes('doctor') || texto.includes('clínica');
-            default:
-              return true;
-          }
-        });
-      }
+      return filtered.filter(
+        (resena) => String(resena?.tipo || '').toLowerCase() === selectedFilter
+      );
     }
 
     return filtered;
   }, [resenas, searchQuery, selectedFilter]);
 
-    // Añadir paginación
-    const {
-        paginaActual,
-        totalPaginas,
-        itemsActuales: resenasActuales,
-        manejarCambioPagina,
-        reiniciarPagina,
-    } = usePaginacion(filteredResenas);
+  const {
+    paginaActual,
+    totalPaginas,
+    itemsActuales: resenasActuales,
+    manejarCambioPagina,
+    reiniciarPagina,
+  } = usePaginacion(filteredResenas);
 
-    // Resetear página cuando cambian filtros
-    useEffect(() => {
-        reiniciarPagina();
-    }, [searchQuery, selectedFilter]);
+  useEffect(() => {
+    reiniciarPagina();
+  }, [searchQuery, selectedFilter, reiniciarPagina]);
 
-    const handleBackPress = () => {
-        navigation.goBack();
-    };
-
-    const handleSearch = (query) => {
-        setSearchQuery(query);
-    };
+  const handleBackPress = () => {
+    navigation.goBack();
+  };
 
   const handleFilterChange = (filter) => {
     setSelectedFilter(filter);
     setShowFilters(false);
   };
 
+  return (
+    <SafeAreaView style={styles.container}>
+      <ScreenHeader
+        title="Mis Reseñas"
+        subtitle="Revisa las reseñas que compartiste en tu experiencia"
+        onBackPress={handleBackPress}
+        showBackButton={true}
+      />
 
-    return (
-      <SafeAreaView style={styles.container}>
-        {/* Header */}
-        <ScreenHeader 
-          title="Mis Reseñas"
-          subtitle="Revisa las reseñas que compartiste en tu experiencia"
-          onBackPress={handleBackPress}
-          showBackButton={true}
-        />
-        
-        <BarraBuscador
-          value={searchQuery}
-          onChangeText={handleSearch}
-          placeholder="Buscar por usuario o comentario"
-          onFilterPress={() => setShowFilters(!showFilters)}
-          filterIcon="menu-outline"
-        />
-  
-        <Filtros
-          filters={[
-            { key: 'todos', label: 'Todos' },
-            { key: 'mejor-calificacion', label: 'Mejor calificación' },
-            { key: 'cuidador', label: 'Cuidadores' },
-            { key: 'paseador', label: 'Paseadores' },
-            { key: 'veterinario', label: 'Veterinarios' },
-          ]}
-          selectedFilter={selectedFilter}
-          onFilterChange={handleFilterChange}
-          visible={showFilters}
-        />
-  
-        {/* Lista de reseñas */}
-        <ScrollView 
-          style={styles.content}
-          showsVerticalScrollIndicator={false}
-        >
+      <BarraBuscador
+        value={searchQuery}
+        onChangeText={setSearchQuery}
+        placeholder="Buscar por usuario o comentario"
+        onFilterPress={() => setShowFilters(!showFilters)}
+        filterIcon="menu-outline"
+      />
+
+      <Filtros
+        filters={filters}
+        selectedFilter={selectedFilter}
+        onFilterChange={handleFilterChange}
+        visible={showFilters}
+      />
+
+      {loading ? (
+        <View style={styles.emptyContainer}>
+          <ActivityIndicator size="large" />
+          <Text style={styles.emptyText}>Cargando tus reseñas...</Text>
+        </View>
+      ) : (
+        <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
           {resenasActuales.length > 0 ? (
             <>
               {resenasActuales.map((resena) => (
-                <ResenaCard
-                  key={resena.id}
-                  resena={resena}
-                />  
+                <ResenaCard key={resena.id} resena={resena} />
               ))}
               {filteredResenas.length > 0 && (
                 <Paginador
@@ -357,17 +170,20 @@ const Resenas = () => {
           ) : (
             <View style={styles.emptyContainer}>
               <Text style={styles.emptyText}>
-                {resenas.length === 0 
-                  ? "Todavía no dejaste reseñas. Cuando completes tus servicios, podrás verlas acá."
-                  : "No se encontraron reseñas con los filtros seleccionados."}
+                {error
+                  ? error
+                  : resenas.length === 0
+                    ? 'Todavía no dejaste reseñas. Cuando completes tus servicios, podrás verlas acá.'
+                    : 'No se encontraron reseñas con los filtros seleccionados.'}
               </Text>
             </View>
           )}
         </ScrollView>
+      )}
 
-        <MenuInferior />
-      </SafeAreaView>
-    );
-}
+      <MenuInferior />
+    </SafeAreaView>
+  );
+};
 
 export default Resenas;

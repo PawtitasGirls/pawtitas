@@ -71,9 +71,9 @@ const ResenaCard = ({ resena }) => {
             </View>
             
             <View style={styles.nameContainer}>
-              <Text style={styles.nombreUsuario}>{usuario.nombre}</Text>
+              <Text style={styles.nombreUsuario}>{usuario?.nombre || 'Usuario'}</Text>
               <View style={styles.ratingContainer}>
-                {renderStars(rating)}
+                {renderStars(Number(rating || 0))}
               </View>
             </View>
           </View>

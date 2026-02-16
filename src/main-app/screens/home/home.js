@@ -282,7 +282,7 @@ const HomeScreen = () => {
               style={styles.option}
               onPress={() => navigation.navigate("Resenas")}
             >
-              <Ionicons name="star-outline" size={15} color="#f9d2ec" />
+              <Ionicons name="star" size={18} color="#f9d2ec" />
               <Text style={styles.backText}>Mis reseñas</Text>
             </TouchableOpacity>
           )}

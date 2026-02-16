@@ -2,6 +2,11 @@ const prisma = require('../config/prisma');
 const resenaRepo = require('../repositories/resena.repo');
 const reservaRepo = require('../repositories/reserva.repo');
 
+function formatNombre(usuario) {
+  if (!usuario) return 'Usuario';
+  return [usuario.nombre, usuario.apellido].filter(Boolean).join(' ') || 'Usuario';
+}
+
 async function crearResenaController(req, res) {
   try {
     const { reservaId, emisorRol, calificacion, comentario } = req.body;
@@ -67,7 +72,99 @@ async function crearResenaController(req, res) {
   }
 }
 
+async function getMisResenasController(req, res) {
+  try {
+    const { role, userId } = req.query;
+    const roleUpper = String(role || '').toUpperCase();
+
+    if (!userId || !roleUpper) {
+      return res.status(400).json({
+        success: false,
+        message: 'Faltan parámetros requeridos: role y userId',
+      });
+    }
+
+    if (roleUpper !== 'DUENIO' && roleUpper !== 'PRESTADOR') {
+      return res.status(400).json({
+        success: false,
+        message: 'Rol inválido para consultar reseñas',
+      });
+    }
+
+    let id;
+    try {
+      id = BigInt(userId);
+    } catch (e) {
+      return res.status(400).json({
+        success: false,
+        message: 'userId inválido',
+      });
+    }
+
+    const where = {
+      emisorRol: roleUpper,
+      reserva: roleUpper === 'DUENIO' ? { duenioId: id } : { prestadorId: id },
+    };
+
+    const resenas = await prisma.resena.findMany({
+      where,
+      include: {
+        reserva: {
+          include: {
+            prestador: {
+              include: {
+                usuario: true,
+              },
+            },
+            duenio: {
+              include: {
+                usuario: true,
+              },
+            },
+          },
+        },
+      },
+      orderBy: { fecha: 'desc' },
+    });
+
+    const items = resenas.map((resena) => {
+      const contraparteUsuario = roleUpper === 'DUENIO'
+        ? resena.reserva?.prestador?.usuario
+        : resena.reserva?.duenio?.usuario;
+
+      const tipo = roleUpper === 'DUENIO'
+        ? (resena.reserva?.prestador?.perfil || '')
+        : 'dueño';
+
+      return {
+        id: resena.id.toString(),
+        reservaId: resena.reservaId?.toString?.() ?? null,
+        rating: Number(resena.calificacion || 0),
+        texto: resena.comentario || '',
+        fecha: resena.fecha,
+        tipo,
+        usuario: {
+          nombre: formatNombre(contraparteUsuario),
+          avatar: null,
+        },
+      };
+    });
+
+    return res.json({
+      success: true,
+      resenas: items,
+    });
+  } catch (error) {
+    console.error('Error al obtener mis reseñas:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Error interno',
+    });
+  }
+}
+
 
 module.exports = {
   crearResenaController,
+  getMisResenasController,
 };
