@@ -56,6 +56,26 @@ export const styles = StyleSheet.create({
   inactiveText: {
     color: colors.navigation.inactive,
   },
+  chatIconWrapper: {
+    position: 'relative',
+  },
+  badge: {
+    position: 'absolute',
+    top: -5,
+    right: -8,
+    backgroundColor: '#e53935',
+    borderRadius: 10,
+    paddingHorizontal: 5,
+    minWidth: 18,
+    height: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  badgeText: {
+    color: '#fff',
+    fontSize: 11,
+    fontWeight: 'bold',
+  },
 });
 
 export const navColors = {
