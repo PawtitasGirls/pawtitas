@@ -21,7 +21,7 @@ async function sendContactEmail({ nombre, email, mensaje }) {
 
   // Configurar el email
   const mailOptions = {
-    from: process.env.SMTP_USER,
+    from: process.env.SMTP_FROM || process.env.SMTP_USER,
     to: process.env.CONTACTO_EMAIL || process.env.SMTP_USER,
     replyTo: email,
     subject: `Contacto desde Pawtitas - ${nombre}`,
@@ -65,7 +65,7 @@ async function sendRecoveryCodeEmail({ email, codigo }) {
   }
 
   const mailOptions = {
-    from: process.env.SMTP_USER,
+    from: process.env.SMTP_FROM || process.env.SMTP_USER,
     to: email,
     subject: 'Pawtitas - Código para recuperar tu contraseña',
     html: `
