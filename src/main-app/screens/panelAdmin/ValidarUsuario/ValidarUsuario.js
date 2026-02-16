@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import Modal from 'react-native-modal';
 import { Ionicons } from '@expo/vector-icons';
+import * as Linking from 'expo-linking';
 import { styles } from './ValidarUsuario.styles';
 import { colors } from '../../../../shared/styles';
 import { ESTADOS_USUARIO, ESTADOS_USUARIO_CONFIG } from '../../../constants/estadosUsuario';
@@ -94,6 +95,18 @@ const ValidarUsuario = ({
   };
 
   const statusStyle = getStatusStyle(usuario.estado);
+
+  const handleOpenPdf = (url) => {
+    if (!url) return;
+    try {
+      const fullUrl = url.startsWith('http')
+        ? url
+        : `${process.env.EXPO_PUBLIC_API_BASE_URL || ''}${url}`;
+      Linking.openURL(fullUrl);
+    } catch (e) {
+      // noop: en MVP solo intentamos abrir el enlace
+    }
+  };
 
   return (
     <Modal
@@ -183,32 +196,51 @@ const ValidarUsuario = ({
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Documentación</Text>
             
-            {/* Aquí se mostrarán los documentos del usuario mediante una API o storage*/}
-            <View style={styles.documentSection}>
-              <View style={styles.documentItem}>
-                <Ionicons 
-                  name="document-text-outline" 
-                  size={24} 
-                  color={colors.primary} 
-                  style={styles.documentIcon} 
-                />
-                <View style={styles.documentInfo}>
-                  <Text style={styles.documentName}>Identificación.pdf</Text>
-                </View>
+            {(!usuario.documentosUrl && !usuario.certificacionesUrl) ? (
+              <Text style={styles.value}>No hay documentos cargados.</Text>
+            ) : (
+              <View style={styles.documentSection}>
+                {usuario.documentosUrl && (
+                  <TouchableOpacity
+                    style={styles.documentItem}
+                    onPress={() => handleOpenPdf(usuario.documentosUrl)}
+                  >
+                    <Ionicons 
+                      name="document-text-outline" 
+                      size={24} 
+                      color={colors.primary} 
+                      style={styles.documentIcon} 
+                    />
+                    <View style={styles.documentInfo}>
+                      <Text style={styles.documentName}>Documento de identidad</Text>
+                      <Text style={styles.value} numberOfLines={1}>
+                        {usuario.documentosUrl}
+                      </Text>
+                    </View>
+                  </TouchableOpacity>
+                )}
+
+                {usuario.certificacionesUrl && (
+                  <TouchableOpacity
+                    style={styles.documentItem}
+                    onPress={() => handleOpenPdf(usuario.certificacionesUrl)}
+                  >
+                    <Ionicons 
+                      name="document-text-outline" 
+                      size={24} 
+                      color={colors.primary} 
+                      style={styles.documentIcon} 
+                    />
+                    <View style={styles.documentInfo}>
+                      <Text style={styles.documentName}>Certificaciones</Text>
+                      <Text style={styles.value} numberOfLines={1}>
+                        {usuario.certificacionesUrl}
+                      </Text>
+                    </View>
+                  </TouchableOpacity>
+                )}
               </View>
-              
-              <View style={styles.documentItem}>
-                <Ionicons 
-                  name="document-text-outline" 
-                  size={24} 
-                  color={colors.primary} 
-                  style={styles.documentIcon} 
-                />
-                <View style={styles.documentInfo}>
-                  <Text style={styles.documentName}>Certificación.pdf</Text>
-                </View>
-              </View>
-            </View>
+            )}
           </View>
 
           {/* Input de motivo (solo visible cuando está confirmando desactivación) */}

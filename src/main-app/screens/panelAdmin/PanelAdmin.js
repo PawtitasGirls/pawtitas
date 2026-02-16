@@ -43,6 +43,8 @@ const PanelAdmin = () => {
           fechaRegistro: u.fechaRegistro,
           descripcion: u.descripcion ?? '',
           motivoRechazo: u.motivoRechazo,
+          documentosUrl: u.documentosUrl || null,
+          certificacionesUrl: u.certificacionesUrl || null,
         })));
       } catch (e) {
         if (!cancelled) setError(e?.message ?? 'Error al cargar prestadores');
