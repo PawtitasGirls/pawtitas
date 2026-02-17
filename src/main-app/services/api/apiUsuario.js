@@ -71,3 +71,7 @@ export async function getPrestadoresPorPerfil(perfil, ciudad = null) {
   return apiUsuario(url, { method: 'GET' });
 }
 
+export async function getPrestadorAttachments(prestadorId) {
+  return apiUsuario(`/api/prestadores/${prestadorId}/attachments`, { method: 'GET' });
+}
+

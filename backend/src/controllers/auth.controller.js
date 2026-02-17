@@ -109,38 +109,28 @@ async function loginController(req, res) {
 // Registro
 async function registroController(req, res) {
   try {
-    if (process.env.DEBUG_UPLOADS) {
-      console.log('[DEBUG_UPLOADS] POST /api/registro', {
-        contentType: req.headers['content-type'],
-        bodyKeys: Object.keys(req.body || {}),
-        fileFields: req.files ? Object.keys(req.files) : [],
-        documentosPath: req.files?.documentosFile?.[0]?.path,
-        certificadosPath: req.files?.certificadosFile?.[0]?.path,
-      });
-    }
-
     const perfil = (req.body && req.body.perfil) ? String(req.body.perfil).toLowerCase() : '';
     const isPrestador = perfil === 'prestador';
+    const fileKeys = req.files ? Object.keys(req.files) : [];
+    const docFile = req.files?.documentosFile?.[0];
+    const certFile = req.files?.certificadosFile?.[0];
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/9d78051a-2c08-4bab-97c6-65d27df68b00',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth.controller.js:registroController',message:'registro multipart',data:{perfil,isPrestador,fileKeys,hasDocBuffer:!!docFile?.buffer,hasCertBuffer:!!certFile?.buffer},timestamp:Date.now(),hypothesisId:'H1'})}).catch(()=>{});
+    // #endregion
+
+    console.log('[REGISTRO] perfil=', perfil, 'isPrestador=', isPrestador, 'req.files keys=', fileKeys, 'hasBuffer doc=', !!docFile?.buffer, 'cert=', !!certFile?.buffer);
 
     if (isPrestador) {
-      const hasDocumentos = req.files?.documentosFile?.[0];
-      const hasCertificados = req.files?.certificadosFile?.[0];
-      if (!hasDocumentos) {
+      if (!docFile) {
         return res.status(400).json({ success: false, message: 'documentosFile es requerido' });
       }
-      if (!hasCertificados) {
+      if (!certFile) {
         return res.status(400).json({ success: false, message: 'certificadosFile es requerido' });
       }
     }
 
-    const documentosFile =
-      (req.files && req.files.documentosFile && req.files.documentosFile[0]) ||
-      req.body?.documentosFile ||
-      null;
-    const certificadosFile =
-      (req.files && req.files.certificadosFile && req.files.certificadosFile[0]) ||
-      req.body?.certificadosFile ||
-      null;
+    const documentosFile = docFile || req.body?.documentosFile || null;
+    const certificadosFile = certFile || req.body?.certificadosFile || null;
 
     const result = await registerUser({
       ...(req.body || {}),

@@ -142,8 +142,24 @@ model prestador {
   usuario           usuario             @relation(fields: [usuarioId], references: [id], map: "Prestador_usuarioId_fkey")
   prestadorservicio prestadorservicio[]
   reserva           reserva[]
+  attachment        attachment[]
 
   @@map("Prestador")
+}
+
+model attachment {
+  id          BigInt   @id @default(autoincrement())
+  prestadorId BigInt
+  field       String
+  fileName    String
+  mimeType    String
+  size        Int
+  data        Bytes
+  createdAt   DateTime @default(now())
+  prestador   prestador @relation(fields: [prestadorId], references: [id], map: "Attachment_prestadorId_fkey")
+
+  @@index([prestadorId], map: "Attachment_prestadorId_fkey")
+  @@map("Attachment")
 }
 
 model prestadorservicio {

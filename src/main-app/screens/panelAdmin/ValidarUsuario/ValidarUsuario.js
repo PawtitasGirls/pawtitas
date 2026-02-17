@@ -7,6 +7,7 @@ import {
   TextInput,
   KeyboardAvoidingView,
   Platform,
+  ActivityIndicator,
 } from 'react-native';
 import Modal from 'react-native-modal';
 import { Ionicons } from '@expo/vector-icons';
@@ -15,6 +16,9 @@ import { styles } from './ValidarUsuario.styles';
 import { colors } from '../../../../shared/styles';
 import { ESTADOS_USUARIO, ESTADOS_USUARIO_CONFIG } from '../../../constants/estadosUsuario';
 import GuardarCancelarBtn from '../../../components/buttons/GuardarCancelarBtn';
+import { getPrestadorAttachments } from '../../../services';
+
+const API_BASE = process.env.EXPO_PUBLIC_API_BASE_URL || '';
 
 const ValidarUsuario = ({ 
   isVisible, 
@@ -25,13 +29,47 @@ const ValidarUsuario = ({
 }) => {
   const [motivoRechazo, setMotivoRechazo] = useState(usuario?.motivoRechazo || '');
   const [isConfirmingDeactivation, setIsConfirmingDeactivation] = useState(false);
+  const [attachments, setAttachments] = useState([]);
+  const [attachmentsLoading, setAttachmentsLoading] = useState(false);
 
   useEffect(() => {
     if (isVisible && usuario) {
       setMotivoRechazo(usuario?.motivoRechazo || '');
       setIsConfirmingDeactivation(false);
+      if (Array.isArray(usuario.attachments) && usuario.attachments.length > 0) {
+        setAttachments(usuario.attachments);
+        setAttachmentsLoading(false);
+      } else {
+        setAttachments([]);
+      }
     }
   }, [usuario, isVisible]);
+
+  useEffect(() => {
+    let cancelled = false;
+    if (!isVisible || !usuario?.prestadorId) {
+      if (!Array.isArray(usuario?.attachments) || !usuario.attachments.length) setAttachments([]);
+      return;
+    }
+    if (Array.isArray(usuario.attachments) && usuario.attachments.length > 0) {
+      setAttachments(usuario.attachments);
+      return;
+    }
+    setAttachmentsLoading(true);
+    getPrestadorAttachments(usuario.prestadorId)
+      .then((res) => {
+        if (cancelled) return;
+        const list = Array.isArray(res?.data) ? res.data : [];
+        setAttachments(list);
+      })
+      .catch(() => {
+        if (!cancelled) setAttachments([]);
+      })
+      .finally(() => {
+        if (!cancelled) setAttachmentsLoading(false);
+      });
+    return () => { cancelled = true; };
+  }, [isVisible, usuario?.prestadorId, usuario?.attachments]);
 
   // Si no hay usuario, no renderizamos
   if (!usuario) return null;
@@ -96,15 +134,25 @@ const ValidarUsuario = ({
 
   const statusStyle = getStatusStyle(usuario.estado);
 
-  const handleOpenPdf = (url) => {
-    if (!url) return;
+  const pdfAttachments = attachments.filter(
+    (a) => (a.mimeType || '').toLowerCase().includes('pdf')
+  );
+  const imageAttachments = attachments.filter(
+    (a) => (a.mimeType || '').toLowerCase().match(/^image\/(jpeg|jpg|png|gif|webp)$/)
+  );
+  const otherAttachments = attachments.filter(
+    (a) => !(a.mimeType || '').toLowerCase().includes('pdf') &&
+      !(a.mimeType || '').toLowerCase().match(/^image\/(jpeg|jpg|png|gif|webp)$/)
+  );
+  const allDisplayAttachments = [...pdfAttachments, ...imageAttachments, ...otherAttachments];
+
+  const handleOpenAttachment = (downloadUrl) => {
+    if (!downloadUrl) return;
     try {
-      const fullUrl = url.startsWith('http')
-        ? url
-        : `${process.env.EXPO_PUBLIC_API_BASE_URL || ''}${url}`;
+      const fullUrl = downloadUrl.startsWith('http') ? downloadUrl : `${API_BASE}${downloadUrl}`;
       Linking.openURL(fullUrl);
     } catch (e) {
-      // noop: en MVP solo intentamos abrir el enlace
+      // noop
     }
   };
 
@@ -192,53 +240,40 @@ const ValidarUsuario = ({
             </View>
           )}
 
-          {/* Documentación */}
+          {/* Documentación (adjuntos desde listado o API) */}
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Documentación</Text>
             
-            {(!usuario.documentosUrl && !usuario.certificacionesUrl) ? (
+            {attachmentsLoading ? (
+              <ActivityIndicator size="small" />
+            ) : allDisplayAttachments.length === 0 ? (
               <Text style={styles.value}>No hay documentos cargados.</Text>
             ) : (
               <View style={styles.documentSection}>
-                {usuario.documentosUrl && (
-                  <TouchableOpacity
-                    style={styles.documentItem}
-                    onPress={() => handleOpenPdf(usuario.documentosUrl)}
-                  >
-                    <Ionicons 
-                      name="document-text-outline" 
-                      size={24} 
-                      color={colors.primary} 
-                      style={styles.documentIcon} 
-                    />
-                    <View style={styles.documentInfo}>
-                      <Text style={styles.documentName}>Documento de identidad</Text>
-                      <Text style={styles.value} numberOfLines={1}>
-                        {usuario.documentosUrl}
-                      </Text>
-                    </View>
-                  </TouchableOpacity>
-                )}
-
-                {usuario.certificacionesUrl && (
-                  <TouchableOpacity
-                    style={styles.documentItem}
-                    onPress={() => handleOpenPdf(usuario.certificacionesUrl)}
-                  >
-                    <Ionicons 
-                      name="document-text-outline" 
-                      size={24} 
-                      color={colors.primary} 
-                      style={styles.documentIcon} 
-                    />
-                    <View style={styles.documentInfo}>
-                      <Text style={styles.documentName}>Certificaciones</Text>
-                      <Text style={styles.value} numberOfLines={1}>
-                        {usuario.certificacionesUrl}
-                      </Text>
-                    </View>
-                  </TouchableOpacity>
-                )}
+                {allDisplayAttachments.map((att) => {
+                  const isPdf = (att.mimeType || '').toLowerCase().includes('pdf');
+                  const isImage = (att.mimeType || '').toLowerCase().match(/^image\//);
+                  return (
+                    <TouchableOpacity
+                      key={att.id}
+                      style={styles.documentItem}
+                      onPress={() => handleOpenAttachment(att.downloadUrl)}
+                    >
+                      <Ionicons 
+                        name={isPdf ? 'document-text-outline' : isImage ? 'image-outline' : 'document-outline'}
+                        size={24}
+                        color={colors.primary}
+                        style={styles.documentIcon}
+                      />
+                      <View style={styles.documentInfo}>
+                        <Text style={styles.documentName}>{att.fileName}</Text>
+                        <Text style={styles.value} numberOfLines={1}>
+                          {isPdf ? 'PDF' : isImage ? 'Imagen' : att.mimeType || 'Archivo'}{typeof att.size === 'number' ? ` · ${(att.size / 1024).toFixed(1)} KB` : ''}
+                        </Text>
+                      </View>
+                    </TouchableOpacity>
+                  );
+                })}
               </View>
             )}
           </View>
