@@ -95,7 +95,7 @@ export const ESPECIALIDADES_OPTIONS = [
   { label: "Cuidador", value: "Cuidador" },
   { label: "Paseador", value: "Paseador" },
   { label: "Veterinaria", value: "Veterinaria" },
-  { label: "Veterinaria a domicilio", value: "VeterinariaDomicilio" }
+  { label: "Veterinaria a domicilio", value: "Veterinaria a Domicilio" }
 ];
 
 // Opciones de perfil
