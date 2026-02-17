@@ -101,7 +101,7 @@ const CalendarioPagoModal = ({
               <View style={styles.instructionRow}>
                 <Ionicons name="information-circle-outline" size={20} color={colors.info} />
                 <Text style={styles.instructionText}>
-                Tené en cuenta los días que el Prestador está disponible consultando la sección de "Precios y horarios" en el perfil del prestador.
+                Tener en cuenta los días y horarios disponibles del prestador. Podés consultarlos en la sección Precios y Horarios de su perfil.
                 </Text>
               </View>
             </View>
