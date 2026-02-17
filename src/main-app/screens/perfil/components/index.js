@@ -6,5 +6,5 @@
 export { PerfilInfoCard as PerfilInfoCard } from './PerfilInfoCard';
 export { MascotasSection as MascotasSection } from './MascotasSection';
 export { LogoutBtn as LogoutBtn } from './LogoutBtn';
-export { SettingsMenu } from './SettingsMenu';
-export { SupportService } from './SupportService';
+export { MenuConfig } from './MenuConfig';
+export { ContactoService } from './ContactoService';

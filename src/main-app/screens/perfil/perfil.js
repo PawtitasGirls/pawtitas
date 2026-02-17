@@ -5,7 +5,7 @@ import { useNavigation } from '@react-navigation/native';
 import { styles } from './perfil.styles';
 import { colors } from '../../../shared/styles';
 import { PerfilHeader, MenuInferior } from '../../components';
-import { PerfilInfoCard, MascotasSection, LogoutBtn, SettingsMenu, SupportService } from './components';
+import { PerfilInfoCard, MascotasSection, LogoutBtn, MenuConfig, ContactoService } from './components';
 import { useAuth } from '../../contexts';
 import { ROLES } from '../../constants/roles';
 import { clearAuthToken } from '../../services';
@@ -110,11 +110,14 @@ const PerfilScreen = () => {
   };
 
   const handleSupport = () => {
-    SupportService.contactEmail();
+    ContactoService.contactEmail({
+      email: user?.email,
+      id: user?.id,
+    });
   };
 
   const handleSettingsMenu = () => {
-    SettingsMenu.showMainMenu(handleSupport);
+    MenuConfig.showMainMenu(handleSupport);
   };
 
   return (
