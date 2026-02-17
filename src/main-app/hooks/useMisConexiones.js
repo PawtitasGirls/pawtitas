@@ -45,106 +45,104 @@ export const useMisConexiones = () => {
   const duenioId = user?.duenioId || (role === ROLES.DUENIO ? user?.id : null);
   const prestadorId = user?.prestadorId || (role === ROLES.PRESTADOR ? user?.id : null);
 
+  const refreshConexiones = useCallback(async () => {
+    setLoadingConexiones(true);
+    try {
+      if (role === ROLES.DUENIO && duenioId) {
+        const res = await getReservasByDuenio(duenioId);
+        const reservas = res?.reservas || [];
+        const list = reservas.map((r) => {
+          const p = r.prestador || {};
+          const serv = p.servicio || {};
+          const dom = p.domicilio || {};
+          const mascotaRaw = r.mascota;
+          const estadoConexion = mapReservaEstadoToConexion(r.estado);
+          const mascota = mascotaRaw
+            ? { nombre: mascotaRaw.nombre ?? '', tipo: mascotaRaw.tipo ?? '', raza: mascotaRaw.raza ?? '' }
+            : null;
+          const rating = getCalificacionPropia(r, 'DUENIO');
+          return {
+            id: r.id,
+            reservaId: r.id,
+            prestadorUsuarioId: p.usuarioId ?? null,
+            nombre: p.nombreCompleto || 'Sin nombre',
+            descripcion: serv.descripcion || 'Sin descripción',
+            precio: serv.precio != null ? `$${Number(serv.precio).toLocaleString('es-AR')}` : 'A convenir',
+            ubicacion: dom.ubicacion || 'No especificado',
+            disponibilidad: serv.horarios || 'A convenir',
+            horario: serv.duracion || 'A convenir',
+            latitude: dom.latitude ?? null,
+            longitude: dom.longitude ?? null,
+            tipo: p.perfil || '',
+            estado: estadoConexion,
+            rating,
+            puedeResenar: Boolean(r.puedeResenar),
+            mascota,
+          };
+        });
+        setProviders(list);
+      } else if (role === ROLES.PRESTADOR && prestadorId) {
+        const res = await getReservasByPrestador(prestadorId);
+        const reservas = res?.reservas || [];
+        const list = reservas.map((r) => {
+          const d = r.duenio || {};
+          const dom = d.domicilio || {};
+          const mascotaRaw = r.mascota || {};
+          const estadoConexion = mapReservaEstadoToConexion(r.estado);
+          const descripcionDuenio = d.descripcion || d.comentarios || '';
+          const mascota = {
+            nombre: mascotaRaw.nombre || null,
+            tipo: mascotaRaw.tipo || null,
+            edad: mascotaRaw.edad != null ? mascotaRaw.edad : null,
+            edadUnidad: mascotaRaw.edadUnidad || null,
+            raza: mascotaRaw.raza || null,
+            infoAdicional: mascotaRaw.infoAdicional || null,
+            condiciones: mascotaRaw.condiciones || null,
+          };
+          const tieneDatosMascota = Object.values(mascota).some(v => v != null && v !== '');
+          const descripcion = descripcionDuenio
+            ? (tieneDatosMascota ? `${descripcionDuenio.slice(0, 80)}${descripcionDuenio.length > 80 ? '…' : ''} · Mascota: ${mascota.nombre || '—'}` : descripcionDuenio)
+            : (tieneDatosMascota ? `Mascota: ${mascota.nombre || '—'}${mascota.tipo ? ` (${mascota.tipo})` : ''}` : 'Sin descripción');
+          const rating = getCalificacionPropia(r, 'PRESTADOR');
+          return {
+            id: r.id,
+            reservaId: r.id,
+            duenioUsuarioId: d.usuarioId ?? null,
+            nombre: d.nombreCompleto || 'Sin nombre',
+            descripcion,
+            descripcionDuenio: descripcionDuenio || null,
+            mascota: tieneDatosMascota ? mascota : null,
+            precio: '',
+            ubicacion: dom.ubicacion || 'No especificado',
+            disponibilidad: '',
+            horario: '',
+            latitude: dom.latitude ?? null,
+            longitude: dom.longitude ?? null,
+            tipo: 'dueño',
+            estado: estadoConexion,
+            rating,
+            puedeResenar: Boolean(r.puedeResenar),
+          };
+        });
+        setProviders(list);
+      } else {
+        setProviders([]);
+      }
+    } catch (err) {
+      setProviders([]);
+    } finally {
+      setLoadingConexiones(false);
+    }
+  }, [role, duenioId, prestadorId]);
+
   useEffect(() => {
     if (!user) {
       setProviders([]);
       setLoadingConexiones(false);
       return;
     }
-    let cancelled = false;
-    setLoadingConexiones(true);
-    const load = async () => {
-      try {
-        if (role === ROLES.DUENIO && duenioId) {
-          
-          const res = await getReservasByDuenio(duenioId);
-          const reservas = res?.reservas || [];
-          const list = reservas.map((r) => {
-            const p = r.prestador || {};
-            const serv = p.servicio || {};
-            const dom = p.domicilio || {};
-            const mascotaRaw = r.mascota;
-            const estadoConexion = mapReservaEstadoToConexion(r.estado);
-            const mascota = mascotaRaw
-              ? { nombre: mascotaRaw.nombre ?? '', tipo: mascotaRaw.tipo ?? '', raza: mascotaRaw.raza ?? '' }
-              : null;
-            const rating = getCalificacionPropia(r, 'DUENIO');
-            return {
-              id: r.id,
-              reservaId: r.id,
-              prestadorUsuarioId: p.usuarioId ?? null,
-              nombre: p.nombreCompleto || 'Sin nombre',
-              descripcion: serv.descripcion || 'Sin descripción',
-              precio: serv.precio != null ? `$${Number(serv.precio).toLocaleString('es-AR')}` : 'A convenir',
-              ubicacion: dom.ubicacion || 'No especificado',
-              disponibilidad: serv.horarios || 'A convenir',
-              horario: serv.duracion || 'A convenir',
-              latitude: dom.latitude ?? null,
-              longitude: dom.longitude ?? null,
-              tipo: p.perfil || '',
-              estado: estadoConexion,
-              rating,
-              puedeResenar: Boolean(r.puedeResenar),
-              mascota,
-            };
-          });
-          if (!cancelled) setProviders(list);
-        } else if (role === ROLES.PRESTADOR && prestadorId) {
-          const res = await getReservasByPrestador(prestadorId);
-          const reservas = res?.reservas || [];
-          const list = reservas.map((r) => {
-            const d = r.duenio || {};
-            const dom = d.domicilio || {};
-            const mascotaRaw = r.mascota || {};
-            const estadoConexion = mapReservaEstadoToConexion(r.estado);
-            const descripcionDuenio = d.descripcion || d.comentarios || '';
-            const mascota = {
-              nombre: mascotaRaw.nombre || null,
-              tipo: mascotaRaw.tipo || null,
-              edad: mascotaRaw.edad != null ? mascotaRaw.edad : null,
-              edadUnidad: mascotaRaw.edadUnidad || null,
-              raza: mascotaRaw.raza || null,
-              infoAdicional: mascotaRaw.infoAdicional || null,
-              condiciones: mascotaRaw.condiciones || null,
-            };
-            const tieneDatosMascota = Object.values(mascota).some(v => v != null && v !== '');
-            const descripcion = descripcionDuenio
-              ? (tieneDatosMascota ? `${descripcionDuenio.slice(0, 80)}${descripcionDuenio.length > 80 ? '…' : ''} · Mascota: ${mascota.nombre || '—'}` : descripcionDuenio)
-              : (tieneDatosMascota ? `Mascota: ${mascota.nombre || '—'}${mascota.tipo ? ` (${mascota.tipo})` : ''}` : 'Sin descripción');
-            const rating = getCalificacionPropia(r, 'PRESTADOR');
-            return {
-              id: r.id,
-              reservaId: r.id,
-              duenioUsuarioId: d.usuarioId ?? null,
-              nombre: d.nombreCompleto || 'Sin nombre',
-              descripcion,
-              descripcionDuenio: descripcionDuenio || null,
-              mascota: tieneDatosMascota ? mascota : null,
-              precio: '',
-              ubicacion: dom.ubicacion || 'No especificado',
-              disponibilidad: '',
-              horario: '',
-              latitude: dom.latitude ?? null,
-              longitude: dom.longitude ?? null,
-              tipo: 'dueño',
-              estado: estadoConexion,
-              rating,
-              puedeResenar: Boolean(r.puedeResenar),
-            };
-          });
-          if (!cancelled) setProviders(list);
-        } else {
-          if (!cancelled) setProviders([]);
-        }
-      } catch (err) {
-        if (!cancelled) setProviders([]);
-      } finally {
-        if (!cancelled) setLoadingConexiones(false);
-      }
-    };
-    load();
-    return () => { cancelled = true; };
-  }, [user, role, duenioId, prestadorId]);
+    refreshConexiones();
+  }, [user, refreshConexiones]);
 
   // Filtrar proveedores y agregar distancias
   const filteredProviders = useMemo(() => {
@@ -306,7 +304,13 @@ export const useMisConexiones = () => {
   const handleClosePaymentWebView = useCallback(() => {
     paymentProviderRef.current = null;
     setState(prev => ({ ...prev, showPaymentWebView: false, paymentUrl: null, selectedProvider: null }));
-  }, []);
+    
+    // Refrescar desde BD para sincronizar con webhook de MercadoPago
+    // Delay para dar tiempo al webhook a procesar
+    setTimeout(() => {
+      refreshConexiones();
+    }, 2000);
+  }, [refreshConexiones]);
 
   const handleDeepLinkPaymentResult = useCallback((result, reservaId) => {
     paymentProviderRef.current = null;

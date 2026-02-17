@@ -112,7 +112,22 @@ async function createPreferenceController(req, res) {
 
       if (pagoExistente.estadoPago === 'PENDIENTE') {
         const preference = buildPreferenceBody(reserva, userEmail);
+        
+        console.log('📤 [CREATE_PREFERENCE] Enviando preferencia a MercadoPago:', {
+          reservaId: reserva.id.toString(),
+          notification_url: preference.notification_url,
+          external_reference: preference.external_reference,
+          metadata: preference.metadata,
+          BACKEND_URL_env: process.env.BACKEND_URL || '(no definido, usando fallback)',
+        });
+        
         const mpRes = await mpPreference.create({ body: preference });
+        
+        console.log('✅ [CREATE_PREFERENCE] Preferencia creada:', {
+          preferenceId: mpRes.id,
+          init_point: mpRes.init_point,
+          sandbox_init_point: mpRes.sandbox_init_point,
+        });
 
         await pagoRepo.updateByReservaId(reservaIdB, {
           linkPago: mpRes.init_point,
@@ -129,7 +144,22 @@ async function createPreferenceController(req, res) {
     }
 
     const preference = buildPreferenceBody(reserva, userEmail);
+    
+    console.log('📤 [CREATE_PREFERENCE] Enviando preferencia a MercadoPago (nuevo pago):', {
+      reservaId: reserva.id.toString(),
+      notification_url: preference.notification_url,
+      external_reference: preference.external_reference,
+      metadata: preference.metadata,
+      BACKEND_URL_env: process.env.BACKEND_URL || '(no definido, usando fallback)',
+    });
+    
     const mpRes = await mpPreference.create({ body: preference });
+    
+    console.log('✅ [CREATE_PREFERENCE] Preferencia creada:', {
+      preferenceId: mpRes.id,
+      init_point: mpRes.init_point,
+      sandbox_init_point: mpRes.sandbox_init_point,
+    });
 
     const pago = await pagoRepo.create({
       reservaId: reservaIdB,
@@ -163,11 +193,14 @@ async function createPreferenceController(req, res) {
 
 async function webhookController(req, res) {
   try {
-    console.log('🔔 [WEBHOOK] Recibido:', {
-      type: req.body?.type,
-      action: req.body?.action,
-      dataId: req.body?.data?.id,
+    // Log completo del request antes de procesarlo
+    console.log('🔔 [WEBHOOK] Request recibido:', {
+      method: req.method,
+      url: req.url,
+      query: req.query,
+      body: req.body,
       headers: {
+        'content-type': req.headers['content-type'],
         'x-signature': req.headers['x-signature'],
         'x-request-id': req.headers['x-request-id'],
       },
@@ -178,22 +211,26 @@ async function webhookController(req, res) {
       return res.status(401).json({ error: 'Invalid signature' });
     }
 
-    const { type, data } = req.body || {};
+    // Intentar obtener datos desde body o query
+    const type = req.body?.type || req.query?.topic;
+    const dataId = req.body?.data?.id || req.query?.id || req.query?.['data.id'];
+    const action = req.body?.action;
+
+    console.log('📦 [WEBHOOK] Datos extraídos:', { type, action, dataId });
 
     if (type !== 'payment') {
       console.log(`ℹ️ [WEBHOOK] Tipo "${type}" ignorado (solo procesamos "payment")`);
       return res.status(200).json({ received: true });
     }
 
-    const paymentId = data?.id;
-    if (!paymentId) {
-      console.log('⚠️ [WEBHOOK] No se encontró paymentId en data.id');
+    if (!dataId) {
+      console.log('⚠️ [WEBHOOK] No se encontró payment ID');
       return res.status(200).json({ received: true });
     }
 
-    console.log(`💳 [WEBHOOK] Obteniendo payment ${paymentId} de MercadoPago...`);
+    console.log(`💳 [WEBHOOK] Obteniendo payment ${dataId} de MercadoPago...`);
     
-    const mp = await mpPayment.get({ id: paymentId });
+    const mp = await mpPayment.get({ id: dataId });
     
     console.log('✅ [WEBHOOK] Payment obtenido:', {
       id: mp.id,
