@@ -163,52 +163,93 @@ async function createPreferenceController(req, res) {
 
 async function webhookController(req, res) {
   try {
+    console.log('🔔 [WEBHOOK] Recibido:', {
+      type: req.body?.type,
+      action: req.body?.action,
+      dataId: req.body?.data?.id,
+      headers: {
+        'x-signature': req.headers['x-signature'],
+        'x-request-id': req.headers['x-request-id'],
+      },
+    });
+
     if (!validateWebhookSignature(req)) {
+      console.log('❌ [WEBHOOK] Firma inválida');
       return res.status(401).json({ error: 'Invalid signature' });
     }
 
     const { type, data } = req.body || {};
 
     if (type !== 'payment') {
+      console.log(`ℹ️ [WEBHOOK] Tipo "${type}" ignorado (solo procesamos "payment")`);
       return res.status(200).json({ received: true });
     }
 
     const paymentId = data?.id;
-    if (!paymentId) return res.status(200).json({ received: true });
+    if (!paymentId) {
+      console.log('⚠️ [WEBHOOK] No se encontró paymentId en data.id');
+      return res.status(200).json({ received: true });
+    }
 
+    console.log(`💳 [WEBHOOK] Obteniendo payment ${paymentId} de MercadoPago...`);
+    
     const mp = await mpPayment.get({ id: paymentId });
+    
+    console.log('✅ [WEBHOOK] Payment obtenido:', {
+      id: mp.id,
+      status: mp.status,
+      preference_id: mp.preference_id,
+      external_reference: mp.external_reference,
+      metadata: mp.metadata,
+    });
+
     const externalRef = mp.external_reference || '';
     const reservaIdStr = mp.metadata?.reserva_id || (externalRef.match(/^pawtitas-(\d+)-/) || [])[1];
 
     if (!reservaIdStr) {
-      console.warn('Pago no procesado: no se encontró la reserva asociada. Revisar webhook', {
+      console.warn('⚠️ [WEBHOOK] Pago no procesado: no se encontró reservaId', {
         paymentId,
         preferenceId: mp.preference_id,
         externalRef,
+        metadata: mp.metadata,
       });
       return res.status(200).json({ received: true });
     }
+
+    console.log(`🔍 [WEBHOOK] Buscando pago en BD para reserva ${reservaIdStr}...`);
 
     let pago = await prisma.pago.findFirst({
       where: { reservaId: BigInt(reservaIdStr) },
       include: { reserva: true },
     });
+    
     if (!pago && mp.preference_id) {
+      console.log(`🔍 [WEBHOOK] No encontrado por reservaId, buscando por preferenceId ${mp.preference_id}...`);
       pago = await pagoRepo.findByMpPreferenceId(mp.preference_id);
     }
 
     if (pago) {
+      console.log(`✅ [WEBHOOK] Pago encontrado. Actualizando...`, {
+        reservaId: pago.reservaId.toString(),
+        estadoAnterior: pago.estadoPago,
+        estadoNuevo: mp.status === 'approved' ? 'PAGADO' : 'PENDIENTE',
+        mpStatus: mp.status,
+      });
+
       await pagoRepo.updateByReservaId(pago.reservaId, {
         mpPaymentId: String(paymentId),
         estadoPago: mp.status === 'approved' ? 'PAGADO' : 'PENDIENTE',
         fechaPago: mp.status === 'approved' ? new Date() : null,
       });
+      
       await prisma.reserva.update({
         where: { id: pago.reservaId },
         data: { estado: mp.status === 'approved' ? 'PAGADO' : 'PENDIENTE_PAGO' },
       });
+
+      console.log(`✅ [WEBHOOK] Pago actualizado exitosamente para reserva ${reservaIdStr}`);
     } else {
-      console.warn('Pago no vinculable, requiere revisión manual: webhook', {
+      console.warn('❌ [WEBHOOK] Pago no vinculable, requiere revisión manual', {
         paymentId,
         preferenceId: mp.preference_id,
         externalRef,
@@ -218,7 +259,12 @@ async function webhookController(req, res) {
 
     return res.status(200).json({ received: true });
   } catch (err) {
-    console.error('webhook error:', err);
+    console.error('❌ [WEBHOOK] Error:', {
+      message: err.message,
+      status: err.status,
+      cause: err.cause,
+      stack: err.stack,
+    });
     return res.status(200).json({ received: true });
   }
 }
