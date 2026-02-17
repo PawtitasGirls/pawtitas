@@ -1,7 +1,7 @@
 const crypto = require('crypto');
 const prisma = require('../config/prisma');
 const pagoRepo = require('../repositories/pago.repo');
-const { preference: mpPreference, payment: mpPayment } = require('../config/mercadopago');
+const { preference: mpPreference, payment: mpPayment, merchantOrder: mpMerchantOrder } = require('../config/mercadopago');
 
 function validateWebhookSignature(req) {
   const secret = process.env.MERCADOPAGO_WEBHOOK_SECRET;
@@ -22,7 +22,7 @@ function validateWebhookSignature(req) {
 
   if (!ts || !v1) return false;
 
-  const dataId = req.query?.['data.id'] ?? req.body?.data?.id;
+  const dataId = req.query?.id ?? req.query?.['data.id'] ?? req.body?.data?.id;
   if (!dataId) return false;
 
   const manifestParts = [`id:${dataId}`];
@@ -218,8 +218,51 @@ async function webhookController(req, res) {
 
     console.log('📦 [WEBHOOK] Datos extraídos:', { type, action, dataId });
 
+    // Manejar merchant_order
+    if (type === 'merchant_order') {
+      console.log(`🛒 [WEBHOOK] Procesando merchant_order ${dataId}...`);
+      
+      if (!dataId) {
+        console.log('⚠️ [WEBHOOK] No se encontró merchant_order ID');
+        return res.status(200).json({ received: true });
+      }
+
+      const merchantOrder = await mpMerchantOrder.get({ merchantOrderId: dataId });
+      
+      console.log('✅ [WEBHOOK] Merchant Order obtenido:', {
+        id: merchantOrder.id,
+        status: merchantOrder.status,
+        payments: merchantOrder.payments?.map(p => ({ id: p.id, status: p.status })),
+      });
+
+      // Extraer el payment ID del merchant order
+      const payment = merchantOrder.payments?.find(p => p.status === 'approved');
+      if (!payment) {
+        console.log('⚠️ [WEBHOOK] No hay pagos aprobados en el merchant_order');
+        return res.status(200).json({ received: true });
+      }
+
+      // Procesar el payment usando su ID
+      const paymentId = payment.id;
+      console.log(`💳 [WEBHOOK] Obteniendo payment ${paymentId} del merchant_order...`);
+      
+      const mp = await mpPayment.get({ id: paymentId });
+      
+      console.log('✅ [WEBHOOK] Payment obtenido:', {
+        id: mp.id,
+        status: mp.status,
+        preference_id: mp.preference_id,
+        external_reference: mp.external_reference,
+        metadata: mp.metadata,
+      });
+
+      // Continuar con el procesamiento normal del payment
+      return await processPayment(mp, res);
+    }
+
+    // Manejar payment directo
     if (type !== 'payment') {
-      console.log(`ℹ️ [WEBHOOK] Tipo "${type}" ignorado (solo procesamos "payment")`);
+      console.log(`ℹ️ [WEBHOOK] Tipo "${type}" ignorado (solo procesamos "payment" y "merchant_order")`);
       return res.status(200).json({ received: true });
     }
 
@@ -240,12 +283,26 @@ async function webhookController(req, res) {
       metadata: mp.metadata,
     });
 
+    return await processPayment(mp, res);
+  } catch (err) {
+    console.error('❌ [WEBHOOK] Error:', {
+      message: err.message,
+      status: err.status,
+      cause: err.cause,
+      stack: err.stack,
+    });
+    return res.status(200).json({ received: true });
+  }
+}
+
+async function processPayment(mp, res) {
+  try {
     const externalRef = mp.external_reference || '';
     const reservaIdStr = mp.metadata?.reserva_id || (externalRef.match(/^pawtitas-(\d+)-/) || [])[1];
 
     if (!reservaIdStr) {
       console.warn('⚠️ [WEBHOOK] Pago no procesado: no se encontró reservaId', {
-        paymentId,
+        paymentId: mp.id,
         preferenceId: mp.preference_id,
         externalRef,
         metadata: mp.metadata,
@@ -274,7 +331,7 @@ async function webhookController(req, res) {
       });
 
       await pagoRepo.updateByReservaId(pago.reservaId, {
-        mpPaymentId: String(paymentId),
+        mpPaymentId: String(mp.id),
         estadoPago: mp.status === 'approved' ? 'PAGADO' : 'PENDIENTE',
         fechaPago: mp.status === 'approved' ? new Date() : null,
       });
@@ -287,7 +344,7 @@ async function webhookController(req, res) {
       console.log(`✅ [WEBHOOK] Pago actualizado exitosamente para reserva ${reservaIdStr}`);
     } else {
       console.warn('❌ [WEBHOOK] Pago no vinculable, requiere revisión manual', {
-        paymentId,
+        paymentId: mp.id,
         preferenceId: mp.preference_id,
         externalRef,
         reservaIdStr: reservaIdStr || '(no disponible)',
@@ -296,7 +353,7 @@ async function webhookController(req, res) {
 
     return res.status(200).json({ received: true });
   } catch (err) {
-    console.error('❌ [WEBHOOK] Error:', {
+    console.error('❌ [PROCESSpayment] Error:', {
       message: err.message,
       status: err.status,
       cause: err.cause,
