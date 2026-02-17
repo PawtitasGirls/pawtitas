@@ -7,8 +7,6 @@ import { colors } from "../../../../../shared/styles";
 const PERFIL_LABELS = {
   Cuidador: "Cuidador",
   Paseador: "Paseador",
-  "Veterinario a domicilio": "Veterinario a domicilio",
-  "Clínica Veterinaria": "Clínica Veterinaria",
   Veterinaria: "Clínica Veterinaria",
   VeterinariaDomicilio: "Veterinario a domicilio",
 };
