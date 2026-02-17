@@ -3,9 +3,10 @@ export const CONEXIONES_CONFIG = {
   SEARCH_DEBOUNCE_DELAY: 300,
   FILTER_OPTIONS: [
     { key: 'todos', label: 'Todos' },
-    { key: 'cuidador', label: 'Cuidadores' },
-    { key: 'paseador', label: 'Paseadores' },
-    { key: 'veterinario', label: 'Veterinarios' },
+    { key: 'pendiente', label: 'Pendiente' },
+    { key: 'confirmado', label: 'Confirmado' },
+    { key: 'finalizado', label: 'Finalizado' },
+    { key: 'rechazado', label: 'Rechazado' },
   ]
 };
 
@@ -46,26 +47,24 @@ export class MisConexionesController {
 
     if (selectedFilter !== 'todos') {
       filtered = filtered.filter(provider => 
-        provider.tipo === selectedFilter
+        provider.estado === selectedFilter
       );
     }
 
     return filtered;
   }
 
-  // Obtener tipo de proveedor, o dueño cuando la vista es del prestador
-  static getProviderType(tipo) {
-    switch(tipo) {
-      case 'cuidador':
-        return 'cuidador';
-      case 'paseador':
-        return 'paseador';
-      case 'veterinario':
-        return 'veterinario';
-      case 'dueño':
-        return 'dueño';
-      default:
-        return 'prestador de servicio';
+  // Obtener estado de la conexión
+  static getProviderType(estado) {
+    switch(estado) {
+      case 'pendiente':
+        return 'Pendiente';
+      case 'confirmado':
+        return 'Confirmado';
+      case 'finalizado':
+        return 'Finalizado';
+      case 'rechazado':
+        return 'Rechazado';
     }
   }
 
