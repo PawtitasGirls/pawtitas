@@ -2,7 +2,7 @@ import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { ScrollView, View, Text, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
-import { ScreenHeader, MenuInferior, BarraBuscador, Filtros, Paginador } from '../../components';
+import { ScreenHeader, MenuInferior, BarraBuscador, Paginador } from '../../components';
 import ResenaCard from '../../components/ResenaCard';
 import { usePaginacion } from '../../hooks/usePaginacion';
 import { useAuth } from '../../contexts';
@@ -16,8 +16,6 @@ const Resenas = () => {
   const { user, role } = useAuth();
 
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedFilter, setSelectedFilter] = useState('todos');
-  const [showFilters, setShowFilters] = useState(false);
   const [resenas, setResenas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -33,23 +31,6 @@ const Resenas = () => {
     if (role === ROLES.PRESTADOR) return user?.prestadorId || null;
     return null;
   }, [role, user]);
-
-  const filters = useMemo(() => {
-    if (role === ROLES.PRESTADOR) {
-      return [
-        { key: 'todos', label: 'Todos' },
-        { key: 'mejor-calificacion', label: 'Mejor calificación' },
-        { key: 'dueño', label: 'Dueños' },
-      ];
-    }
-    return [
-      { key: 'todos', label: 'Todos' },
-      { key: 'mejor-calificacion', label: 'Mejor calificación' },
-      { key: 'cuidador', label: 'Cuidadores' },
-      { key: 'paseador', label: 'Paseadores' },
-      { key: 'veterinario', label: 'Veterinarios' },
-    ];
-  }, [role]);
 
   const loadMisResenas = useCallback(async () => {
     if (!roleApi || !roleEntityId) {
@@ -89,18 +70,8 @@ const Resenas = () => {
       );
     }
 
-    if (selectedFilter === 'mejor-calificacion') {
-      return filtered.sort((a, b) => Number(b.rating || 0) - Number(a.rating || 0));
-    }
-
-    if (selectedFilter !== 'todos') {
-      return filtered.filter(
-        (resena) => String(resena?.tipo || '').toLowerCase() === selectedFilter
-      );
-    }
-
     return filtered;
-  }, [resenas, searchQuery, selectedFilter]);
+  }, [resenas, searchQuery]);
 
   const {
     paginaActual,
@@ -112,15 +83,10 @@ const Resenas = () => {
 
   useEffect(() => {
     reiniciarPagina();
-  }, [searchQuery, selectedFilter, reiniciarPagina]);
+  }, [searchQuery, reiniciarPagina]);
 
   const handleBackPress = () => {
     navigation.goBack();
-  };
-
-  const handleFilterChange = (filter) => {
-    setSelectedFilter(filter);
-    setShowFilters(false);
   };
 
   return (
@@ -136,15 +102,6 @@ const Resenas = () => {
         value={searchQuery}
         onChangeText={setSearchQuery}
         placeholder="Buscar por usuario o comentario"
-        onFilterPress={() => setShowFilters(!showFilters)}
-        filterIcon="menu-outline"
-      />
-
-      <Filtros
-        filters={filters}
-        selectedFilter={selectedFilter}
-        onFilterChange={handleFilterChange}
-        visible={showFilters}
       />
 
       {loading ? (
@@ -174,7 +131,7 @@ const Resenas = () => {
                   ? error
                   : resenas.length === 0
                     ? 'Todavía no dejaste reseñas. Cuando completes tus servicios, podrás verlas acá.'
-                    : 'No se encontraron reseñas con los filtros seleccionados.'}
+                    : 'No se encontraron reseñas con el criterio de búsqueda. Volver a intentarlo con otro criterio.'}
               </Text>
             </View>
           )}
