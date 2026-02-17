@@ -2,16 +2,16 @@ import React from 'react';
 import { Alert, ActionSheetIOS, Platform } from 'react-native';
 
 // Componente para manejar el menú de configuración
-export const SettingsMenu = {
-  // Menú principal de opciones
+export const MenuConfig = {
   showMainMenu: (onContactSupport) => {
+    // iOS
     if (Platform.OS === 'ios') {
       ActionSheetIOS.showActionSheetWithOptions(
         {
-          options: ['Cancelar', 'Contactar Soporte'],
+          options: ['Cancelar', 'Contactar a Pawtitas'],
           cancelButtonIndex: 0,
           destructiveButtonIndex: -1,
-          title: 'Contáctanos por email para resolver tus dudas, sugerencias o inquietudes'
+          title: 'Escribinos a contacto@pawtitas-ar.com y te responderemos a la brevedad.'
         },
         (buttonIndex) => {
           if (buttonIndex === 1) {
@@ -20,15 +20,16 @@ export const SettingsMenu = {
         }
       );
     } else {
-      // Para Android, usar Alert
+      // Android
       Alert.alert(
         'Contáctanos',
-        'Contáctanos por email para resolver tus dudas, sugerencias o inquietudes',
+        'Escribinos a contacto@pawtitas-ar.com y te responderemos a la brevedad.',
         [
           { text: 'Cancelar', style: 'cancel' },
-          { text: 'Contactar Soporte', onPress: onContactSupport },
+          { text: 'Contactar a Pawtitas', onPress: onContactSupport },
         ]
       );
     }
   },
 };
+

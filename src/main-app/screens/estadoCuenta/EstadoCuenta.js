@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../../contexts';
 import { clearAuthToken } from '../../services';
-import { LogoutBtn, SupportService } from '../perfil/components';
+import { LogoutBtn, ContactoService } from '../perfil/components';
 import { styles } from './EstadoCuenta.styles';
 
 // Estados de cuenta para usuarios == false, prestador.estado == 'RECHAZADO'
@@ -37,7 +37,6 @@ export default function EstadoCuenta({ route }) {
   const type = params.type ?? 'rechazado';
   const config = ESTADO_CONFIG[type] ?? ESTADO_CONFIG.rechazado;
 
-  // Permitir override desde params
   const icon = params.icon ?? config.icon;
   const title = params.title ?? config.title;
   const message = params.message ?? config.message;
@@ -49,9 +48,9 @@ export default function EstadoCuenta({ route }) {
     navigation.reset({ index: 0, routes: [{ name: 'Inicio' }] });
   };
 
-  const primaryActionLabel = params.primaryActionLabel ?? 'Contactar soporte 📨';
+  const primaryActionLabel = params.primaryActionLabel ?? 'Contactar a Pawtitas 📨';
   const secondaryActionLabel = params.secondaryActionLabel ?? 'Cerrar sesión';
-  const onPrimaryAction = params.onPrimaryAction ?? SupportService.contactEmail;
+  const onPrimaryAction = params.onPrimaryAction ?? ContactoService.contactEmail;
   const onSecondaryAction = params.onSecondaryAction ?? handleSalir;
 
   const showPrimaryAction = Boolean(primaryActionLabel);
