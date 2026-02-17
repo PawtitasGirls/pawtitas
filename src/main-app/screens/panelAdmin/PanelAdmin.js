@@ -33,6 +33,7 @@ const PanelAdmin = () => {
         const data = Array.isArray(res?.data) ? res.data : [];
         setUsers(data.map((u) => ({
           id: u.id,
+          prestadorId: u.prestadorId || null,
           nombre: u.nombre,
           nombreApellido: u.nombre,
           email: u.email,
@@ -43,8 +44,7 @@ const PanelAdmin = () => {
           fechaRegistro: u.fechaRegistro,
           descripcion: u.descripcion ?? '',
           motivoRechazo: u.motivoRechazo,
-          documentosUrl: u.documentosUrl || null,
-          certificacionesUrl: u.certificacionesUrl || null,
+          attachments: Array.isArray(u.attachments) ? u.attachments : [],
         })));
       } catch (e) {
         if (!cancelled) setError(e?.message ?? 'Error al cargar prestadores');

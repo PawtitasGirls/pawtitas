@@ -1,29 +1,28 @@
+const path = require('path');
+const fs = require('fs');
 const bcrypt = require('bcryptjs');
 const { Prisma } = require('@prisma/client');
 const prisma = require('../config/prisma');
+const DEBUG_LOG = path.resolve(__dirname, '../../../.cursor/debug.log');
 const usuarioRepo = require('../repositories/usuario.repo');
 const { descomponerUbicacion } = require('../utils/ubicacion');
 const { updateDomicilioWithCoordinates } = require('./geocoding.service');
 
-function normalizeFileField(file) {
-  if (!file) return null;
-
-  if (typeof file === 'string') return file;
-
-  // Multer: guardar siempre como /uploads/<filename> para servir vía express.static
-  if (file.filename) {
-    return `/uploads/${file.filename}`;
-  }
-  if (file.path) {
-    const normalized = String(file.path).replace(/\\/g, '/');
-    const uploadsIndex = normalized.lastIndexOf('/uploads/');
-    if (uploadsIndex !== -1) return normalized.slice(uploadsIndex);
-    const base = normalized.split('/').pop() || normalized;
-    return `/uploads/${base}`;
-  }
-
-  if (file.name) return file.name;
-  return null;
+function saveAttachmentFromMulterFile(tx, prestadorId, field, file) {
+  if (!file || !Buffer.isBuffer(file.buffer)) return null;
+  const fileName = (file.originalname || file.name || 'archivo').replace(/[^a-zA-Z0-9.\-_]/g, '_');
+  const mimeType = file.mimetype || 'application/octet-stream';
+  const size = Number(file.size) || file.buffer.length;
+  return tx.attachment.create({
+    data: {
+      prestadorId,
+      field,
+      fileName,
+      mimeType,
+      size,
+      data: file.buffer,
+    },
+  });
 }
 
 async function registerUser({
@@ -41,7 +40,6 @@ async function registerUser({
   documentosFile,
   certificadosFile,
 }) {
-  // Validar campos requeridos
   const required = [
     'nombre',
     'apellido',
@@ -64,10 +62,8 @@ async function registerUser({
     throw new Error('fechaNacimiento inválida');
   }
 
-  // Descomponer ubicación
   const { calle, numero, ciudad } = descomponerUbicacion(ubicacion);
 
-  // Verificar duplicados
   const existingUser = await usuarioRepo.existsByEmailOrDni(correo, documento);
   if (existingUser) {
     const conflicts = [];
@@ -79,7 +75,6 @@ async function registerUser({
 
   const hashedPassword = await bcrypt.hash(password, 10);
 
-  // Crear usuario
   const result = await prisma.$transaction(async (tx) => {
     const generoRow = await tx.genero.upsert({
       where: { nombre: genero },
@@ -107,19 +102,37 @@ async function registerUser({
       },
     });
 
+    let attachmentsCreated = 0;
+    let prestadorIdCreated = null;
     if (perfil === 'prestador') {
       const prestador = await tx.prestador.create({
         data: {
           usuarioId: usuarioRow.id,
-          certificaciones: normalizeFileField(certificadosFile),
-          documentos: normalizeFileField(documentosFile),
+          certificaciones: null,
+          documentos: null,
           perfil: especialidad || null,
           estado: 'PENDIENTE',
         },
       });
+      prestadorIdCreated = prestador.id;
+
+      if (documentosFile && Buffer.isBuffer(documentosFile.buffer)) {
+        await saveAttachmentFromMulterFile(tx, prestador.id, 'documentosFile', documentosFile);
+        attachmentsCreated++;
+      }
+      if (certificadosFile && Buffer.isBuffer(certificadosFile.buffer)) {
+        await saveAttachmentFromMulterFile(tx, prestador.id, 'certificadosFile', certificadosFile);
+        attachmentsCreated++;
+      }
+      // #region agent log
+      try {
+        const line = JSON.stringify({ location: 'registro.service.js:registerUser', message: 'attachmentsCreated', data: { prestadorId: prestador.id.toString(), attachmentsCreated }, timestamp: Date.now(), hypothesisId: 'H1' }) + '\n';
+        fs.appendFileSync(DEBUG_LOG, line);
+      } catch (_) {}
+      // #endregion
 
       if (especialidad) {
-          const servicio = await tx.servicio.create({
+        const servicio = await tx.servicio.create({
           data: {
             descripcion: especialidad,
             tipoMascota: 'General',
@@ -135,7 +148,7 @@ async function registerUser({
       await tx.duenio.create({ data: { usuarioId: usuarioRow.id } });
     }
 
-    return { usuarioRow, documentosFile, certificadosFile };
+    return { usuarioRow, attachmentsCreated, prestadorId: prestadorIdCreated };
   });
 
   try {
@@ -144,11 +157,8 @@ async function registerUser({
     console.warn('Geocoding domicilio en registro falló:', err?.message ?? err);
   }
 
-  if (process.env.DEBUG_UPLOADS) {
-    console.log('[DEBUG_UPLOADS] registerUser saved', {
-      documentos: normalizeFileField(result.documentosFile),
-      certificaciones: normalizeFileField(result.certificadosFile),
-    });
+  if (result.prestadorId != null) {
+    console.log('[REGISTRO] prestadorId creado=', result.prestadorId.toString(), 'attachments creados=', result.attachmentsCreated ?? 0);
   }
 
   return result.usuarioRow;
