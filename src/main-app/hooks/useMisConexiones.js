@@ -35,6 +35,7 @@ export const useMisConexiones = () => {
     showPaymentWebView: false,
     paymentUrl: null,
     pendingResenaProvider: null,
+    pendingCalendarioProvider: null,
   }));
   const [providers, setProviders] = useState([]);
   const [loadingConexiones, setLoadingConexiones] = useState(true);
@@ -199,7 +200,8 @@ export const useMisConexiones = () => {
       ...prev,
       showDetalles: false,
       selectedProvider: provider,
-      showCalendarioModal: true,
+      pendingCalendarioProvider: provider,
+      showCalendarioModal: false,
     }));
   }, []);
 
@@ -262,7 +264,12 @@ export const useMisConexiones = () => {
 
   const handleCancelarCalendario = useCallback(() => {
     paymentProviderRef.current = null;
-    setState(prev => ({ ...prev, showCalendarioModal: false, selectedProvider: null }));
+    setState(prev => ({ 
+      ...prev, 
+      showCalendarioModal: false, 
+      selectedProvider: null,
+      pendingCalendarioProvider: null,
+    }));
   }, []);
 
   const handlePaymentSuccess = useCallback(() => {
@@ -466,15 +473,22 @@ export const useMisConexiones = () => {
 
   const handleDetallesModalHide = useCallback(() => {
     setState((prev) => {
-      if (!prev.pendingResenaProvider) {
-        return prev;
+      if (prev.pendingResenaProvider) {
+        return {
+          ...prev,
+          selectedProvider: prev.pendingResenaProvider,
+          pendingResenaProvider: null,
+          showResenaModal: true,
+        };
       }
-      return {
-        ...prev,
-        selectedProvider: prev.pendingResenaProvider,
-        pendingResenaProvider: null,
-        showResenaModal: true,
-      };
+      if (prev.pendingCalendarioProvider) {
+        return {
+          ...prev,
+          showCalendarioModal: true,
+          pendingCalendarioProvider: null,
+        };
+      }
+      return prev;
     });
   }, []);
 
