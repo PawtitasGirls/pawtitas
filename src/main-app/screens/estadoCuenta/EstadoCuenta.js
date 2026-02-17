@@ -48,7 +48,7 @@ export default function EstadoCuenta({ route }) {
     navigation.reset({ index: 0, routes: [{ name: 'Inicio' }] });
   };
 
-  const primaryActionLabel = params.primaryActionLabel ?? 'Contactar soporte 📨';
+  const primaryActionLabel = params.primaryActionLabel ?? 'Contactar a Pawtitas 📨';
   const secondaryActionLabel = params.secondaryActionLabel ?? 'Cerrar sesión';
   const onPrimaryAction = params.onPrimaryAction ?? ContactoService.contactEmail;
   const onSecondaryAction = params.onSecondaryAction ?? handleSalir;
