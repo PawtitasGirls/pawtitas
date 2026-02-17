@@ -1,25 +1,6 @@
-const path = require('path');
-const fs = require('fs');
 const multer = require('multer');
 
 const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024; // 10MB
-
-const uploadsDir = path.join(__dirname, '..', 'uploads');
-try {
-  fs.mkdirSync(uploadsDir, { recursive: true });
-} catch (e) {}
-
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, uploadsDir);
-  },
-  filename: function (req, file, cb) {
-    const timestamp = Date.now();
-    const safeOriginalName = String(file.originalname || 'file')
-      .replace(/[^a-zA-Z0-9.\-_]/g, '_');
-    cb(null, `${timestamp}-${safeOriginalName}`);
-  },
-});
 
 const ALLOWED_MIMETYPES = [
   'application/pdf',
@@ -51,6 +32,9 @@ const fileFilter = (req, file, cb) => {
   cb(null, true);
 };
 
+// Siempre memoryStorage: archivos en req.files[].buffer para guardar en Attachment (BLOB). No usar diskStorage.
+const storage = multer.memoryStorage();
+
 const upload = multer({
   storage,
   fileFilter,
@@ -62,6 +46,4 @@ const upload = multer({
 
 module.exports = {
   upload,
-  uploadsDir,
 };
-

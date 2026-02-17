@@ -1,4 +1,7 @@
+const path = require('path');
+const fs = require('fs');
 const prisma = require('../config/prisma');
+const DEBUG_LOG = path.resolve(__dirname, '../../../.cursor/debug.log');
 
 // Mapea estado backend -> front (estadosUsuario)
 function mapEstado(estado) {
@@ -9,7 +12,7 @@ function mapEstado(estado) {
   return 'pendiente';
 }
 
-// Lista prestadores para el panel admin
+// Lista prestadores para el panel admin (incluye attachments sin data, con downloadUrl)
 async function listPrestadores(req, res) {
   try {
     const rows = await prisma.prestador.findMany({
@@ -19,6 +22,10 @@ async function listPrestadores(req, res) {
           take: 1,
           orderBy: { id: 'desc' },
           include: { servicio: true },
+        },
+        attachment: {
+          select: { id: true, field: true, fileName: true, mimeType: true, size: true },
+          orderBy: { createdAt: 'asc' },
         },
       },
       orderBy: { fechaIngreso: 'desc' },
@@ -31,6 +38,43 @@ async function listPrestadores(req, res) {
       const ubicacion = domicilio
         ? [domicilio.calle, domicilio.numero, domicilio.ciudad].filter(Boolean).join(', ')
         : null;
+
+      const fromAttachment = (p.attachment || []).map((a) => ({
+        id: a.id.toString(),
+        field: a.field,
+        fileName: a.fileName,
+        mimeType: a.mimeType,
+        size: a.size,
+        downloadUrl: `/api/attachments/${a.id}/download`,
+      }));
+      // Legacy: solo si no hay filas en Attachment (prestadores viejos con rutas en Prestador.documentos/certificaciones)
+      const legacyDocs = [];
+      if (fromAttachment.length === 0) {
+        const toLegacyUrl = (val) => {
+          if (!val || typeof val !== 'string') return null;
+          const trimmed = val.trim();
+          if (trimmed.startsWith('/')) return trimmed;
+          if (trimmed.toLowerCase().startsWith('uploads')) return `/${trimmed}`;
+          return `/uploads/${trimmed}`;
+        };
+        if (p.documentos) {
+          const name = p.documentos.replace(/^.*[/\\]/, '') || 'documento';
+          const urlPath = toLegacyUrl(p.documentos);
+          if (urlPath) legacyDocs.push({ id: 'legacy-documentos', field: 'documentosFile', fileName: name, mimeType: 'application/pdf', size: null, downloadUrl: urlPath });
+        }
+        if (p.certificaciones) {
+          const name = p.certificaciones.replace(/^.*[/\\]/, '') || 'certificado';
+          const urlPath = toLegacyUrl(p.certificaciones);
+          if (urlPath) legacyDocs.push({ id: 'legacy-certificaciones', field: 'certificadosFile', fileName: name, mimeType: 'application/pdf', size: null, downloadUrl: urlPath });
+        }
+      }
+      const attachments = fromAttachment.length > 0 ? fromAttachment : legacyDocs;
+      // #region agent log
+      try {
+        const line = JSON.stringify({ location: 'admin.controller.js:listPrestadores', message: 'prestador attachments', data: { prestadorId: p.id?.toString(), attachmentCount: (p.attachment || []).length, hasDocumentos: !!p.documentos, hasCertificaciones: !!p.certificaciones, finalCount: attachments.length }, timestamp: Date.now(), hypothesisId: 'H2-H3' }) + '\n';
+        fs.appendFileSync(DEBUG_LOG, line);
+      } catch (_) {}
+      // #endregion
 
       return {
         id: u?.id?.toString?.() ?? String(p.id),
@@ -45,8 +89,7 @@ async function listPrestadores(req, res) {
         estadoBackend: p.estado,
         motivoRechazo: p.motivoRechazo ?? null,
         fechaRegistro: u?.creadoEn ?? p.fechaIngreso,
-        documentosUrl: p.documentos || null,
-        certificacionesUrl: p.certificaciones || null,
+        attachments,
       };
     });
 
