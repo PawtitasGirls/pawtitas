@@ -237,7 +237,15 @@ export const useMisConexiones = () => {
         return;
       }
 
-      const url = __DEV__ ? res.sandboxInitPoint || res.initPoint : res.initPoint || res.sandboxInitPoint;
+      const url = res.sandboxInitPoint || res.initPoint;
+
+      if (__DEV__) {
+        console.log('🧾 [PAGO] URLs recibidas de preferencia:', {
+          initPoint: res.initPoint,
+          sandboxInitPoint: res.sandboxInitPoint,
+          urlSeleccionada: url,
+        });
+      }
 
       if (url) {
         setState(prev => ({ ...prev, paymentUrl: url, showPaymentWebView: true }));
