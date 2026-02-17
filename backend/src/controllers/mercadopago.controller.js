@@ -3,6 +3,21 @@ const prisma = require('../config/prisma');
 const pagoRepo = require('../repositories/pago.repo');
 const { preference: mpPreference, payment: mpPayment, merchantOrder: mpMerchantOrder } = require('../config/mercadopago');
 
+function extractWebhookDataId(req) {
+  const queryId = req.query?.id ?? req.query?.['data.id'];
+  const bodyId = req.body?.data?.id ?? req.body?.id;
+  if (queryId || bodyId) return String(queryId ?? bodyId);
+
+  // Legacy/IPN payloads may only include "resource" URL.
+  const resource = req.body?.resource;
+  if (typeof resource === 'string') {
+    const match = resource.match(/\/(\d+)(?:\?.*)?$/);
+    if (match?.[1]) return match[1];
+  }
+
+  return null;
+}
+
 function validateWebhookSignature(req) {
   const secret = process.env.MERCADOPAGO_WEBHOOK_SECRET;
   if (!secret) return true;
@@ -22,7 +37,7 @@ function validateWebhookSignature(req) {
 
   if (!ts || !v1) return false;
 
-  const dataId = req.query?.id ?? req.query?.['data.id'] ?? req.body?.data?.id;
+  const dataId = extractWebhookDataId(req);
   if (!dataId) return false;
 
   const manifestParts = [`id:${dataId}`];
@@ -212,8 +227,8 @@ async function webhookController(req, res) {
     }
 
     // Intentar obtener datos desde body o query
-    const type = req.body?.type || req.query?.topic;
-    const dataId = req.body?.data?.id || req.query?.id || req.query?.['data.id'];
+    const type = req.body?.type || req.body?.topic || req.query?.topic;
+    const dataId = extractWebhookDataId(req);
     const action = req.body?.action;
 
     console.log('📦 [WEBHOOK] Datos extraídos:', { type, action, dataId });
