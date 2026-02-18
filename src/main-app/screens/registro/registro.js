@@ -377,7 +377,7 @@ export default function RegistroScreen({ navigation }) {
       {errors.telefono && <Text style={styles.errorText}>{errors.telefono}</Text>}
 
       <TextInput
-        placeholder="Ubicación"
+        placeholder="Calle, Altura, Barrio/Ciudad"
         style={[styles.input, errors.ubicacion && styles.inputError]}
         value={form.ubicacion}
         onChangeText={(v) => handleInputChange("ubicacion", v)}
@@ -492,7 +492,7 @@ export default function RegistroScreen({ navigation }) {
         </TouchableOpacity>
       </View>
 
-      <Text style={styles.infoText}>Más adelante podrás editar tu perfil y agregar más información.</Text>
+      <Text style={styles.infoText}>*Más adelante podrás editar tu perfil y agregar más información.</Text>
       </ScrollView>
 
       <MensajeFlotante
