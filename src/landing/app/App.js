@@ -57,7 +57,7 @@ export default function LandingApp() {
 
   const scrollToSection = (key) => {
     if (sectionPositions.current[key] !== undefined) {
-      const offset = isMobile ? 250 : 0;
+      const offset = 0;
       scrollRef.current.scrollTo({
         y: Math.max(0, sectionPositions.current[key] - offset),
         animated: true,
