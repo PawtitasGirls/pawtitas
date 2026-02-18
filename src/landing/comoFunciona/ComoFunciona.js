@@ -17,7 +17,7 @@ export default function ComoFunciona() {
     <View style={styles.section}>
       <Text style={styles.title}>¿Cómo funciona?</Text>
       <Text style={styles.subtitle}>
-        En 4 simples pasos podés comenzar a disfrutar de nuestros servicios
+        En 4 simples pasos podés comenzar a disfrutar de nuestros servicios.
       </Text>
 
       <View style={[styles.stepsContainer, isMobile && styles.stepsContainerMobile]}>
