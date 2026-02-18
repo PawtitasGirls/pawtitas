@@ -29,7 +29,7 @@ export default function Suscripciones({ scrollToSection }) {
       <View style={styles.header}>
         <Text style={styles.title}>Suscripciones</Text>
         <Text style={styles.subtitle}>
-          Elegí cómo querés usar Pawtitas y encontrá la opción ideal para vos
+          Elegí cómo querés usar Pawtitas y encontrá la opción ideal para vos.
         </Text>
       </View>
 

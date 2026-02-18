@@ -177,7 +177,7 @@ export default function Contacto() {
     <View style={styles.section}>
       <Text style={styles.title}>Contacto</Text>
       <Text style={styles.subtitle}>
-        Cualquier inquietud no dudes en consultarnos
+        Cualquier inquietud no dudes en consultarnos.
       </Text>
 
       {/* Formulario */}
