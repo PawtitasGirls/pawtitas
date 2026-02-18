@@ -1,4 +1,4 @@
-import { StyleSheet } from "react-native";
+import { StyleSheet, Platform } from "react-native";
 import { colors, typography } from "../../shared/styles";
 
 const styles = StyleSheet.create({
@@ -20,17 +20,28 @@ const styles = StyleSheet.create({
     marginTop: 16,
   },
 
-  /* ================= HEADER ================= */
 
 header: {
   paddingHorizontal: 20,
   paddingVertical: 20,
   justifyContent: "center",
-  alignItems: "center", 
+  alignItems: "center",
   borderBottomWidth: 1,
   borderBottomColor: "rgba(0,0,0,0.1)",
-  width: "100%", 
+  width: "100%",
 },
+
+headerFixed: Platform.select({
+  web: {
+    position: "fixed",
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 999,
+    backgroundColor: colors.backgroundLanding,
+  },
+  default: {},
+}),
 
 navContainer: {
   maxWidth: 1200,

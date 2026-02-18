@@ -10,6 +10,7 @@ import {
   ActivityIndicator,
   useWindowDimensions,
   Linking,
+  Platform,
 } from "react-native";
 
 import styles from "./App.styles";
@@ -90,59 +91,58 @@ export default function LandingApp() {
   return (
     <SafeAreaProvider>
       <SafeAreaView style={styles.container}>
-        <ScrollView ref={scrollRef} contentContainerStyle={{ flexGrow: 1 }}>
+        <View style={[styles.header, isMobile && styles.headerFixed]}>
+          <View style={styles.navContainer}>
+            {isMobile && (
+              <TouchableOpacity
+                style={styles.hamburger}
+                onPress={() => setMenuOpen(!menuOpen)}
+              >
+                <View style={styles.hamburgerLine} />
+                <View style={styles.hamburgerLine} />
+                <View style={styles.hamburgerLine} />
+              </TouchableOpacity>
+            )}
 
-<View style={styles.header}>
-  <View style={styles.navContainer}>
-    
-    {isMobile && (
-      <TouchableOpacity 
-        style={styles.hamburger} 
-        onPress={() => setMenuOpen(!menuOpen)}
-      >
-        <View style={styles.hamburgerLine} />
-        <View style={styles.hamburgerLine} />
-        <View style={styles.hamburgerLine} />
-      </TouchableOpacity>
-    )}
+            {(!isMobile || menuOpen) && (
+              <View style={[styles.navMenu, isMobile && styles.navMenuMobile]}>
+                {[
+                  { label: "Inicio", action: () => {
+                    scrollRef.current?.scrollTo({ y: 0, animated: true });
+                    setMenuOpen(false);
+                  }},
+                  { label: "Servicios", action: () => scrollToSection("servicios") },
+                  { label: "Cómo Funciona", action: () => scrollToSection("comoFunciona") },
+                  { label: "Suscripciones", action: () => scrollToSection("suscripciones") },
+                  { label: "Nosotros", action: () => scrollToSection("nosotros") },
+                  { label: "Contacto", action: () => scrollToSection("contacto") },
+                ].map((item, i) => (
+                  <TouchableOpacity
+                    key={i}
+                    onPress={item.action}
+                    style={isMobile && styles.navButtonMobile}
+                  >
+                    <Text style={[styles.navItem, isMobile && styles.navItemMobile]}>
+                      {item.label}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            )}
+          </View>
+        </View>
 
-    {(!isMobile || menuOpen) && (
-      <View style={[styles.navMenu, isMobile && styles.navMenuMobile]}>
-        {[
-          { label: "Inicio", action: () => {
-            scrollRef.current.scrollTo({ y: 0, animated: true });
-            setMenuOpen(false);
-          }},
-          { label: "Servicios", action: () => scrollToSection("servicios") },
-          { label: "Cómo Funciona", action: () => scrollToSection("comoFunciona") },
-          { label: "Suscripciones", action: () => scrollToSection("suscripciones") },
-          { label: "Nosotros", action: () => scrollToSection("nosotros") },
-          { label: "Contacto", action: () => scrollToSection("contacto") },
-        ].map((item, i) => (
-          <TouchableOpacity
-            key={i}
-            onPress={item.action}
-            style={isMobile && styles.navButtonMobile}
-          >
-            <Text style={[styles.navItem, isMobile && styles.navItemMobile]}>
-              {item.label}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </View>
-    )}
-
-  </View>
-</View>
-
-
-          {/* ================= LOGO ================= */}
+        <ScrollView
+          ref={scrollRef}
+          contentContainerStyle={[
+            { flexGrow: 1 },
+            Platform.OS === "web" && isMobile && { paddingTop: 72 },
+          ]}
+        >
           <Text style={styles.logo}>PAWTITAS</Text>
 
-          {/* ================= HERO IMAGE ================= */}
           <Image source={Logo} style={styles.heroImage} resizeMode="contain" />
 
-          {/* ================= HERO ================= */}
           <View style={styles.hero}>
             <Text style={styles.heroTitle}>
               Cuidados para tu{" "}
@@ -155,7 +155,6 @@ export default function LandingApp() {
 
             <Text style={styles.heroSubtitle}>Disponible en</Text>
 
-            {/* Botones responsive */}
             <View style={[styles.buttonRow, isMobile && styles.buttonRowMobile]}>
               <TouchableOpacity
                 style={[styles.button, styles.playStore]}
@@ -179,7 +178,6 @@ export default function LandingApp() {
             </View>
           </View>
 
-          {/* ================= SECTIONS ================= */}
           <Features />
 
           <View onLayout={(e) => onSectionLayout("servicios", e)}>
@@ -202,7 +200,6 @@ export default function LandingApp() {
             <Contacto />
           </View>
 
-          {/* ================= FOOTER ================= */}
           <Footer
             scrollToSection={scrollToSection}
             scrollToTop={() =>
