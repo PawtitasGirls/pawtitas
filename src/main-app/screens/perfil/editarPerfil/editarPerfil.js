@@ -122,7 +122,7 @@ export default function EditarPerfil({ navigation, route }) {
 
   useEffect(() => {
     loadProfileData();
-  }, [userRole, user]);
+  }, [userRole, user?.id]);
 
   const loadProfileData = async () => {
     setLoading(true);
