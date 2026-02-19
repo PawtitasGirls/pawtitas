@@ -472,7 +472,9 @@ export default function RegistroScreen({ navigation }) {
             <Text style={styles.termsLink}>Terminos y condiciones</Text>
           </TouchableOpacity>
         </View>
-        {errors.acceptedTerms ? <Text style={styles.errorText}>{errors.acceptedTerms}</Text> : null}
+        {errors.acceptedTerms ? (
+          <Text style={[styles.errorText, styles.termsErrorText]}>{errors.acceptedTerms}</Text>
+        ) : null}
       </View>
 
       <View style={styles.buttonRow}>
