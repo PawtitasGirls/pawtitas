@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { ROLES } from '../../constants/roles';
 import ScreenHeader from '../../components/ScreenHeader';
-import MenuInferior from '../../components/MenuInferior/MenuInferior';
+import MenuInferior, { useNavbarHeight } from '../../components/MenuInferior';
 import BarraBuscador from '../../components/BarraBuscador/BarraBuscador';
 import Filtros from '../../components/Filtros/Filtros';
 import ResenaFormModal from '../../components/ResenaFormModal/ResenaFormModal';
@@ -22,6 +22,7 @@ import { styles } from './MisConexiones.styles';
 // Pantalla de Mis Conexiones
 const MisConexiones = () => {
   const navigation = useNavigation();
+  const navbarHeight = useNavbarHeight();
   const {
     state,
     providers,
@@ -122,7 +123,7 @@ const MisConexiones = () => {
       <ScrollView 
         style={styles.content}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.usersList}
+        contentContainerStyle={[styles.usersList, { paddingBottom: navbarHeight }]}
       >
         {providersActuales.map((provider) => (
           <ConexionCard

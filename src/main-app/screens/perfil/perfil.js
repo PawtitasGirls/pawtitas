@@ -4,7 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { styles } from './perfil.styles';
 import { colors } from '../../../shared/styles';
-import { PerfilHeader, MenuInferior } from '../../components';
+import { PerfilHeader, MenuInferior, useNavbarHeight } from '../../components';
 import { PerfilInfoCard, MascotasSection, LogoutBtn, MenuConfig, ContactoService, MercadoPagoConnect } from './components';
 import { useAuth } from '../../contexts';
 import { ROLES } from '../../constants/roles';
@@ -44,6 +44,7 @@ const roleLabelByRole = (role) => {
 
 const PerfilScreen = () => {
   const navigation = useNavigation();
+  const navbarHeight = useNavbarHeight();
   const { user, role, clearAuth } = useAuth();
 
   const userProfile = useMemo(() => {
@@ -138,7 +139,7 @@ const PerfilScreen = () => {
       <ScrollView
         style={styles.content}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[styles.scrollContent, { paddingBottom: navbarHeight }]}
       >
         <PerfilInfoCard
           user={userProfile}

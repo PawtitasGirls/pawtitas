@@ -3,13 +3,14 @@ import { View, FlatList, ActivityIndicator } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { styles } from './misMascotas.styles';
-import { ScreenHeader, MenuInferior, FloatingAddBtn, MensajeFlotante, ConfirmacionDialogo as ConfirmacionDialogo } from '../../components';
+import { ScreenHeader, MenuInferior, FloatingAddBtn, MensajeFlotante, ConfirmacionDialogo as ConfirmacionDialogo, useNavbarHeight } from '../../components';
 import { MascotaCard, EmptyMascotasList, MascotaFormModal } from './components';
 import { useAuth } from '../../contexts/AuthContext';
 import { getMascotasByDuenio, createMascota, updateMascota, deleteMascota } from '../../services/api/apiMascota';
 
 const MisMascotas = () => {
   const navigation = useNavigation();
+  const navbarHeight = useNavbarHeight();
   const { user, updateUser } = useAuth();
   
   const [modalVisible, setModalVisible] = useState(false);
@@ -250,7 +251,7 @@ const MisMascotas = () => {
             data={mascotas}
             renderItem={renderMascota}
             keyExtractor={(item) => item.id}
-            contentContainerStyle={styles.mascotasList}
+            contentContainerStyle={[styles.mascotasList, { paddingBottom: navbarHeight }]}
             ItemSeparatorComponent={renderSeparator}
             showsVerticalScrollIndicator={false}
             bounces={true}

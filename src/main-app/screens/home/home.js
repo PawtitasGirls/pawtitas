@@ -1,5 +1,5 @@
 import { styles } from './home.styles';
-import MenuInferior from '../../components/MenuInferior';
+import MenuInferior, { useNavbarHeight } from '../../components/MenuInferior';
 import iconImage from '../../assets/icon.png';
 import React, { useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, Modal, ScrollView, Image, ActivityIndicator } from "react-native";
@@ -181,6 +181,7 @@ const HomeHeader = ({ hidePendingControls, hideForAdmin }) => {
 
 const HomeScreen = () => {
   const navigation = useNavigation();
+  const navbarHeight = useNavbarHeight();
   const { role, user } = useAuth();
   const estadoPrestador = String(user?.estadoPrestador || '').toUpperCase();
   const isPrestadorPendiente =
@@ -244,7 +245,7 @@ const HomeScreen = () => {
       <ScrollView 
         style={styles.content} 
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[styles.scrollContent, { paddingBottom: navbarHeight }]}
       >
         <HomeHeader hidePendingControls={isPrestadorPendiente} hideForAdmin={isAdmin} />
 

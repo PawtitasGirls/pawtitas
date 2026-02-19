@@ -2,7 +2,7 @@ import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { ScrollView, View, Text, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
-import { ScreenHeader, MenuInferior, BarraBuscador, Paginador } from '../../components';
+import { ScreenHeader, MenuInferior, BarraBuscador, Paginador, useNavbarHeight } from '../../components';
 import ResenaCard from '../../components/ResenaCard';
 import { usePaginacion } from '../../hooks/usePaginacion';
 import { useAuth } from '../../contexts';
@@ -13,6 +13,7 @@ import { styles } from './Resenas.styles';
 // Pantalla de Mis Reseñas
 const Resenas = () => {
   const navigation = useNavigation();
+  const navbarHeight = useNavbarHeight();
   const { user, role } = useAuth();
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -110,7 +111,7 @@ const Resenas = () => {
           <Text style={styles.emptyText}>Cargando tus reseñas...</Text>
         </View>
       ) : (
-        <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+        <ScrollView style={styles.content} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: navbarHeight }}>
           {resenasActuales.length > 0 ? (
             <>
               {resenasActuales.map((resena) => (

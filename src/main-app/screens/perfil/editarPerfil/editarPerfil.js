@@ -8,7 +8,7 @@ import {
   Platform
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { ScreenHeader, GuardarCancelarBtn, MensajeFlotante, MenuInferior } from "../../../components";
+import { ScreenHeader, GuardarCancelarBtn, MensajeFlotante, MenuInferior, useNavbarHeight } from "../../../components";
 import { styles } from "./editarPerfil.styles";
 import PerfilFactory from "./roles/PerfilFactory";
 import ROLES from "./roles/types";
@@ -109,6 +109,7 @@ const buildFormDataFromUser = (role, userData) => {
 
 export default function EditarPerfil({ navigation, route }) {
   const { user, role: authRole, updateUser } = useAuth();
+  const navbarHeight = useNavbarHeight();
 
   const userRole = route?.params?.role || authRole || ROLES.DUENIO;
 
@@ -291,7 +292,7 @@ export default function EditarPerfil({ navigation, route }) {
           {PerfilFactory.createProfileForm(userRole, { formData, handleInputChange, errors })}
         </ScrollView>
 
-        <View style={styles.buttonContainer}>
+        <View style={[styles.buttonContainer, { paddingBottom: navbarHeight }]}>
           <GuardarCancelarBtn
             label="Guardar"
             onPress={handleSave}
