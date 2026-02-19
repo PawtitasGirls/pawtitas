@@ -294,8 +294,40 @@ async function getReservasByPrestadorController(req, res) {
   }
 }
 
+async function cancelarReservaController(req, res) {
+  try {
+    const { id } = req.params;
+    if (!id) {
+      return res.status(400).json({ success: false, message: 'Falta ID de reserva' });
+    }
+    let reservaId;
+    try {
+      reservaId = BigInt(id);
+    } catch (e) {
+      return res.status(400).json({ success: false, message: 'ID inválido' });
+    }
+    
+    const reserva = await reservaRepo.findById(reservaId);
+    if (!reserva) {
+      return res.status(404).json({ success: false, message: 'Reserva no encontrada' });
+    }
+    if (!['PENDIENTE_PAGO', 'PAGADO'].includes(reserva.estado)) {
+      return res.status(400).json({ success: false, message: 'No se puede cancelar esta reserva' });
+    }
+    const actualizada = await reservaRepo.updateEstado(reservaId, 'CANCELADO');
+    return res.json({ success: true, reserva: serializeReserva(actualizada) });
+  } catch (err) {
+    console.error('Error al cancelar reserva:', err);
+    return res.status(500).json({ 
+      success: false, 
+      message: err.message || 'Error al cancelar la reserva' 
+    });
+  }
+}
+
 module.exports = {
   createReservaController,
   getReservasByDuenioController,
   getReservasByPrestadorController,
+  cancelarReservaController,
 };
