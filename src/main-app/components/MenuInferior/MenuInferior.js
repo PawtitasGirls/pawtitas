@@ -3,7 +3,12 @@ import { View, TouchableOpacity, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { styles, getContainerStyle } from './MenuInferior.styles';
+import { styles, getContainerStyle, NAVBAR_BASE_HEIGHT } from './MenuInferior.styles';
+
+export const useNavbarHeight = () => {
+  const insets = useSafeAreaInsets();
+  return insets.bottom + NAVBAR_BASE_HEIGHT;
+};
 import { colors } from '../../../shared/styles';
 import { useAuth, useStreamChat } from '../../contexts';
 import { isRouteAllowed, ROLES } from '../../constants/roles';
