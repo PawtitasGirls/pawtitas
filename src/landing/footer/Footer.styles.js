@@ -3,7 +3,7 @@ import { colors } from "../../shared/styles";
 
 const styles = StyleSheet.create({
   footer: {
-    backgroundColor: colors.surface,
+    backgroundColor: colors.backgroundLanding,
     paddingVertical: 24,
     paddingHorizontal: 20,
     borderTopWidth: 1,
@@ -14,11 +14,9 @@ const styles = StyleSheet.create({
     maxWidth: 1200,
     width: "100%",
     alignSelf: "center",
-    alignItems: "stretch", // ← importante
+    alignItems: "stretch",
     gap: 12,
   },
-
-  /* ---------- MAIN CONTENT ---------- */
 
   mainContent: {
     flexDirection: "row",
@@ -34,8 +32,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     textAlign: "center",
   },
-
-  /* ---------- BRAND ---------- */
 
   brandSection: {
     flexDirection: "row",
@@ -68,8 +64,6 @@ const styles = StyleSheet.create({
     flexWrap: "wrap",
   },
 
-  /* ---------- LINKS ---------- */
-
   navLinks: {
     flexDirection: "row",
     alignItems: "center",
@@ -88,14 +82,10 @@ const styles = StyleSheet.create({
     color: colors.text.disabled,
   },
 
-  /* ---------- SOCIALS ---------- */
-
   socials: {
     flexDirection: "row",
     gap: 14,
   },
-
-  /* ---------- COPYRIGHT ---------- */
 
   copyright: {
     fontSize: 12,

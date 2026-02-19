@@ -1,7 +1,6 @@
 import { StyleSheet, Platform } from 'react-native';
 import { colors } from '../../../shared/styles';
 
-// Estilos para el componente MenuInferior
 export const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
@@ -9,11 +8,11 @@ export const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'flex-end',
     paddingHorizontal: 20,
-    paddingBottom: Platform.OS === 'ios' ? 5 : 0,
     position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
+    paddingBottom: Platform.OS === 'ios' ? 8 : 0,
   },
   navBar: {
     flexDirection: 'row',
@@ -77,6 +76,13 @@ export const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
 });
+
+export const NAVBAR_BASE_HEIGHT = 80;
+
+export const getContainerStyle = (bottomInset) =>
+  Platform.OS === 'android'
+    ? { paddingBottom: bottomInset + 8 }
+    : {};
 
 export const navColors = {
   active: colors.navigation.active,

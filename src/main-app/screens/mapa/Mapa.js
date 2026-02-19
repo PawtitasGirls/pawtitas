@@ -10,47 +10,21 @@ import {
   Keyboard,
   TouchableWithoutFeedback,
 } from 'react-native';
+import MapView, { Marker, Polyline, PROVIDER_DEFAULT } from 'react-native-maps';
 import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useLocation } from '../../contexts';
 import MenuInferior from '../../components/MenuInferior';
 import { MapaController, MAPA_CONFIG } from '../../controller';
-import { styles } from './Mapa.styles';
-
-// Importación condicional de react-native-maps (solo en plataformas nativas)
-// En web, estas variables permanecerán como null
-let MapView = null;
-let Marker = null;
-let Polyline = null;
-let PROVIDER_DEFAULT = null;
-
-// Función helper para cargar react-native-maps solo en plataformas nativas
-const loadMaps = () => {
-  if (Platform.OS !== 'web') {
-    try {
-      const Maps = require('react-native-maps');
-      MapView = Maps.default;
-      Marker = Maps.Marker;
-      Polyline = Maps.Polyline;
-      PROVIDER_DEFAULT = Maps.PROVIDER_DEFAULT;
-    } catch (error) {
-      console.error('Error cargando react-native-maps:', error);
-    }
-  }
-};
-
-// Cargar maps inmediatamente si no estamos en web
-if (Platform.OS !== 'web') {
-  loadMaps();
-}
+import { styles, getAttributionStyle } from './Mapa.styles';
 
 const MapaScreen = () => {
   const mapRef = useRef(null);
+  const insets = useSafeAreaInsets();
   const { userLocation, getCurrentLocation, isLoadingLocation, isLocationEnabled } = useLocation();
 
-  // Estado del mapa usando el controller
   const [state, setState] = useState(MapaController.getInitialState());
 
-  // Destructurar estado para facilitar uso
   const {
     region,
     mapHeading,
@@ -68,12 +42,10 @@ const MapaScreen = () => {
     isLoadingRoute,
   } = state;
 
-  // Actualizar estado de forma limpia
   const updateState = (updates) => {
     setState((prev) => ({ ...prev, ...updates }));
   };
 
-  // Cargar ubicación inicial
   useEffect(() => {
     loadInitialLocation();
   }, []);
@@ -106,7 +78,6 @@ const MapaScreen = () => {
     }
   };
 
-  // Actualizar región y heading del mapa
   const handleRegionChangeComplete = async (newRegion) => {
     updateState({ region: newRegion });
 
@@ -120,7 +91,6 @@ const MapaScreen = () => {
     }
   };
 
-  // Búsqueda con debounce
   useEffect(() => {
     if (!MapaController.isValidSearchQuery(searchQuery)) {
       updateState({ searchResults: [], showSearchResults: false });
@@ -134,7 +104,6 @@ const MapaScreen = () => {
     return () => clearTimeout(timeoutId);
   }, [searchQuery]);
 
-  // Buscar dirección
   const handleSearch = async () => {
     if (!MapaController.isValidSearchQuery(searchQuery)) return;
 
@@ -151,7 +120,6 @@ const MapaScreen = () => {
     }
   };
 
-  // Seleccionar resultado de búsqueda
   const handleSelectSearchResult = (result) => {
     const newRegion = MapaController.getRegionForLocation(result, 0.01);
 
@@ -186,7 +154,6 @@ const MapaScreen = () => {
     });
   };
 
-  // Calcular ruta
   const handleGetRoute = async (destination) => {
     const defaultProfile = MAPA_CONFIG.ROUTE_PROFILES.WALKING;
 
@@ -196,7 +163,6 @@ const MapaScreen = () => {
       routeProfile: defaultProfile,
     });
 
-    // Ruta caminando por defecto
     const route = await MapaController.calculateRoute(
       userLocation,
       destination,
@@ -211,7 +177,6 @@ const MapaScreen = () => {
         routeInfo: formattedInfo,
       });
 
-      // Ajustar vista para mostrar toda la ruta
       if (mapRef.current) {
         mapRef.current.fitToCoordinates([userLocation, destination], {
           edgePadding: MAPA_CONFIG.ROUTE_EDGE_PADDING,
@@ -223,7 +188,6 @@ const MapaScreen = () => {
     updateState({ isLoadingRoute: false });
   };
 
-  // Limpiar ruta
   const clearRoute = () => {
     updateState({
       routeCoordinates: [],
@@ -237,7 +201,6 @@ const MapaScreen = () => {
     const newProfile = MapaController.toggleRouteProfile(routeProfile);
     updateState({ routeProfile: newProfile, isLoadingRoute: true });
 
-    // Recalcular con el nuevo perfil
     if (selectedDestination) {
       const route = await MapaController.calculateRoute(
         userLocation,
@@ -258,7 +221,6 @@ const MapaScreen = () => {
     updateState({ isLoadingRoute: false });
   };
 
-  // Ir a ubicación actual
   const goToUserLocation = () => {
     if (MapaController.hasUserLocation(userLocation) && mapRef.current) {
       const newRegion = MapaController.getRegionForLocation(userLocation, 0.01);
@@ -282,7 +244,6 @@ const MapaScreen = () => {
     }
   };
 
-  // Limpiar búsqueda
   const clearSearch = () => {
     updateState({
       searchQuery: '',
@@ -292,7 +253,6 @@ const MapaScreen = () => {
     Keyboard.dismiss();
   };
 
-  // Cerrar teclado al tocar fuera del input
   const handleDismissKeyboard = () => {
     Keyboard.dismiss();
     if (searchResults.length > 0) {
@@ -318,33 +278,38 @@ const MapaScreen = () => {
 
   const compassIsNeutral = Math.abs(mapHeading) < 1;
 
+  const mapPaddingTop = Platform.select({
+    ios: insets.top + 140,
+    android: insets.top + 120,
+    default: insets.top + 120,
+  });
+
+  const mapPaddingBottom = Platform.select({
+    ios: insets.bottom + 90,
+    android: insets.bottom + 90,
+    default: insets.bottom + 90,
+  });
+
   return (
     <TouchableWithoutFeedback onPress={handleDismissKeyboard}>
       <View style={styles.container}>
         {/* Mapa */}
-        {Platform.OS === 'web' ? (
-          <View style={styles.map}>
-            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 }}>
-              <Ionicons name="map-outline" size={64} color="#999" />
-              <Text style={{ marginTop: 16, fontSize: 16, color: '#666', textAlign: 'center' }}>
-                El mapa no está disponible en la versión web
-              </Text>
-              <Text style={{ marginTop: 8, fontSize: 14, color: '#999', textAlign: 'center' }}>
-                Por favor, usa la aplicación móvil para acceder a la funcionalidad de mapas
-              </Text>
-            </View>
-          </View>
-        ) : MapView ? (
-          <MapView
-            ref={mapRef}
-            style={styles.map}
-            provider={PROVIDER_DEFAULT}
-            region={region}
-            showsCompass={false}
-            onRegionChangeComplete={handleRegionChangeComplete}
-            showsUserLocation={MapaController.hasUserLocation(userLocation)}
-            showsMyLocationButton={false}
-          >
+        <MapView
+          ref={mapRef}
+          style={styles.map}
+          provider={PROVIDER_DEFAULT}
+          region={region}
+          showsCompass={false}
+          onRegionChangeComplete={handleRegionChangeComplete}
+          showsUserLocation={MapaController.hasUserLocation(userLocation)}
+          showsMyLocationButton={false}
+          mapPadding={{
+            top: mapPaddingTop,
+            bottom: mapPaddingBottom,
+            left: 0,
+            right: 0,
+          }}
+        >
           {/* Marcador de ubicación del usuario */}
           {MapaController.hasUserLocation(userLocation) && (
             <Marker
@@ -372,7 +337,6 @@ const MapaScreen = () => {
             );
           })}
 
-          {/* Ruta */}
           {routeCoordinates.length > 0 && (
             <Polyline
               coordinates={routeCoordinates}
@@ -381,16 +345,6 @@ const MapaScreen = () => {
             />
           )}
         </MapView>
-        ) : (
-          <View style={styles.map}>
-            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 }}>
-              <ActivityIndicator size="large" color={MAPA_CONFIG.MARKER_COLORS.USER} />
-              <Text style={{ marginTop: 16, fontSize: 16, color: '#666', textAlign: 'center' }}>
-                Cargando mapa...
-              </Text>
-            </View>
-          </View>
-        )}
 
       {/* Barra de búsqueda + brújula */}
       <View style={styles.topControls}>
@@ -436,10 +390,9 @@ const MapaScreen = () => {
         <TouchableOpacity
           style={[
             styles.compassButton,
-            (compassIsNeutral || Platform.OS === 'web') && styles.compassButtonDisabled,
+            compassIsNeutral && styles.compassButtonDisabled,
           ]}
           onPress={resetCompass}
-          disabled={Platform.OS === 'web'}
         >
           <Ionicons
             name="compass"
@@ -463,7 +416,7 @@ const MapaScreen = () => {
               key={button.type}
               style={[styles.poiButton, isActive && styles.poiButtonActive]}
               onPress={() => togglePOI(button.type)}
-              disabled={isLoadingPOIs || Platform.OS === 'web'}
+              disabled={isLoadingPOIs}
             >
               <Ionicons
                 name={button.icon}
@@ -531,7 +484,7 @@ const MapaScreen = () => {
       <TouchableOpacity
         style={styles.locationButton}
         onPress={isLoadingLocation ? null : goToUserLocation}
-        disabled={!MapaController.hasUserLocation(userLocation) || Platform.OS === 'web'}
+        disabled={!MapaController.hasUserLocation(userLocation)}
       >
         {isLoadingLocation ? (
           <ActivityIndicator size="small" color={MAPA_CONFIG.MARKER_COLORS.USER} />
@@ -557,7 +510,7 @@ const MapaScreen = () => {
       )}
 
       {/* Atribución OSM */}
-      <View style={styles.attribution}>
+      <View style={[styles.attribution, getAttributionStyle(insets.bottom)]}>
         <Text style={styles.attributionText}>© OpenStreetMap contributors</Text>
         <Text style={styles.attributionDisclaimerText}>
         Los lugares mostrados no implican asociación directa con Pawtitas.

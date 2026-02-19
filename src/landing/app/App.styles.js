@@ -155,8 +155,6 @@ logo: {
     marginVertical: 20,
   },
 
-  /* ================= BUTTONS ================= */
-
   buttonRow: {
     flexDirection: "row",
     gap: 12,
