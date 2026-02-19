@@ -186,12 +186,12 @@ const MisConexiones = () => {
 
       <ConfirmacionDialogo
         visible={state.showRechazarModal}
-        title="Rechazar solicitud"
-        message="¿Estás seguro de que quieres rechazar esta solicitud? Esta acción no se puede deshacer."
+        title="Cancelar solicitud"
+        message="¿Estás seguro de que quieres cancelar esta solicitud? Esta acción no se puede deshacer."
         onConfirm={handleConfirmarRechazo}
         onCancel={handleCancelarRechazo}
-        confirmText="Rechazar"
-        cancelText="Cancelar"
+        confirmText="Cancelar"
+        cancelText="Volver"
         type="danger"
       />
 

@@ -57,10 +57,15 @@ async function findExistingPendienteOrConfirmado(duenioId, prestadorId, mascotaI
   });
 }
 
+async function updateEstado(id, estado) {
+  return prisma.reserva.update({ where: { id }, data: { estado } });
+}
+
 module.exports = {
   create,
   findById,
   findManyByDuenioId,
   findManyByPrestadorId,
   findExistingPendienteOrConfirmado,
+  updateEstado,
 };

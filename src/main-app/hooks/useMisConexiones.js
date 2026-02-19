@@ -10,6 +10,7 @@ import {
   getReservasByPrestador,
   createPaymentPreference,
   confirmarFinalizacionServicio,
+  cancelarReserva,
 } from '../services';
 
 const getResenasArray = (reserva) => {
@@ -439,30 +440,38 @@ export const useMisConexiones = () => {
     setState(prev => ({ 
       ...prev, 
       showDetalles: false,
-      selectedProvider: provider, 
-      showRechazarModal: true 
+      pendingRechazarProvider: provider,
     }));
   }, []);
 
-  const handleConfirmarRechazo = useCallback(() => {
+  const handleConfirmarRechazo = useCallback(async () => {
     if (!state.selectedProvider) return;
-    
-    setProviders(prev => 
-      MisConexionesController.updateProviderState(
-        prev, 
-        state.selectedProvider.id, 
-        ESTADOS_CONEXION.SOLICITUD_RECHAZADA
-      )
-    );
-    
-    const message = MisConexionesController.getActionMessages('rechazar');
-    setState(prev => ({
-      ...prev,
-      showRechazarModal: false,
-      selectedProvider: null,
-      showMensajeFlotante: true,
-      mensajeFlotante: message
-    }));
+    try {
+      await cancelarReserva(state.selectedProvider.id);
+      setProviders(prev =>
+        MisConexionesController.updateProviderState(
+          prev,
+          state.selectedProvider.id,
+          ESTADOS_CONEXION.SOLICITUD_RECHAZADA
+        )
+      );
+      const message = MisConexionesController.getActionMessages('rechazar');
+      setState(prev => ({
+        ...prev,
+        showRechazarModal: false,
+        selectedProvider: null,
+        showMensajeFlotante: true,
+        mensajeFlotante: message,
+      }));
+    } catch (err) {
+      setState(prev => ({
+        ...prev,
+        showRechazarModal: false,
+        selectedProvider: null,
+        showMensajeFlotante: true,
+        mensajeFlotante: { type: 'error', text: err?.message || 'Error al cancelar la solicitud' },
+      }));
+    }
   }, [state.selectedProvider]);
 
   const handleCancelarRechazo = useCallback(() => {
@@ -498,6 +507,14 @@ export const useMisConexiones = () => {
           ...prev,
           showCalendarioModal: true,
           pendingCalendarioProvider: null,
+        };
+      }
+      if (prev.pendingRechazarProvider) {
+        return {
+          ...prev,
+          selectedProvider: prev.pendingRechazarProvider,
+          pendingRechazarProvider: null,
+          showRechazarModal: true,
         };
       }
       return prev;

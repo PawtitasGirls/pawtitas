@@ -20,6 +20,7 @@ export class MisConexionesController {
       showDetalles: false,
       showResenaModal: false,
       showRechazarModal: false,
+      pendingRechazarProvider: null,
       showMensajeFlotante: false,
       mensajeFlotante: { type: '', text: '' }
     };
