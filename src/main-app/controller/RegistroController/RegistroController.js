@@ -109,7 +109,8 @@ export const PERFIL_OPTIONS = [
 export const GENERO_OPTIONS = [
   { label: "Seleccione un género", value: "" },
   { label: "Femenino", value: "femenino" },
-  { label: "Masculino", value: "masculino" }
+  { label: "Masculino", value: "masculino" },
+  { label: "Prefiero no especificar", value: "Prefiero no especificar" },
 ];
 
 export class RegistroController {
