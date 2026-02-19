@@ -15,6 +15,7 @@ import PanelAdminScreen from "../screens/panelAdmin";
 import ValidarUsuarioScreen from "../screens/panelAdmin/ValidarUsuario/ValidarUsuario";
 import MisConexionesScreen from "../screens/misConexiones/MisConexiones";
 import ResenasScreen from "../screens/resenas/Resenas";
+import ResenasRecibidasScreen from "../screens/resenasRecibidas/ResenasRecibidas";
 import ChatScreen from "../screens/chat/Chat";
 import Conversacion from "../screens/chat/Conversacion";
 import MapaScreen from "../screens/mapa/Mapa";
@@ -42,6 +43,7 @@ export const guardedScreens = [
   { name: "ValidarUsuario", component: ValidarUsuarioScreen },
   { name: "MisConexiones", component: MisConexionesScreen },
   { name: "Resenas", component: ResenasScreen },
+  { name: "ResenasRecibidas", component: ResenasRecibidasScreen },
   { name: "Chat", component: ChatScreen },
   { name: "Conversacion", component: Conversacion },
   { name: "Mapa", component: MapaScreen },

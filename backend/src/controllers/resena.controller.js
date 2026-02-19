@@ -163,8 +163,88 @@ async function getMisResenasController(req, res) {
   }
 }
 
+async function getResenasRecibidasController(req, res) {
+  try {
+    const { targetRole, targetId } = req.query;
+    const roleUpper = String(targetRole || '').toUpperCase();
+
+    if (!targetId || !roleUpper) {
+      return res.status(400).json({
+        success: false,
+        message: 'Faltan parámetros requeridos: targetRole y targetId',
+      });
+    }
+
+    if (roleUpper !== 'DUENIO' && roleUpper !== 'PRESTADOR') {
+      return res.status(400).json({
+        success: false,
+        message: 'Rol inválido para consultar reseñas recibidas',
+      });
+    }
+
+    let entityId;
+    try {
+      entityId = BigInt(targetId);
+    } catch (e) {
+      return res.status(400).json({
+        success: false,
+        message: 'targetId inválido',
+      });
+    }
+
+    const emisorEsperado = roleUpper === 'PRESTADOR' ? 'DUENIO' : 'PRESTADOR';
+    const where = {
+      emisorRol: emisorEsperado,
+      reserva: roleUpper === 'PRESTADOR' ? { prestadorId: entityId } : { duenioId: entityId },
+    };
+
+    const resenas = await prisma.resena.findMany({
+      where,
+      include: {
+        reserva: {
+          include: {
+            duenio: { include: { usuario: true } },
+            prestador: { include: { usuario: true } },
+          },
+        },
+      },
+      orderBy: { fecha: 'desc' },
+    });
+
+    const items = resenas.map((resena) => {
+      const autor = resena.emisorRol === 'DUENIO'
+        ? resena.reserva?.duenio?.usuario
+        : resena.reserva?.prestador?.usuario;
+
+      return {
+        id: resena.id.toString(),
+        reservaId: resena.reservaId?.toString?.() ?? null,
+        rating: Number(resena.calificacion || 0),
+        texto: resena.comentario || '',
+        fecha: resena.fecha,
+        autor: {
+          nombre: formatNombre(autor),
+          avatar: null,
+        },
+      };
+    });
+
+    return res.json({
+      success: true,
+      resenas: items,
+    });
+  } catch (error) {
+    console.error('Error al obtener reseñas recibidas:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Error interno',
+    });
+  }
+}
+
 
 module.exports = {
   crearResenaController,
   getMisResenasController,
+  getResenasRecibidasController,
 };

@@ -7,13 +7,14 @@ import { useLocation } from '../../contexts';
 import { styles } from './ConexionCard.styles';
 
 // Componente reutilizable para mostrar una tarjeta de prestador de servicio (cuidador, paseador o veterinario) o dueño
-const ConexionCard = ({ provider, onPress, providerType, misConexiones = false }) => {
+const ConexionCard = ({ provider, onPress, providerType, misConexiones = false, onRatingPress }) => {
   const { formatDistance } = useLocation();
   
   const { 
     id,
     nombre, 
     rating,
+    reviewsCount,
     descripcion,
     precio,
     ubicacion,
@@ -38,9 +39,10 @@ const ConexionCard = ({ provider, onPress, providerType, misConexiones = false }
   const providerTypeText = getProviderTypeText(tipo);
   
   // Renderizar estrellas de calificación
-  const renderStars = (rating) => {
+  const renderStars = (ratingValue) => {
     const stars = [];
     const maxStars = 5;
+    const rating = Number(ratingValue || 0);
     
     for (let i = 1; i <= maxStars; i++) {
       stars.push(
@@ -55,6 +57,23 @@ const ConexionCard = ({ provider, onPress, providerType, misConexiones = false }
     
     return stars;
   };
+
+  const handleRatingPress = () => {
+    if (typeof onRatingPress === 'function') {
+      onRatingPress(provider);
+    }
+  };
+
+  const ratingNode = (
+    <View style={styles.ratingContainer}>
+      {renderStars(rating)}
+      {Number.isFinite(Number(reviewsCount)) && (
+        <Text style={styles.ratingSummaryText}>
+          {`${Number(rating || 0).toFixed(1)} (${Number(reviewsCount)})`}
+        </Text>
+      )}
+    </View>
+  );
 
   return (
     <TouchableOpacity 
@@ -80,9 +99,13 @@ const ConexionCard = ({ provider, onPress, providerType, misConexiones = false }
                   {(mascota.tipo || mascota.raza) ? ` (${[mascota.tipo, mascota.raza].filter(Boolean).join(', ')})` : ''}
                 </Text>
               ) : null}
-              <View style={styles.ratingContainer}>
-                {renderStars(rating)}
-              </View>
+              {onRatingPress ? (
+                <TouchableOpacity onPress={handleRatingPress} activeOpacity={0.7}>
+                  {ratingNode}
+                </TouchableOpacity>
+              ) : (
+                ratingNode
+              )}
             </View>
           </View>
           

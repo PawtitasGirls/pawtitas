@@ -29,14 +29,19 @@ export class PrestadorController {
       domicilio, 
       servicio,
       celular,
-      perfil 
+      perfil,
+      avgRating,
+      reviewsCount,
+      usuarioId,
     } = prestador;
 
     return {
       id: id?.toString() || '',
+      usuarioId: usuarioId?.toString?.() || usuarioId || '',
       servicioId: servicio?.id?.toString?.() || servicio?.id || '',
       nombre: nombreCompleto || 'Sin nombre',
-      rating: 0, // TODO: Implementar sistema de ratings
+      rating: Number(avgRating || 0),
+      reviewsCount: Number(reviewsCount || 0),
       descripcion: servicio?.descripcion || 'Sin descripción',
       precio: this.formatPrecio(servicio?.precio),
       ubicacion: domicilio?.ubicacion || 'No especificado',
@@ -48,6 +53,8 @@ export class PrestadorController {
       celular: celular || '',
       tipoMascota: servicio?.tipoMascota || '',
       disponible: servicio?.disponible ?? true,
+      reviewedRole: 'PRESTADOR',
+      reviewedEntityId: id?.toString() || '',
     };
   }
 

@@ -16,3 +16,13 @@ export async function getMisResenas({ role, userId }) {
     method: 'GET',
   });
 }
+
+export async function getResenasRecibidas({ targetRole, targetId }) {
+  const params = new URLSearchParams();
+  params.append('targetRole', targetRole);
+  params.append('targetId', String(targetId));
+
+  return apiUsuario(`/api/resenas/recibidas?${params.toString()}`, {
+    method: 'GET',
+  });
+}

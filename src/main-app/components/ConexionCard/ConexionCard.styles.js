@@ -61,6 +61,13 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: 4,
   },
+  ratingSummaryText: {
+    ...typography.styles.caption,
+    color: colors.text.secondary,
+    marginLeft: 6,
+    fontSize: 12,
+    fontWeight: '600',
+  },
   providerTypeContainer: {
     backgroundColor: colors.surfaceVariant,
     paddingHorizontal: 12,

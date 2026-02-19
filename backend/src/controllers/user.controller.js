@@ -397,10 +397,42 @@ async function listPrestadoresController(req, res) {
     };
 
     const prestadores = await prestadorRepo.findActivosConFiltros(filtros);
+    const prestadorIds = prestadores
+      .map((p) => p?.id)
+      .filter((id) => id != null);
+
+    const reservasConResenas = prestadorIds.length > 0
+      ? await prisma.reserva.findMany({
+          where: {
+            prestadorId: { in: prestadorIds },
+          },
+          select: {
+            prestadorId: true,
+            resena: {
+              where: { emisorRol: 'DUENIO' },
+              select: { calificacion: true },
+            },
+          },
+        })
+      : [];
+
+    const ratingByPrestadorId = reservasConResenas.reduce((acc, reserva) => {
+      const key = reserva.prestadorId?.toString?.() ?? String(reserva.prestadorId);
+      if (!acc[key]) {
+        acc[key] = { total: 0, count: 0 };
+      }
+      for (const resena of reserva.resena || []) {
+        acc[key].total += Number(resena.calificacion || 0);
+        acc[key].count += 1;
+      }
+      return acc;
+    }, {});
 
     const result = prestadores.map((p) => {
       const { usuario, perfil, fechaIngreso, prestadorservicio = [] } = p;
       const { domicilio } = usuario ?? {};
+      const ratingData = ratingByPrestadorId[String(p.id)] || { total: 0, count: 0 };
+      const avgRating = ratingData.count > 0 ? ratingData.total / ratingData.count : 0;
 
       const servicioMain = prestadorservicio[0]?.servicio;
 
@@ -439,6 +471,8 @@ async function listPrestadoresController(req, res) {
         },
 
         fechaIngreso,
+        avgRating,
+        reviewsCount: ratingData.count,
       };
     });
 
