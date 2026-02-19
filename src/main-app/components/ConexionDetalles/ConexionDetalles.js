@@ -28,7 +28,7 @@ const ConexionDetalles = ({
   onPago,
   onFinalizarServicio,
   onAgregarResena,
-  onRechazar,
+  onCancelar,
   loadingPrimary = false,
   isAdmin = false,
 }) => {
@@ -60,7 +60,7 @@ const ConexionDetalles = ({
     onPago,
     onFinalizarServicio,
     onAgregarResena,
-    onRechazar
+    onCancelar
   });
 
   const menuItems = getMenuItems(actionHandlers);

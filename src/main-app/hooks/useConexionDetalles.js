@@ -40,7 +40,7 @@ export const useConexionDetalles = (provider, misConexiones, visible = true, onC
     handlePago: () => handlers.onPago?.(provider),
     handleFinalizarServicio: () => handlers.onFinalizarServicio?.(provider),
     handleAgregarResena: () => handlers.onAgregarResena?.(provider),
-    handleRechazar: () => handlers.onRechazar?.(provider),
+    handleCancelar: () => handlers.onCancelar?.(provider),
   });
 
   const getMenuItems = (actionHandlers) =>

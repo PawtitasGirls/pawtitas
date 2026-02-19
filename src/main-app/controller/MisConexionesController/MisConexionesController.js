@@ -6,7 +6,7 @@ export const CONEXIONES_CONFIG = {
     { key: 'pendiente', label: 'Pendiente' },
     { key: 'confirmado', label: 'Confirmado' },
     { key: 'finalizado', label: 'Finalizado' },
-    { key: 'rechazado', label: 'Rechazado' },
+    { key: 'cancelado', label: 'Cancelado' },
   ]
 };
 
@@ -19,8 +19,8 @@ export class MisConexionesController {
       selectedProvider: null,
       showDetalles: false,
       showResenaModal: false,
-      showRechazarModal: false,
-      pendingRechazarProvider: null,
+      showCancelarModal: false,
+      pendingCancelarProvider: null,
       showMensajeFlotante: false,
       mensajeFlotante: { type: '', text: '' }
     };
@@ -64,8 +64,8 @@ export class MisConexionesController {
         return 'Confirmado';
       case 'finalizado':
         return 'Finalizado';
-      case 'rechazado':
-        return 'Rechazado';
+      case 'cancelado':
+        return 'Cancelado';
     }
   }
 
@@ -80,7 +80,7 @@ export class MisConexionesController {
 
   static getActionMessages(action) {
     const messages = {
-      rechazar: {
+      cancelar: {
         type: 'success',
         text: 'Solicitud cancelada correctamente'
       },

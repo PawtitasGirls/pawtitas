@@ -436,48 +436,45 @@ export const useMisConexiones = () => {
     }
   }, [isPrestadorView, prestadorId, duenioId]);
 
-  const handleRechazar = useCallback((provider) => {
+  const handleCancelar = useCallback((provider) => {
     setState(prev => ({ 
       ...prev, 
       showDetalles: false,
-      pendingRechazarProvider: provider,
+      pendingCancelarProvider: provider,
     }));
   }, []);
 
-  const handleConfirmarRechazo = useCallback(async () => {
+  const handleConfirmarCancelar = useCallback(async () => {
     if (!state.selectedProvider) return;
     try {
       await cancelarReserva(state.selectedProvider.id);
-      setProviders(prev =>
-        MisConexionesController.updateProviderState(
-          prev,
-          state.selectedProvider.id,
-          ESTADOS_CONEXION.SOLICITUD_RECHAZADA
-        )
-      );
-      const message = MisConexionesController.getActionMessages('rechazar');
+      const message = MisConexionesController.getActionMessages('cancelar');
       setState(prev => ({
         ...prev,
-        showRechazarModal: false,
+        showCancelarModal: false,
         selectedProvider: null,
         showMensajeFlotante: true,
         mensajeFlotante: message,
       }));
+      // Refrescar desde BD para obtener el estado actualizado
+      setTimeout(() => {
+        refreshConexiones();
+      }, 500);
     } catch (err) {
       setState(prev => ({
         ...prev,
-        showRechazarModal: false,
+        showCancelarModal: false,
         selectedProvider: null,
         showMensajeFlotante: true,
         mensajeFlotante: { type: 'error', text: err?.message || 'Error al cancelar la solicitud' },
       }));
     }
-  }, [state.selectedProvider]);
+  }, [state.selectedProvider, refreshConexiones]);
 
   const handleCancelarRechazo = useCallback(() => {
     setState(prev => ({ 
       ...prev, 
-      showRechazarModal: false, 
+      showCancelarModal: false, 
       selectedProvider: null 
     }));
   }, []);
@@ -509,12 +506,12 @@ export const useMisConexiones = () => {
           pendingCalendarioProvider: null,
         };
       }
-      if (prev.pendingRechazarProvider) {
+      if (prev.pendingCancelarProvider) {
         return {
           ...prev,
-          selectedProvider: prev.pendingRechazarProvider,
-          pendingRechazarProvider: null,
-          showRechazarModal: true,
+          selectedProvider: prev.pendingCancelarProvider,
+          pendingCancelarProvider: null,
+          showCancelarModal: true,
         };
       }
       return prev;
@@ -614,8 +611,8 @@ export const useMisConexiones = () => {
     handlePaymentFailure,
     handleClosePaymentWebView,
     handleFinalizarServicio,
-    handleRechazar,
-    handleConfirmarRechazo,
+    handleCancelar,
+    handleConfirmarCancelar,
     handleCancelarRechazo,
     handleAgregarResena,
     handleDetallesModalHide,

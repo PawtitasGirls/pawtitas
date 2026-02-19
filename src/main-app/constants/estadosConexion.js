@@ -3,7 +3,7 @@ export const ESTADOS_CONEXION = {
   PAGO_CONFIRMADO: 'confirmado',
   PAGO_RETENIDO: 'confirmado',
   PENDIENTE_DE_PAGO: 'pendiente',
-  SOLICITUD_RECHAZADA: 'rechazado',
+  SOLICITUD_CANCELADO: 'cancelado',
   SERVICIO_FINALIZADO: 'finalizado',
 };
 
@@ -12,7 +12,7 @@ export const RESERVA_ESTADO_A_CONEXION = {
   PAGADO: ESTADOS_CONEXION.PAGO_CONFIRMADO,
   EN_PROGRESO: ESTADOS_CONEXION.PAGO_CONFIRMADO,
   FINALIZADO: ESTADOS_CONEXION.SERVICIO_FINALIZADO,
-  CANCELADO: ESTADOS_CONEXION.SOLICITUD_RECHAZADA,
+  CANCELADO: ESTADOS_CONEXION.SOLICITUD_CANCELADO,
 };
 
 export function mapReservaEstadoToConexion(reservaEstado, pagoEstado) {
@@ -37,11 +37,11 @@ export const ESTADOS_CONEXION_CONFIG = {
     colorType: 'warning',
     description: 'Esperando confirmación de pago',
   },
-  [ESTADOS_CONEXION.SOLICITUD_RECHAZADA]: {
-    label: 'Cancelada',
+  [ESTADOS_CONEXION.SOLICITUD_CANCELADO]: {
+    label: 'Cancelado',
     icon: 'close-circle',
     colorType: 'error',
-    description: 'Solicitud cancelada',
+    description: 'Solicitud cancelado',
   },
   [ESTADOS_CONEXION.SERVICIO_FINALIZADO]: {
     label: 'Finalizado',
