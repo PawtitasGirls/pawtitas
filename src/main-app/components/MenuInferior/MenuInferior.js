@@ -2,7 +2,8 @@ import React from 'react';
 import { View, TouchableOpacity, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute } from '@react-navigation/native';
-import { styles } from './MenuInferior.styles';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { styles, getContainerStyle } from './MenuInferior.styles';
 import { colors } from '../../../shared/styles';
 import { useAuth, useStreamChat } from '../../contexts';
 import { isRouteAllowed, ROLES } from '../../constants/roles';
@@ -10,6 +11,7 @@ import { isRouteAllowed, ROLES } from '../../constants/roles';
 const MenuInferior = () => {
   const navigation = useNavigation();
   const route = useRoute();
+  const insets = useSafeAreaInsets();
   const { role, user } = useAuth();
   const { totalUnreadCount = 0 } = useStreamChat();
   const estadoPrestador = String(user?.estadoPrestador || '').toUpperCase();
@@ -38,7 +40,7 @@ const MenuInferior = () => {
   });
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, getContainerStyle(insets.bottom)]}>
       <View style={styles.navBar}>
         {visibleItems.map((item) => {
           const isActive = route.name === item.route;
