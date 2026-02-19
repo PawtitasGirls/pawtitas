@@ -12,7 +12,12 @@ export const clearAuthToken = () => {
 };
 
 export async function apiUsuario(path, options = {}) {
-  const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) };
+  const isFormData = typeof FormData !== 'undefined' && options.body instanceof FormData;
+  const headers = { ...(options.headers || {}) };
+
+  if (!isFormData && !headers['Content-Type']) {
+    headers['Content-Type'] = 'application/json';
+  }
 
   if (authToken) {
     headers.Authorization = `Bearer ${authToken}`;
@@ -36,6 +41,35 @@ export async function apiUsuario(path, options = {}) {
 }
 
 export async function updateUserProfile(userId, payload) {
+  const avatarFile = payload?.avatarFile || null;
+  if (avatarFile?.uri) {
+    const formData = new FormData();
+    const payloadWithoutAvatar = { ...payload };
+    delete payloadWithoutAvatar.avatarFile;
+
+    Object.entries(payloadWithoutAvatar).forEach(([key, value]) => {
+      if (value === undefined || value === null) return;
+      if (typeof value === 'object') {
+        formData.append(key, JSON.stringify(value));
+        return;
+      }
+      formData.append(key, String(value));
+    });
+
+    const fileName = avatarFile.fileName || avatarFile.name || `avatar-${Date.now()}.jpg`;
+    const mimeType = avatarFile.mimeType || avatarFile.type || 'image/jpeg';
+    formData.append('avatar', {
+      uri: avatarFile.uri,
+      name: fileName,
+      type: mimeType,
+    });
+
+    return apiUsuario(`/api/perfil/${userId}`, {
+      method: 'PUT',
+      body: formData,
+    });
+  }
+
   return apiUsuario(`/api/perfil/${userId}`, {
     method: 'PUT',
     body: JSON.stringify(payload),

@@ -60,7 +60,7 @@ const PerfilScreen = () => {
       }
     };
     loadProfileStats();
-  }, [user?.id, role, updateUser]);
+  }, [user?.id, role]);
 
   const userProfile = useMemo(() => {
     if (!user) {

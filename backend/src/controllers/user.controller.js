@@ -1,4 +1,6 @@
 const { Prisma } = require('@prisma/client');
+const fs = require('fs/promises');
+const path = require('path');
 const prisma = require('../config/prisma');
 const usuarioRepo = require('../repositories/usuario.repo');
 const prestadorRepo = require('../repositories/prestador.repo');
@@ -12,6 +14,27 @@ const {
   buildTipoMascotaFromPetTypes,
 } = require('../utils/mappers');
 const { getCoordinatesForDomicilio } = require('../services/geocoding.service');
+const { buildPublicUrl } = require('../utils/publicUrl');
+
+function parseMaybeJson(value, fallback = null) {
+  if (value == null) return fallback;
+  if (typeof value === 'object') return value;
+  if (typeof value !== 'string') return fallback;
+  try {
+    return JSON.parse(value);
+  } catch (_) {
+    return fallback;
+  }
+}
+
+function parseMaybeBoolean(value, fallback = false) {
+  if (typeof value === 'boolean') return value;
+  if (typeof value === 'string') {
+    if (value.toLowerCase() === 'true') return true;
+    if (value.toLowerCase() === 'false') return false;
+  }
+  return fallback;
+}
 
 // Obtener perfil de usuario
 async function getPerfilController(req, res) {
@@ -59,6 +82,7 @@ async function getPerfilController(req, res) {
       id: usuario.id?.toString?.() || usuario.id,
       nombre: usuario.nombre,
       apellido: usuario.apellido,
+      avatar: buildPublicUrl(req, usuario.avatar),
       email: usuario.email,
       celular: usuario.celular,
       activo: usuario.activo,
@@ -168,6 +192,9 @@ async function updatePerfilController(req, res) {
     } = req.body || {};
 
     const normalizedRole = String(role || '').toLowerCase();
+    const availabilityValue = parseMaybeJson(availability, {});
+    const petTypesValue = parseMaybeJson(petTypes, {});
+    const serviceActiveValue = parseMaybeBoolean(serviceActive, false);
     if (!normalizedRole) {
       return res.status(400).json({ success: false, message: 'Falta role' });
     }
@@ -248,6 +275,29 @@ async function updatePerfilController(req, res) {
         }
       : null;
 
+    let avatarPath = null;
+    if (req.file) {
+      const file = req.file;
+      const mime = (file.mimetype || '').toLowerCase();
+      if (!mime.startsWith('image/')) {
+        return res.status(400).json({ success: false, message: 'El avatar debe ser una imagen válida' });
+      }
+
+      const extByMime = {
+        'image/jpeg': '.jpg',
+        'image/jpg': '.jpg',
+        'image/png': '.png',
+        'image/webp': '.webp',
+      };
+      const extension = extByMime[mime] || path.extname(file.originalname || '').toLowerCase() || '.jpg';
+      const uploadsDir = path.join(__dirname, '..', 'uploads', 'avatars');
+      await fs.mkdir(uploadsDir, { recursive: true });
+      const fileName = `avatar-${String(userId)}-${Date.now()}${extension}`;
+      const fullPath = path.join(uploadsDir, fileName);
+      await fs.writeFile(fullPath, file.buffer);
+      avatarPath = `/uploads/avatars/${fileName}`;
+    }
+
     // Actualizar datos
     await prisma.$transaction(async (tx) => {
       const dataUsuario = {};
@@ -255,6 +305,7 @@ async function updatePerfilController(req, res) {
       if (apellido) dataUsuario.apellido = apellido;
       if (email) dataUsuario.email = email;
       if (telefono) dataUsuario.celular = telefono;
+      if (avatarPath) dataUsuario.avatar = avatarPath;
 
       if (Object.keys(dataUsuario).length) {
         await tx.usuario.update({ where: { id: userId }, data: dataUsuario });
@@ -286,8 +337,8 @@ async function updatePerfilController(req, res) {
       }
 
       if (normalizedRole === 'prestador') {
-        const horariosValue = buildHorariosFromAvailability(availability);
-        const tipoMascotaValue = buildTipoMascotaFromPetTypes(petTypes, petTypesCustom);
+        const horariosValue = buildHorariosFromAvailability(availabilityValue);
+        const tipoMascotaValue = buildTipoMascotaFromPetTypes(petTypesValue, petTypesCustom);
 
         const prestador = await tx.prestador.upsert({
           where: { usuarioId: userId },
@@ -307,7 +358,7 @@ async function updatePerfilController(req, res) {
           precio: new Prisma.Decimal(hasPrice ? priceNumber : 0),
           horarios: horariosValue || null,
           duracion: duracion || null,
-          disponible: serviceActive === true,
+          disponible: serviceActiveValue === true,
         };
 
         if (existingLink?.servicioId) {
@@ -370,6 +421,7 @@ async function updatePerfilController(req, res) {
       id: updatedUser.id?.toString?.() || updatedUser.id,
       nombre: updatedUser.nombre,
       apellido: updatedUser.apellido,
+      avatar: buildPublicUrl(req, updatedUser.avatar),
       email: updatedUser.email,
       celular: updatedUser.celular,
       activo: updatedUser.activo,
@@ -474,6 +526,7 @@ async function listPrestadoresController(req, res) {
         nombreCompleto:
           [usuario?.nombre, usuario?.apellido].filter(Boolean).join(' ') || 'Sin nombre',
 
+        avatar: buildPublicUrl(req, usuario?.avatar || null),
         email: usuario?.email ?? '',
         celular: usuario?.celular ?? '',
         perfil: perfil ?? '',

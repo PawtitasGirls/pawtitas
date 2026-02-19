@@ -13,7 +13,10 @@ export default function PetOwnerProfileForm({ formData, handleInputChange, error
         iconName="person"
         size={64}
         imageUri={formData.avatarUri}
-        onImageSelected={(image) => handleInputChange('avatarUri', image.uri)}
+        onImageSelected={(image) => {
+          handleInputChange('avatarUri', image.uri);
+          handleInputChange('avatarFile', image);
+        }}
       />
       
       <PerfilInputField

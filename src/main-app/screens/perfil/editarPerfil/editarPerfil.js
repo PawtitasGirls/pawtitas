@@ -14,6 +14,7 @@ import PerfilFactory from "./roles/PerfilFactory";
 import ROLES from "./roles/types";
 import { useAuth } from "../../../contexts";
 import { getUserProfile, updateUserProfile } from "../../../services";
+import { ensureChatUser } from "../../../services/api/apiChat";
 
 const buildLocation = (user) => {
   if (!user) return "";
@@ -37,6 +38,7 @@ const buildFormDataFromUser = (role, userData) => {
   const next = { ...base };
 
   if ("avatarUri" in next) next.avatarUri = userData.avatar || null;
+  if ("avatarFile" in next) next.avatarFile = null;
   if ("nombreApellido" in next) next.nombreApellido = buildFullName(userData);
   if ("descripcion" in next) next.descripcion = userData.descripcion || next.descripcion;
   if ("email" in next) next.email = userData.email || next.email;
@@ -122,7 +124,7 @@ export default function EditarPerfil({ navigation, route }) {
 
   useEffect(() => {
     loadProfileData();
-  }, [userRole, user]);
+  }, [userRole, user?.id]);
 
   const loadProfileData = async () => {
     setLoading(true);
@@ -188,6 +190,7 @@ export default function EditarPerfil({ navigation, route }) {
         petTypes: formData.petTypes,
         petTypesCustom: formData.petTypesCustom,
         serviceActive: formData.serviceActive,
+        avatarFile: formData.avatarFile,
       };
       if (userRole !== ROLES.PRESTADOR) payload.services = formData.services;
 
@@ -196,6 +199,16 @@ export default function EditarPerfil({ navigation, route }) {
       if (response?.userData) {
         updateUser(response.userData);
         setFormData(buildFormDataFromUser(userRole, response.userData));
+
+        const fullName =
+          [response.userData.nombre, response.userData.apellido].filter(Boolean).join(" ").trim() ||
+          formData.nombreApellido ||
+          "Usuario";
+        ensureChatUser({
+          userId: String(response.userData.id || user.id),
+          name: fullName,
+          image: response.userData.avatar || null,
+        }).catch(() => {});
       }
 
       setMessage({ type: "success", text: "Perfil actualizado exitosamente" });

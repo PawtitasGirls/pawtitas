@@ -157,6 +157,12 @@ const Chat = () => {
         const lastMessage = ChatController.getLastMessage(item);
         const userRole = getUserRole(otherUser);
         const dateString = ChatController.formatMessageDate(lastMessage?.created_at);
+        const hasImageAttachment = (lastMessage?.attachments || []).some(
+          (att) => att?.type === 'image' && (att?.image_url || att?.thumb_url)
+        );
+        const previewText = lastMessage
+          ? (lastMessage.text || (hasImageAttachment ? 'Imagen adjunta' : ''))
+          : 'Haz clic para iniciar la conversación';
 
         return (
             <TouchableOpacity style={styles.channelItem} onPress={() => handleChannelPress(item)}>
@@ -175,7 +181,7 @@ const Chat = () => {
                     </View>
                     <View style={styles.bottomRow}>
                         <Text style={styles.lastMessage} numberOfLines={1}>
-                            {lastMessage ? lastMessage.text : 'Haz clic para iniciar la conversación'}
+                            {previewText}
                         </Text>
                         {userRole && (
                             <View style={styles.roleChip}>

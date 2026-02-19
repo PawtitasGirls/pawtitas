@@ -6,6 +6,8 @@ import { useStreamChat } from '../../contexts';
 import { ChatController } from '../../controller';
 import { colors } from '../../../shared/styles';
 import { styles } from './Conversacion.styles';
+import * as ImagePicker from 'expo-image-picker';
+import { uploadChatImage } from '../../services/api/apiChat';
 
 const Conversacion = () => {
     const route = useRoute();
@@ -17,7 +19,9 @@ const Conversacion = () => {
     const [activeChannel, setActiveChannel] = useState(channel || null);
     const [messages, setMessages] = useState([]);
     const [inputText, setInputText] = useState('');
+    const [selectedImage, setSelectedImage] = useState(null);
     const [loading, setLoading] = useState(!channel);
+    const [sending, setSending] = useState(false);
     const [otherUser, setOtherUser] = useState(null);
     const flatListRef = useRef(null);
 
@@ -72,17 +76,49 @@ const Conversacion = () => {
     }, [channelId, chatClient]);
 
     const sendMessage = async () => {
-        if (!ChatController.canSendMessage(inputText) || !activeChannel) return;
+        if (!ChatController.canSendMessage(inputText, selectedImage) || !activeChannel || sending) return;
         
         try {
+            setSending(true);
             const text = inputText;
+            let uploadedImageUrl = null;
+
+            if (selectedImage?.uri) {
+                const uploadResponse = await uploadChatImage(selectedImage);
+                uploadedImageUrl = uploadResponse?.url || null;
+            }
+
             setInputText('');
-            const payload = ChatController.prepareMessagePayload(text);
+            setSelectedImage(null);
+            const payload = ChatController.prepareMessagePayload(text, uploadedImageUrl);
             await activeChannel.sendMessage(payload);
         } catch (error) {
             console.error("Error al enviar mensaje:", error);
             Alert.alert('Error al enviar mensaje:', error.message);
-            setInputText(inputText); 
+        } finally {
+            setSending(false);
+        }
+    };
+
+    const handlePickImage = async () => {
+        try {
+            const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+            if (status !== 'granted') {
+                Alert.alert('Permiso requerido', 'Necesitamos acceso a la galería para adjuntar imágenes.');
+                return;
+            }
+
+            const result = await ImagePicker.launchImageLibraryAsync({
+                mediaTypes: ['images'],
+                quality: 0.8,
+                allowsEditing: true,
+            });
+
+            if (!result.canceled && result.assets?.length) {
+                setSelectedImage(result.assets[0]);
+            }
+        } catch (error) {
+            Alert.alert('Error', 'No se pudo seleccionar la imagen.');
         }
     };
 
@@ -95,9 +131,22 @@ const Conversacion = () => {
                 styles.messageBubble, 
                 isMyMessage ? styles.myMessage : styles.theirMessage
             ]}>
-                <Text style={[styles.messageText, isMyMessage ? styles.myMessageText : styles.theirMessageText]}>
-                    {item.text}
-                </Text>
+                {!!item.text && (
+                    <Text style={[styles.messageText, isMyMessage ? styles.myMessageText : styles.theirMessageText]}>
+                        {item.text}
+                    </Text>
+                )}
+                {(item.attachments || [])
+                  .filter((att) => att?.type === 'image' && (att.image_url || att.thumb_url))
+                  .map((att, idx) => (
+                    <Image
+                        key={`${item.id}-img-${idx}`}
+                        source={{ uri: att.image_url || att.thumb_url }}
+                        style={styles.messageImage}
+                        resizeMode="cover"
+                    />
+                  ))
+                }
                 <Text style={[styles.timestamp, isMyMessage ? styles.myTimestamp : styles.theirTimestamp]}>
                     {timestamp}
                 </Text>
@@ -174,6 +223,13 @@ const Conversacion = () => {
                 />
 
                 <View style={styles.inputContainer}>
+                    <TouchableOpacity
+                        onPress={handlePickImage}
+                        style={styles.attachButton}
+                        activeOpacity={0.8}
+                    >
+                        <Text style={styles.attachButtonText}>📎</Text>
+                    </TouchableOpacity>
                     <TextInput
                         style={styles.input}
                         value={inputText}
@@ -186,14 +242,22 @@ const Conversacion = () => {
                         onPress={sendMessage} 
                         style={[
                             styles.sendButton, 
-                            !ChatController.canSendMessage(inputText) && styles.sendButtonDisabled
+                            !ChatController.canSendMessage(inputText, selectedImage) && styles.sendButtonDisabled
                         ]} 
-                        disabled={!ChatController.canSendMessage(inputText)}
+                        disabled={!ChatController.canSendMessage(inputText, selectedImage) || sending}
                         activeOpacity={0.8}
                     >
-                        <Text style={styles.sendButtonText}>Enviar</Text>
+                        <Text style={styles.sendButtonText}>{sending ? 'Enviando...' : 'Enviar'}</Text>
                     </TouchableOpacity>
                 </View>
+                {selectedImage?.uri && (
+                    <View style={styles.previewContainer}>
+                        <Image source={{ uri: selectedImage.uri }} style={styles.previewImage} />
+                        <TouchableOpacity onPress={() => setSelectedImage(null)} style={styles.removePreviewBtn}>
+                            <Text style={styles.removePreviewText}>Quitar</Text>
+                        </TouchableOpacity>
+                    </View>
+                )}
             </KeyboardAvoidingView>
         </SafeAreaView>
     );

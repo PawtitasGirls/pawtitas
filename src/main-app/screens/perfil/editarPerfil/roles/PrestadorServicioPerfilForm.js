@@ -46,7 +46,10 @@ export default function PrestadorServicioPerfilForm({ formData, handleInputChang
           iconName="person"
           size={64}
           imageUri={formData.avatarUri}
-          onImageSelected={(image) => handleInputChange('avatarUri', image.uri)}
+          onImageSelected={(image) => {
+            handleInputChange('avatarUri', image.uri);
+            handleInputChange('avatarFile', image);
+          }}
         />
         
         <PerfilInputField

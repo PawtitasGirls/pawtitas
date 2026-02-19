@@ -93,6 +93,12 @@ export const styles = StyleSheet.create({
         lineHeight: 22,
         fontWeight: '400',
     },
+    messageImage: {
+        width: 210,
+        height: 210,
+        borderRadius: 10,
+        marginTop: 8,
+    },
     myMessageText: {
         color: colors.text.inverse,
     },
@@ -129,6 +135,18 @@ export const styles = StyleSheet.create({
         maxHeight: 100,
         color: colors.text.primary,
     },
+    attachButton: {
+        marginRight: 8,
+        width: 38,
+        height: 38,
+        borderRadius: 19,
+        backgroundColor: colors.surfaceVariant,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    attachButtonText: {
+        fontSize: 18,
+    },
     sendButton: {
         marginLeft: 10,
         paddingHorizontal: 20,
@@ -150,6 +168,33 @@ export const styles = StyleSheet.create({
     disabledSendText: {
         color: colors.text.inverse,
         opacity: 0.5,
+    },
+    previewContainer: {
+        backgroundColor: colors.surface,
+        borderTopWidth: 1,
+        borderTopColor: colors.border.light,
+        paddingHorizontal: 12,
+        paddingTop: 8,
+        paddingBottom: 10,
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    previewImage: {
+        width: 54,
+        height: 54,
+        borderRadius: 8,
+    },
+    removePreviewBtn: {
+        marginLeft: 10,
+        paddingHorizontal: 10,
+        paddingVertical: 6,
+        borderRadius: 8,
+        backgroundColor: colors.surfaceVariant,
+    },
+    removePreviewText: {
+        color: colors.text.primary,
+        fontSize: 12,
+        fontWeight: '600',
     },
     emptyChat: {
         flex: 1,
