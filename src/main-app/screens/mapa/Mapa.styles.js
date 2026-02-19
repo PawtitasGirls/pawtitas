@@ -93,7 +93,7 @@ export const styles = StyleSheet.create({
   // Botones de POIs
   poiButtonsContainer: {
     position: 'absolute',
-    top: Platform.OS === 'ios' ? 120 : 100,
+    top: 120,
     left: 15,
     right: 15,
     flexDirection: 'row',
@@ -241,6 +241,17 @@ export const styles = StyleSheet.create({
     color: '#666',
     lineHeight: 13,
   },
+});
+
+const ANDROID_ATTRIBUTION_OFFSET = 70;
+
+export const getAttributionStyle = (bottomInset) => ({
+  ...(Platform.OS !== 'ios' && {
+    bottom: bottomInset + 90,
+    left: ANDROID_ATTRIBUTION_OFFSET,
+    right: undefined,
+    alignItems: 'flex-start',
+  }),
 });
 
 export default styles;
