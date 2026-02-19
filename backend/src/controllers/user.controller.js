@@ -82,6 +82,18 @@ async function getPerfilController(req, res) {
       // Contar las mascotas del dueño
       const mascotas = await mascotaRepo.findByDuenioId(usuario.duenio.id);
       userData.petsCount = mascotas.length;
+
+      // Promedio de reseñas recibidas por el dueño (emitidas por prestadores)
+      const duenioResenaStats = await prisma.resena.aggregate({
+        where: {
+          emisorRol: 'PRESTADOR',
+          reserva: { duenioId: usuario.duenio.id },
+        },
+        _avg: { calificacion: true },
+        _count: { id: true },
+      });
+      userData.rating = Number(duenioResenaStats?._avg?.calificacion || 0);
+      userData.reviewsCount = Number(duenioResenaStats?._count?.id || 0);
     }
 
     if (usuario.rol === 'PRESTADOR') {
@@ -98,6 +110,23 @@ async function getPerfilController(req, res) {
       if (servicio?.disponible != null) userData.serviceActive = Boolean(servicio.disponible);
       userData.estadoPrestador = prestador?.estado ?? 'PENDIENTE';
       userData.motivoRechazo = prestador?.motivoRechazo ?? null;
+
+      // Promedio de reseñas recibidas por el prestador (emitidas por dueños)
+      if (prestador?.id != null) {
+        const prestadorResenaStats = await prisma.resena.aggregate({
+          where: {
+            emisorRol: 'DUENIO',
+            reserva: { prestadorId: prestador.id },
+          },
+          _avg: { calificacion: true },
+          _count: { id: true },
+        });
+        userData.rating = Number(prestadorResenaStats?._avg?.calificacion || 0);
+        userData.reviewsCount = Number(prestadorResenaStats?._count?.id || 0);
+      } else {
+        userData.rating = 0;
+        userData.reviewsCount = 0;
+      }
     }
 
     return res.json({ success: true, userData });

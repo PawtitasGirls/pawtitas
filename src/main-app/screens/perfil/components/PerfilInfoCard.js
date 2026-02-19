@@ -46,6 +46,9 @@ export const PerfilInfoCard = ({ user, onEdit, role }) => {
             {!isAdmin && (
               <View style={styles.ratingContainer}>
                 {renderStars(user.rating)}
+                <Text style={{ color: colors.text.secondary, marginLeft: 6, fontSize: 12, fontWeight: '600' }}>
+                  {Number(user.rating || 0).toFixed(1)}
+                </Text>
               </View>
             )}
           </View>
