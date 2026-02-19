@@ -143,6 +143,21 @@ const PrestadorServiciosScreen = ({
   };
 
   const handleResenas = (provider) => {
+    if (!provider) return;
+    const isSelfPrestador =
+      role === ROLES.PRESTADOR &&
+      String(user?.prestadorId || '') === String(provider?.reviewedEntityId || provider?.id || '');
+
+    if (isSelfPrestador) {
+      Alert.alert('No disponible', 'No podés ver tus propias reseñas recibidas desde esta pantalla.');
+      return;
+    }
+
+    navigation.navigate('ResenasRecibidas', {
+      targetRole: provider?.reviewedRole || 'PRESTADOR',
+      targetId: provider?.reviewedEntityId || provider?.id,
+      targetName: provider?.nombre || 'Prestador',
+    });
     handleCloseDetalles();
   };
 
@@ -327,6 +342,7 @@ const PrestadorServiciosScreen = ({
                 provider={provider}
                 providerType={providerType}
                 onPress={() => handleProviderPress(provider)}
+                onRatingPress={provider?.reviewsCount > 0 ? handleResenas : undefined}
               />
             ))}
             <Paginador

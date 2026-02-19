@@ -22,7 +22,8 @@ export const ROLE_BLOCKED_ROUTES = {
     'Chat', 
     'Conversacion', 
     'MisConexiones', 
-    'Resenas'
+    'Resenas',
+    'ResenasRecibidas',
   ],
 };
 
