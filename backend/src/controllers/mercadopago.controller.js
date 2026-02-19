@@ -71,7 +71,7 @@ function buildPreferenceBody(reserva, userEmail) {
         currency_id: 'ARS',
       },
     ],
-    payer: { email: userEmail || reserva.duenio?.usuario?.email || 'test@test.com' },
+    payer: {},
     back_urls: {
       success: `${APP_URL}payment/success?reserva_id=${reserva.id}`,
       failure: `${APP_URL}payment/failure?reserva_id=${reserva.id}`,
