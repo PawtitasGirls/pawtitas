@@ -40,7 +40,7 @@ export class PrestadorController {
       usuarioId: usuarioId?.toString?.() || usuarioId || '',
       servicioId: servicio?.id?.toString?.() || servicio?.id || '',
       nombre: nombreCompleto || 'Sin nombre',
-      rating: Number(avgRating || 0),
+      rating: Number(avgRating ?? prestador?.rating ?? 0),
       reviewsCount: Number(reviewsCount || 0),
       descripcion: servicio?.descripcion || 'Sin descripción',
       precio: this.formatPrecio(servicio?.precio),

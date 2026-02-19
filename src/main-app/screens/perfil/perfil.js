@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect } from 'react';
 import { View, ScrollView, TouchableOpacity, Alert, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
@@ -8,7 +8,7 @@ import { PerfilHeader, MenuInferior, useNavbarHeight } from '../../components';
 import { PerfilInfoCard, MascotasSection, LogoutBtn, MenuConfig, ContactoService } from './components';
 import { useAuth } from '../../contexts';
 import { ROLES } from '../../constants/roles';
-import { clearAuthToken } from '../../services';
+import { clearAuthToken, getUserProfile } from '../../services';
 
 const formatDate = (value) => {
   if (!value) return 'Pendiente';
@@ -45,7 +45,22 @@ const roleLabelByRole = (role) => {
 const PerfilScreen = () => {
   const navigation = useNavigation();
   const navbarHeight = useNavbarHeight();
-  const { user, role, clearAuth } = useAuth();
+  const { user, role, clearAuth, updateUser } = useAuth();
+
+  useEffect(() => {
+    const loadProfileStats = async () => {
+      if (!user?.id || !role) return;
+      try {
+        const response = await getUserProfile(user.id, role);
+        if (response?.success && response?.userData) {
+          updateUser(response.userData);
+        }
+      } catch (error) {
+        // Si falla, seguimos mostrando datos locales sin bloquear la pantalla.
+      }
+    };
+    loadProfileStats();
+  }, [user?.id, role, updateUser]);
 
   const userProfile = useMemo(() => {
     if (!user) {
@@ -73,6 +88,7 @@ const PerfilScreen = () => {
       location: buildLocation(user),
       role: roleLabelByRole(role),
       rating: user.rating ?? 0,
+      reviewsCount: user.reviewsCount ?? 0,
       description: user.descripcion || 'Sin descripción',
       registrationDate: formatDate(user.creadoEn),
       petsCount: user.petsCount ?? 0,

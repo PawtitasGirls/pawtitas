@@ -39,7 +39,10 @@ const baseConfig = {
   },
   // Añadir variables de entorno que serán accesibles en la app
   extra: {
-    appType: appType
+    appType: appType,
+    eas: {
+      projectId: "8ff1fced-a870-4126-8137-6f3c13bc2f93"
+    }    
   }
 };
 

@@ -69,7 +69,7 @@ const ConexionCard = ({ provider, onPress, providerType, misConexiones = false, 
       {renderStars(rating)}
       {Number.isFinite(Number(reviewsCount)) && (
         <Text style={styles.ratingSummaryText}>
-          {`${Number(rating || 0).toFixed(1)} (${Number(reviewsCount)})`}
+          {Number(rating || 0).toFixed(1)}
         </Text>
       )}
     </View>
