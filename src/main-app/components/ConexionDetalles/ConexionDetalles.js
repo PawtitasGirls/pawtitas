@@ -35,6 +35,12 @@ const ConexionDetalles = ({
   const { formatDistance } = useLocation();
   const {
     scrollViewRef,
+    scrollOffset,
+    scrollOffsetMax,
+    handleScrollTo,
+    handleScroll,
+    handleContentSizeChange,
+    handleScrollViewLayout,
     providerInfo,
     isValidProvider,
     buttonConfig,
@@ -79,7 +85,13 @@ const ConexionDetalles = ({
   const mascotasList = (mascotas && mascotas.length > 0) ? mascotas : (mascota ? [mascota] : []);
 
   return (
-    <Modal {...modalProps} style={styles.modalContainer}>
+    <Modal
+      {...modalProps}
+      scrollTo={handleScrollTo}
+      scrollOffset={scrollOffset}
+      scrollOffsetMax={scrollOffsetMax}
+      style={styles.modalContainer}
+    >
       <View style={styles.contentContainer}>
         <View style={styles.handle} />
         
@@ -132,7 +144,7 @@ const ConexionDetalles = ({
           </View>
         </View>
 
-        <ScrollView 
+        <ScrollView
           ref={scrollViewRef}
           style={styles.scrollContainer}
           contentContainerStyle={styles.scrollContent}
@@ -141,6 +153,10 @@ const ConexionDetalles = ({
           keyboardShouldPersistTaps="handled"
           nestedScrollEnabled={true}
           persistentScrollbar={true}
+          onScroll={handleScroll}
+          scrollEventThrottle={16}
+          onContentSizeChange={handleContentSizeChange}
+          onLayout={handleScrollViewLayout}
         >
 
           {!esVistaPrestador && (
