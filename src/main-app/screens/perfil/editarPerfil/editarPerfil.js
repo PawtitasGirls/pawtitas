@@ -292,7 +292,12 @@ export default function EditarPerfil({ navigation, route }) {
           {PerfilFactory.createProfileForm(userRole, { formData, handleInputChange, errors })}
         </ScrollView>
 
-        <View style={[styles.buttonContainer, { paddingBottom: navbarHeight }]}>
+        <View
+          style={[
+            styles.buttonContainer,
+            Platform.OS === 'android' && { paddingBottom: navbarHeight },
+          ]}
+        >
           <GuardarCancelarBtn
             label="Guardar"
             onPress={handleSave}

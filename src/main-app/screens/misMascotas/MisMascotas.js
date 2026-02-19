@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, FlatList, ActivityIndicator } from 'react-native';
+import { View, FlatList, ActivityIndicator, Platform } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { styles } from './misMascotas.styles';
@@ -251,7 +251,10 @@ const MisMascotas = () => {
             data={mascotas}
             renderItem={renderMascota}
             keyExtractor={(item) => item.id}
-            contentContainerStyle={[styles.mascotasList, { paddingBottom: navbarHeight }]}
+            contentContainerStyle={[
+              styles.mascotasList,
+              Platform.OS === 'android' && { paddingBottom: navbarHeight },
+            ]}
             ItemSeparatorComponent={renderSeparator}
             showsVerticalScrollIndicator={false}
             bounces={true}

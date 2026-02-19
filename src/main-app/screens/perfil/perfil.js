@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { View, ScrollView, TouchableOpacity, Alert } from 'react-native';
+import { View, ScrollView, TouchableOpacity, Alert, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { styles } from './perfil.styles';
@@ -139,7 +139,10 @@ const PerfilScreen = () => {
       <ScrollView
         style={styles.content}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={[styles.scrollContent, { paddingBottom: navbarHeight }]}
+        contentContainerStyle={[
+          styles.scrollContent,
+          Platform.OS === 'android' && { paddingBottom: navbarHeight },
+        ]}
       >
         <PerfilInfoCard
           user={userProfile}

@@ -2,7 +2,7 @@ import { styles } from './home.styles';
 import MenuInferior, { useNavbarHeight } from '../../components/MenuInferior';
 import iconImage from '../../assets/icon.png';
 import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, Modal, ScrollView, Image, ActivityIndicator } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, Modal, ScrollView, Image, ActivityIndicator, Platform } from "react-native";
 import { Ionicons } from "@expo/vector-icons"; // librería de íconos
 import { useNavigation } from "@react-navigation/native";
 import { useLocation, useAuth } from '../../contexts';
@@ -245,7 +245,10 @@ const HomeScreen = () => {
       <ScrollView 
         style={styles.content} 
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={[styles.scrollContent, { paddingBottom: navbarHeight }]}
+        contentContainerStyle={[
+          styles.scrollContent,
+          Platform.OS === 'android' && { paddingBottom: navbarHeight },
+        ]}
       >
         <HomeHeader hidePendingControls={isPrestadorPendiente} hideForAdmin={isAdmin} />
 

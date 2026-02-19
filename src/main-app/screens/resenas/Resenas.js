@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
-import { ScrollView, View, Text, ActivityIndicator } from 'react-native';
+import { ScrollView, View, Text, ActivityIndicator, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { ScreenHeader, MenuInferior, BarraBuscador, Paginador, useNavbarHeight } from '../../components';
@@ -111,7 +111,11 @@ const Resenas = () => {
           <Text style={styles.emptyText}>Cargando tus reseñas...</Text>
         </View>
       ) : (
-        <ScrollView style={styles.content} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: navbarHeight }}>
+        <ScrollView
+          style={styles.content}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={Platform.OS === 'android' ? { paddingBottom: navbarHeight } : undefined}
+        >
           {resenasActuales.length > 0 ? (
             <>
               {resenasActuales.map((resena) => (

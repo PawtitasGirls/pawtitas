@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { ScrollView, View, Text, ActivityIndicator } from 'react-native';
+import { ScrollView, View, Text, ActivityIndicator, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { ROLES } from '../../constants/roles';
@@ -123,7 +123,10 @@ const MisConexiones = () => {
       <ScrollView 
         style={styles.content}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={[styles.usersList, { paddingBottom: navbarHeight }]}
+        contentContainerStyle={[
+          styles.usersList,
+          Platform.OS === 'android' && { paddingBottom: navbarHeight },
+        ]}
       >
         {providersActuales.map((provider) => (
           <ConexionCard
