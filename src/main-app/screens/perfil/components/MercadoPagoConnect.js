@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as WebBrowser from 'expo-web-browser';
-import { apiRequest } from '../../../services';
+import { apiUsuario } from '../../../services';
 import { colors } from '../../../../shared/styles';
 import { styles } from './MercadoPagoConnect.styles';
 
@@ -15,7 +15,7 @@ const MercadoPagoConnect = ({ prestadorId }) => {
     if (!prestadorId) return;
     try {
       setLoading(true);
-      const res = await apiRequest(`/api/mercadopago/oauth-status?prestadorId=${prestadorId}`);
+      const res = await apiUsuario(`/api/mercadopago/oauth-status?prestadorId=${prestadorId}`);
       setStatus(res);
     } catch {
       setStatus({ connected: false });
@@ -31,7 +31,7 @@ const MercadoPagoConnect = ({ prestadorId }) => {
   const handleConnect = async () => {
     try {
       setConnecting(true);
-      const res = await apiRequest(`/api/mercadopago/oauth-url?prestadorId=${prestadorId}`);
+      const res = await apiUsuario(`/api/mercadopago/oauth-url?prestadorId=${prestadorId}`);
       if (!res?.url) throw new Error('No se pudo obtener la URL de autorización');
 
       const result = await WebBrowser.openAuthSessionAsync(res.url, 'pawtitas://oauth/success');
@@ -57,7 +57,7 @@ const MercadoPagoConnect = ({ prestadorId }) => {
           style: 'destructive',
           onPress: async () => {
             try {
-              await apiRequest('/api/mercadopago/oauth-disconnect', {
+              await apiUsuario('/api/mercadopago/oauth-disconnect', {
                 method: 'POST',
                 body: JSON.stringify({ prestadorId }),
               });
