@@ -1,8 +1,30 @@
-import { useRef, useMemo } from 'react';
+import { useRef, useMemo, useState, useCallback } from 'react';
 import { ConexionDetallesController } from '../controller';
 
 export const useConexionDetalles = (provider, misConexiones, visible = true, onClose, esVistaPrestador = false, onModalHide, isAdmin = false) => {
   const scrollViewRef = useRef(null);
+  const contentHeightRef = useRef(0);
+  const layoutHeightRef = useRef(0);
+  const [scrollOffset, setScrollOffset] = useState(0);
+  const [scrollOffsetMax, setScrollOffsetMax] = useState(0);
+
+  const handleScrollTo = useCallback((p) => {
+    scrollViewRef.current?.scrollTo(p);
+  }, []);
+
+  const handleScroll = useCallback((event) => {
+    setScrollOffset(event.nativeEvent.contentOffset.y);
+  }, []);
+
+  const handleContentSizeChange = useCallback((_, contentHeight) => {
+    contentHeightRef.current = contentHeight;
+    setScrollOffsetMax(Math.max(0, contentHeight - layoutHeightRef.current));
+  }, []);
+
+  const handleScrollViewLayout = useCallback((event) => {
+    layoutHeightRef.current = event.nativeEvent.layout.height;
+    setScrollOffsetMax(Math.max(0, contentHeightRef.current - layoutHeightRef.current));
+  }, []);
 
   const isValidProvider = ConexionDetallesController.validateProvider(provider);
 
@@ -70,7 +92,7 @@ export const useConexionDetalles = (provider, misConexiones, visible = true, onC
   );
 
   const modalProps = useMemo(() =>
-    ConexionDetallesController.getModalProps(visible, onClose, scrollViewRef, onModalHide),
+    ConexionDetallesController.getModalProps(visible, onClose, onModalHide),
     [visible, onClose, onModalHide]
   );
 
@@ -91,6 +113,12 @@ export const useConexionDetalles = (provider, misConexiones, visible = true, onC
 
   return {
     scrollViewRef,
+    scrollOffset,
+    scrollOffsetMax,
+    handleScrollTo,
+    handleScroll,
+    handleContentSizeChange,
+    handleScrollViewLayout,
     providerInfo,
     isValidProvider,
     buttonConfig,

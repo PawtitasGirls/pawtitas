@@ -97,7 +97,7 @@ export class ConexionDetallesController {
     }));
   }
 
-  static getModalProps(visible, onClose, scrollViewRef, onModalHide) {
+  static getModalProps(visible, onClose, onModalHide) {
     return {
       isVisible: visible,
       onBackdropPress: onClose,
@@ -105,9 +105,7 @@ export class ConexionDetallesController {
       onSwipeComplete: onClose,
       onModalHide,
       swipeDirection: ['down'],
-      style: 'modalContainer',
       propagateSwipe: true,
-      scrollTo: (reactNode) => scrollViewRef.current?.scrollTo(reactNode),
       backdropTransitionOutTiming: 0,
       useNativeDriverForBackdrop: true,
       avoidKeyboard: true,

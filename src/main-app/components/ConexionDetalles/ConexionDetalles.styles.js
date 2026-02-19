@@ -105,7 +105,6 @@ export const styles = StyleSheet.create({
   scrollContainer: {
     flex: 1,
     paddingHorizontal: 20,
-    paddingBottom: 120,
   },
   scrollContent: {
     paddingTop: 4,
