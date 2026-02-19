@@ -79,7 +79,7 @@ function buildPreferenceBody(reserva, userEmail) {
     },
     auto_return: 'approved',
     external_reference: externalRef,
-    notification_url: `${BACKEND_URL}/api/mercadopago/webhook`, // Implementar URL backend para webhook
+    notification_url: `${BACKEND_URL}/api/mercadopago/webhook`,
     metadata: { reserva_id: reserva.id.toString() },
   };
 }
@@ -135,6 +135,7 @@ async function createPreferenceController(req, res) {
           metadata: preference.metadata,
           BACKEND_URL_env: process.env.BACKEND_URL || '(no definido, usando fallback)',
         });
+        console.log('Preferencia body payer:', preference.payer);
         
         const mpRes = await mpPreference.create({ body: preference });
         
@@ -167,6 +168,7 @@ async function createPreferenceController(req, res) {
       metadata: preference.metadata,
       BACKEND_URL_env: process.env.BACKEND_URL || '(no definido, usando fallback)',
     });
+    console.log('Preferencia body payer:', preference.payer);
     
     const mpRes = await mpPreference.create({ body: preference });
     
