@@ -5,7 +5,7 @@ import { useNavigation } from '@react-navigation/native';
 import { styles } from './perfil.styles';
 import { colors } from '../../../shared/styles';
 import { PerfilHeader, MenuInferior } from '../../components';
-import { PerfilInfoCard, MascotasSection, LogoutBtn, MenuConfig, ContactoService } from './components';
+import { PerfilInfoCard, MascotasSection, LogoutBtn, MenuConfig, ContactoService, MercadoPagoConnect } from './components';
 import { useAuth } from '../../contexts';
 import { ROLES } from '../../constants/roles';
 import { clearAuthToken } from '../../services';
@@ -152,6 +152,10 @@ const PerfilScreen = () => {
             description={userProfile.petsDescription}
             onPress={handleNavigateToPets}
           />
+        )}
+
+        {role === ROLES.PRESTADOR && user?.prestadorId && (
+          <MercadoPagoConnect prestadorId={user.prestadorId} />
         )}
 
         <LogoutBtn onPress={handleLogout} />

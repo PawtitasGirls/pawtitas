@@ -139,6 +139,10 @@ model prestador {
   perfil            String
   estado            prestador_estado    @default(PENDIENTE)
   motivoRechazo     String?
+  mpAccessToken     String?             @db.Text
+  mpRefreshToken    String?             @db.Text
+  mpUserId          String?
+  mpConnectedAt     DateTime?
   usuario           usuario             @relation(fields: [usuarioId], references: [id], map: "Prestador_usuarioId_fkey")
   prestadorservicio prestadorservicio[]
   reserva           reserva[]
