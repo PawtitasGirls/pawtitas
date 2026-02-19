@@ -7,6 +7,7 @@ const mascotaRepo = require('../repositories/mascota.repo');
 const { registerUser } = require('../services/registro.service');
 const { sendRecoveryCodeEmail } = require('../services/email.service');
 const streamChatService = require('../services/streamChat.service');
+const { buildPublicUrl } = require('../utils/publicUrl');
 
 // Login
 async function loginController(req, res) {
@@ -51,6 +52,7 @@ async function loginController(req, res) {
       id: usuario.id?.toString?.() || usuario.id,
       nombre: usuario.nombre,
       apellido: usuario.apellido,
+      avatar: buildPublicUrl(req, usuario.avatar),
       email: usuario.email,
       celular: usuario.celular,
       activo: usuario.activo,

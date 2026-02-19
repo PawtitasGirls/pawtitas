@@ -2,6 +2,7 @@ const prisma = require('../config/prisma');
 const reservaRepo = require('../repositories/reserva.repo');
 const mascotaRepo = require('../repositories/mascota.repo');
 const { Prisma } = require('@prisma/client');
+const { buildPublicUrl } = require('../utils/publicUrl');
 
 function serializeReserva(r) {
   const id = r.id?.toString?.() ?? r.id;
@@ -179,6 +180,7 @@ const serialized = reservas.map((r) => {
       id: String(prestador.id),
       usuarioId: usuario?.id != null ? String(usuario.id) : null,
       nombreCompleto: [usuario?.nombre, usuario?.apellido].filter(Boolean).join(' ') || 'Sin nombre',
+      avatar: buildPublicUrl(req, usuario?.avatar || null),
       domicilio: domicilio && {
         ubicacion: [domicilio.calle, domicilio.numero, domicilio.ciudad].filter(Boolean).join(', '),
         latitude: domicilio.latitude ?? null,
@@ -254,6 +256,7 @@ async function getReservasByPrestadorController(req, res) {
           id: String(duenio.id),
           usuarioId: usuario?.id != null ? String(usuario.id) : null,
           nombreCompleto: [usuario?.nombre, usuario?.apellido].filter(Boolean).join(' ') || 'Sin nombre',
+          avatar: buildPublicUrl(req, usuario?.avatar || null),
           descripcion: duenio.comentarios ?? '',
           domicilio: domicilio && {
             ubicacion,

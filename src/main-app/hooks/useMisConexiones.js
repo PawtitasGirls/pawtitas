@@ -582,12 +582,21 @@ export const useMisConexiones = () => {
       console.warn('No se encontró usuarioId para abrir chat');
       return;
     }
+
+    const targetUserImage =
+      provider?.avatar ||
+      provider?.image ||
+      provider?.prestadorAvatar ||
+      provider?.duenioAvatar ||
+      provider?.prestador?.avatar ||
+      provider?.duenio?.avatar ||
+      null;
   
     navigation.navigate('Chat', {
       targetUser: {
         id: String(targetUserId),
-        name: provider.nombre,
-        image: null, // puedes agregar avatar si lo incluyes luego
+        name: provider.nombre || provider.nombreCompleto || 'Usuario',
+        image: targetUserImage,
       },
     });
   

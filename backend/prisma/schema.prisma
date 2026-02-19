@@ -230,6 +230,7 @@ model usuario {
   clave                      String
   nombre                     String
   apellido                   String
+  avatar                     String?
   dni                        String      @unique(map: "Usuario_dni_key")
   fechaNacimiento            DateTime
   celular                    String

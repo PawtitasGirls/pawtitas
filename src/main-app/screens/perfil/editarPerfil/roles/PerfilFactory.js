@@ -23,6 +23,7 @@ export default class PerfilFactory {
   static getInitialFormState(role) {
     const baseFormState = {
       avatarUri: null,
+      avatarFile: null,
       nombreApellido: "",
       descripcion: "",
       email: "",

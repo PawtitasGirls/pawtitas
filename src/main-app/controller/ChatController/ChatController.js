@@ -135,13 +135,24 @@ export class ChatController {
   }
 
   // Validar si un mensaje puede ser enviado
-  static canSendMessage(messageText) {
-    return messageText && messageText.trim().length > 0;
+  static canSendMessage(messageText, imageAsset = null) {
+    const hasText = !!(messageText && messageText.trim().length > 0);
+    const hasImage = !!imageAsset?.uri;
+    return hasText || hasImage;
   }
 
   // Preparar el payload de un mensaje para enviar
-  static prepareMessagePayload(text) {
-    return { text: text.trim() };
+  static prepareMessagePayload(text, imageUrl = null) {
+    const payload = { text: (text || '').trim() };
+    if (imageUrl) {
+      payload.attachments = [
+        {
+          type: 'image',
+          image_url: imageUrl,
+        },
+      ];
+    }
+    return payload;
   }
 
   // Formatar la fecha de un mensaje (hoy: hora, otro día: fecha)
