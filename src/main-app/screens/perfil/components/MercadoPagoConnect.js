@@ -6,7 +6,7 @@ import { apiUsuario } from '../../../services';
 import { colors } from '../../../../shared/styles';
 import { styles } from './MercadoPagoConnect.styles';
 
-const MercadoPagoConnect = ({ prestadorId }) => {
+const MercadoPagoConnect = ({ prestadorId, compact = false }) => {
   const [status, setStatus] = useState(null);
   const [loading, setLoading] = useState(true);
   const [connecting, setConnecting] = useState(false);
@@ -70,6 +70,38 @@ const MercadoPagoConnect = ({ prestadorId }) => {
       ]
     );
   };
+
+  if (compact) {
+    const handleCompactPress = status?.connected ? handleDisconnect : handleConnect;
+
+    return (
+      <TouchableOpacity
+        style={styles.compactBtn}
+        onPress={handleCompactPress}
+        disabled={loading || connecting}
+        activeOpacity={0.75}
+      >
+        <Ionicons name="card-outline" size={18} color="#f9d2ec" />
+        <View style={styles.compactTextContainer}>
+          <Text style={styles.compactTitle}>MercadoPago</Text>
+          {loading || connecting ? (
+            <ActivityIndicator size="small" color={colors.brand.accent} style={{ marginTop: 2 }} />
+          ) : status?.connected ? (
+            <Text style={styles.compactSubConnected}>Cuenta conectada ✓</Text>
+          ) : (
+            <Text style={styles.compactSubDisconnected}>Conectá para recibir pagos</Text>
+          )}
+        </View>
+        {!loading && !connecting && (
+          <Ionicons
+            name={status?.connected ? 'ellipsis-horizontal' : 'chevron-forward'}
+            size={16}
+            color={status?.connected ? '#ccc' : '#aaa'}
+          />
+        )}
+      </TouchableOpacity>
+    );
+  }
 
   if (loading) {
     return (
