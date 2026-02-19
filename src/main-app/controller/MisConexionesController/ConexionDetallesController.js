@@ -5,7 +5,7 @@ export class ConexionDetallesController {
   static getMenuItems(estado, misConexiones, actionHandlers, _esVistaPrestador) {
     if (misConexiones && estado === ESTADOS_CONEXION.PENDIENTE_DE_PAGO) {
       return [{
-        text: 'Rechazar solicitud',
+        text: 'Cancelar solicitud',
         icon: 'close-circle-outline',
         iconColor: colors.error,
         textStyle: { color: colors.error },
