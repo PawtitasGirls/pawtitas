@@ -40,8 +40,8 @@ const MisConexiones = () => {
     handlePaymentFailure,
     handleClosePaymentWebView,
     handleFinalizarServicio,
-    handleRechazar,
-    handleConfirmarRechazo,
+    handleCancelar,
+    handleConfirmarCancelar,
     handleCancelarRechazo,
     handleAgregarResena,
     handleDetallesModalHide,
@@ -158,7 +158,7 @@ const MisConexiones = () => {
         onPago={handlePago}
         onFinalizarServicio={handleFinalizarServicio}
         onAgregarResena={handleAgregarResena}
-        onRechazar={handleRechazar}
+        onCancelar={handleCancelar}
         onModalHide={handleDetallesModalHide}
         isAdmin={role === ROLES.ADMIN}
       />
@@ -185,10 +185,10 @@ const MisConexiones = () => {
       />
 
       <ConfirmacionDialogo
-        visible={state.showRechazarModal}
+        visible={state.showCancelarModal}
         title="Cancelar solicitud"
         message="¿Estás seguro de que quieres cancelar esta solicitud? Esta acción no se puede deshacer."
-        onConfirm={handleConfirmarRechazo}
+        onConfirm={handleConfirmarCancelar}
         onCancel={handleCancelarRechazo}
         confirmText="Cancelar"
         cancelText="Volver"

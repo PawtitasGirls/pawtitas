@@ -9,7 +9,7 @@ export class ConexionDetallesController {
         icon: 'close-circle-outline',
         iconColor: colors.error,
         textStyle: { color: colors.error },
-        onPress: actionHandlers?.handleRechazar
+        onPress: actionHandlers?.handleCancelar
       }];
     }
     return [];
@@ -31,7 +31,7 @@ export class ConexionDetallesController {
       };
     }
     
-    if (misConexiones && (estado === ESTADOS_CONEXION.SOLICITUD_RECHAZADA || estado === ESTADOS_CONEXION.SERVICIO_FINALIZADO)) {
+    if (misConexiones && (estado === ESTADOS_CONEXION.SOLICITUD_CANCELADA || estado === ESTADOS_CONEXION.SERVICIO_FINALIZADO)) {
       return {
         primary: { 
           label: 'Agregar reseña', 
