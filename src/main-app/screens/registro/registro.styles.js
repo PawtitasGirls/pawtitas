@@ -133,6 +133,9 @@ export const styles = StyleSheet.create({
       fontFamily: typography.fontFamily.bodySemiBold,
       textDecorationLine: "underline",
     },
+    termsErrorText: {
+      marginTop: 6,
+    },
     buttonRow: {
       flexDirection: "row",
       justifyContent: "space-between",
