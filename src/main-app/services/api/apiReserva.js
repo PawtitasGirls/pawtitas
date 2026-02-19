@@ -14,3 +14,7 @@ export async function getReservasByDuenio(duenioId) {
 export async function getReservasByPrestador(prestadorId) {
   return apiUsuario(`/api/reservas/prestador/${prestadorId}`, { method: 'GET' });
 }
+
+export async function cancelarReserva(reservaId) {
+  return apiUsuario(`/api/reservas/${reservaId}/cancelar`, { method: 'PATCH' });
+}
