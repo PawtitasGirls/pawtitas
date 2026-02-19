@@ -1,4 +1,4 @@
-import { StyleSheet, Platform } from 'react-native';
+import { StyleSheet } from 'react-native';
 import { colors } from '../../../shared/styles';
 
 // Estilos para el componente MenuInferior
@@ -9,7 +9,6 @@ export const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'flex-end',
     paddingHorizontal: 20,
-    paddingBottom: Platform.OS === 'ios' ? 5 : 0,
     position: 'absolute',
     bottom: 0,
     left: 0,
@@ -76,6 +75,10 @@ export const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: 'bold',
   },
+});
+
+export const getContainerStyle = (bottomInset) => ({
+  paddingBottom: bottomInset + 8,
 });
 
 export const navColors = {
