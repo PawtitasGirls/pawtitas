@@ -8,7 +8,6 @@ function extractWebhookDataId(req) {
   const bodyId = req.body?.data?.id ?? req.body?.id;
   if (queryId || bodyId) return String(queryId ?? bodyId);
 
-  // Legacy/IPN payloads may only include "resource" URL.
   const resource = req.body?.resource;
   if (typeof resource === 'string') {
     const match = resource.match(/\/(\d+)(?:\?.*)?$/);
@@ -61,6 +60,7 @@ const APP_URL = process.env.APP_URL || 'pawtitas://';
 function buildPreferenceBody(reserva, userEmail) {
   const montoTotal = Number(reserva.montoTotal);
   const externalRef = `pawtitas-${reserva.id}-${Date.now()}`;
+
   return {
     items: [
       {
@@ -127,21 +127,17 @@ async function createPreferenceController(req, res) {
 
       if (pagoExistente.estadoPago === 'PENDIENTE') {
         const preference = buildPreferenceBody(reserva, userEmail);
-        
-        console.log('📤 [CREATE_PREFERENCE] Enviando preferencia a MercadoPago:', {
+
+        console.log('Enviando preferencia a MercadoPago:', {
           reservaId: reserva.id.toString(),
           notification_url: preference.notification_url,
           external_reference: preference.external_reference,
-          metadata: preference.metadata,
-          BACKEND_URL_env: process.env.BACKEND_URL || '(no definido, usando fallback)',
         });
-        console.log('Preferencia body payer:', preference.payer);
-        
+
         const mpRes = await mpPreference.create({ body: preference });
-        
-        console.log('✅ [CREATE_PREFERENCE] Preferencia creada:', {
+
+        console.log('Preferencia creada:', {
           preferenceId: mpRes.id,
-          init_point: mpRes.init_point,
           sandbox_init_point: mpRes.sandbox_init_point,
         });
 
@@ -160,19 +156,16 @@ async function createPreferenceController(req, res) {
     }
 
     const preference = buildPreferenceBody(reserva, userEmail);
-    
-    console.log('📤 [CREATE_PREFERENCE] Enviando preferencia a MercadoPago (nuevo pago):', {
+
+    console.log('Enviando preferencia a MercadoPago (nuevo pago):', {
       reservaId: reserva.id.toString(),
       notification_url: preference.notification_url,
       external_reference: preference.external_reference,
-      metadata: preference.metadata,
-      BACKEND_URL_env: process.env.BACKEND_URL || '(no definido, usando fallback)',
     });
-    console.log('Preferencia body payer:', preference.payer);
-    
+
     const mpRes = await mpPreference.create({ body: preference });
     
-    console.log('✅ [CREATE_PREFERENCE] Preferencia creada:', {
+    console.log('Preferencia creada:', {
       preferenceId: mpRes.id,
       init_point: mpRes.init_point,
       sandbox_init_point: mpRes.sandbox_init_point,
@@ -210,8 +203,8 @@ async function createPreferenceController(req, res) {
 
 async function webhookController(req, res) {
   try {
-    // Log completo del request antes de procesarlo
-    console.log('🔔 [WEBHOOK] Request recibido:', {
+    // Log del request antes de procesarlo
+    console.log('Request recibido:', {
       method: req.method,
       url: req.url,
       query: req.query,
@@ -224,7 +217,7 @@ async function webhookController(req, res) {
     });
 
     if (!validateWebhookSignature(req)) {
-      console.log('⚠️ [WEBHOOK] Firma inválida, procesando de todas formas');
+      console.log('[WEBHOOK] Firma inválida, procesando de todas formas');
     }
 
     // Intentar obtener datos desde body o query
@@ -232,20 +225,20 @@ async function webhookController(req, res) {
     const dataId = extractWebhookDataId(req);
     const action = req.body?.action;
 
-    console.log('📦 [WEBHOOK] Datos extraídos:', { type, action, dataId });
+    console.log('[WEBHOOK] Datos extraídos:', { type, action, dataId });
 
     // Manejar merchant_order
     if (type === 'merchant_order') {
-      console.log(`🛒 [WEBHOOK] Procesando merchant_order ${dataId}...`);
+      console.log(`[WEBHOOK] Procesando merchant_order ${dataId}...`);
       
       if (!dataId) {
-        console.log('⚠️ [WEBHOOK] No se encontró merchant_order ID');
+        console.log('[WEBHOOK] No se encontró merchant_order ID');
         return res.status(200).json({ received: true });
       }
 
       const merchantOrder = await mpMerchantOrder.get({ merchantOrderId: dataId });
       
-      console.log('✅ [WEBHOOK] Merchant Order obtenido:', {
+      console.log('[WEBHOOK] Merchant Order obtenido:', {
         id: merchantOrder.id,
         status: merchantOrder.status,
         payments: merchantOrder.payments?.map(p => ({ id: p.id, status: p.status })),
@@ -254,17 +247,17 @@ async function webhookController(req, res) {
       // Extraer el payment ID del merchant order
       const payment = merchantOrder.payments?.find(p => p.status === 'approved');
       if (!payment) {
-        console.log('⚠️ [WEBHOOK] No hay pagos aprobados en el merchant_order');
+        console.log('[WEBHOOK] No hay pagos aprobados en el merchant_order');
         return res.status(200).json({ received: true });
       }
 
       // Procesar el payment usando su ID
       const paymentId = payment.id;
-      console.log(`💳 [WEBHOOK] Obteniendo payment ${paymentId} del merchant_order...`);
+      console.log(`[WEBHOOK] Obteniendo payment ${paymentId} del merchant_order...`);
       
       const mp = await mpPayment.get({ id: paymentId });
       
-      console.log('✅ [WEBHOOK] Payment obtenido:', {
+      console.log('[WEBHOOK] Payment obtenido:', {
         id: mp.id,
         status: mp.status,
         preference_id: mp.preference_id,
@@ -278,20 +271,20 @@ async function webhookController(req, res) {
 
     // Manejar payment directo
     if (type !== 'payment') {
-      console.log(`ℹ️ [WEBHOOK] Tipo "${type}" ignorado (solo procesamos "payment" y "merchant_order")`);
+      console.log(`[WEBHOOK] Tipo "${type}" ignorado (solo procesamos "payment" y "merchant_order")`);
       return res.status(200).json({ received: true });
     }
 
     if (!dataId) {
-      console.log('⚠️ [WEBHOOK] No se encontró payment ID');
+      console.log('[WEBHOOK] No se encontró payment ID');
       return res.status(200).json({ received: true });
     }
 
-    console.log(`💳 [WEBHOOK] Obteniendo payment ${dataId} de MercadoPago...`);
+    console.log(`[WEBHOOK] Obteniendo payment ${dataId} de MercadoPago...`);
     
     const mp = await mpPayment.get({ id: dataId });
     
-    console.log('✅ [WEBHOOK] Payment obtenido:', {
+    console.log('[WEBHOOK] Payment obtenido:', {
       id: mp.id,
       status: mp.status,
       preference_id: mp.preference_id,
@@ -301,7 +294,7 @@ async function webhookController(req, res) {
 
     return await processPayment(mp, res);
   } catch (err) {
-    console.error('❌ [WEBHOOK] Error:', {
+    console.error('[WEBHOOK] Error:', {
       message: err.message,
       status: err.status,
       cause: err.cause,
@@ -317,7 +310,7 @@ async function processPayment(mp, res) {
     const reservaIdStr = mp.metadata?.reserva_id || (externalRef.match(/^pawtitas-(\d+)-/) || [])[1];
 
     if (!reservaIdStr) {
-      console.warn('⚠️ [WEBHOOK] Pago no procesado: no se encontró reservaId', {
+      console.warn('[WEBHOOK] Pago no procesado: no se encontró reservaId', {
         paymentId: mp.id,
         preferenceId: mp.preference_id,
         externalRef,
@@ -326,7 +319,7 @@ async function processPayment(mp, res) {
       return res.status(200).json({ received: true });
     }
 
-    console.log(`🔍 [WEBHOOK] Buscando pago en BD para reserva ${reservaIdStr}...`);
+    console.log(`[WEBHOOK] Buscando pago en BD para reserva ${reservaIdStr}...`);
 
     let pago = await prisma.pago.findFirst({
       where: { reservaId: BigInt(reservaIdStr) },
@@ -334,12 +327,12 @@ async function processPayment(mp, res) {
     });
     
     if (!pago && mp.preference_id) {
-      console.log(`🔍 [WEBHOOK] No encontrado por reservaId, buscando por preferenceId ${mp.preference_id}...`);
+      console.log(`[WEBHOOK] No encontrado por reservaId, buscando por preferenceId ${mp.preference_id}...`);
       pago = await pagoRepo.findByMpPreferenceId(mp.preference_id);
     }
 
     if (pago) {
-      console.log(`✅ [WEBHOOK] Pago encontrado. Actualizando...`, {
+      console.log(`[WEBHOOK] Pago encontrado. Actualizando...`, {
         reservaId: pago.reservaId.toString(),
         estadoAnterior: pago.estadoPago,
         estadoNuevo: mp.status === 'approved' ? 'PAGADO' : 'PENDIENTE',
@@ -357,9 +350,9 @@ async function processPayment(mp, res) {
         data: { estado: mp.status === 'approved' ? 'PAGADO' : 'PENDIENTE_PAGO' },
       });
 
-      console.log(`✅ [WEBHOOK] Pago actualizado exitosamente para reserva ${reservaIdStr}`);
+      console.log(`[WEBHOOK] Pago actualizado exitosamente para reserva ${reservaIdStr}`);
     } else {
-      console.warn('❌ [WEBHOOK] Pago no vinculable, requiere revisión manual', {
+      console.warn('[WEBHOOK] Pago no vinculable, requiere revisión manual', {
         paymentId: mp.id,
         preferenceId: mp.preference_id,
         externalRef,
@@ -369,7 +362,7 @@ async function processPayment(mp, res) {
 
     return res.status(200).json({ received: true });
   } catch (err) {
-    console.error('❌ [PROCESSpayment] Error:', {
+    console.error('[PROCESSpayment] Error:', {
       message: err.message,
       status: err.status,
       cause: err.cause,
@@ -377,6 +370,45 @@ async function processPayment(mp, res) {
     });
     return res.status(200).json({ received: true });
   }
+}
+
+async function transferirAlPrestador({ reservaId, montoTotal, mpUserIdPrestador }) {
+  const comisionPorcentaje = Number(process.env.COMISION_PORCENTAJE || 12);
+  const montoPrestador = Math.round(montoTotal * (1 - comisionPorcentaje / 100) * 100) / 100;
+
+  console.log(`Iniciando transferencia para reserva ${reservaId}:`, {
+    montoTotal,
+    comisionPorcentaje,
+    montoPrestador,
+    destinatario: mpUserIdPrestador,
+  });
+
+  const response = await fetch('https://api.mercadopago.com/v1/account/bank_transfers', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${process.env.MERCADOPAGO_ACCESS_TOKEN}`,
+    },
+    body: JSON.stringify({
+      amount: montoPrestador,
+      origin_account: { type: 'current', user_id: process.env.MERCADOPAGO_USER_ID },
+      destination_account: { type: 'current', user_id: String(mpUserIdPrestador) },
+      description: `Liberación de pago reserva #${reservaId}`,
+    }),
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    console.error(`[TRANSFERENCIA] Error al transferir a prestador (reserva ${reservaId}):`, data);
+    return;
+  }
+
+  console.log(`[TRANSFERENCIA] Transferencia exitosa para reserva ${reservaId}:`, {
+    monto: montoPrestador,
+    destinatario: mpUserIdPrestador,
+    transferId: data.id,
+  });
 }
 
 async function confirmarFinalizacionController(req, res) {
@@ -438,6 +470,19 @@ async function confirmarFinalizacionController(req, res) {
           where: { reservaId: reservaIdB },
           data: { estadoPago: 'LIBERADO' },
         });
+
+        const prestador = await prisma.prestador.findUnique({
+          where: { id: reserva.prestadorId },
+          select: { mpUserId: true },
+        });
+
+        if (prestador?.mpUserId) {
+          await transferirAlPrestador({
+            reservaId,
+            montoTotal: Number(reserva.pago.monto),
+            mpUserIdPrestador: prestador.mpUserId,
+          });
+        }
       }
 
       return res.json({
@@ -462,8 +507,133 @@ async function confirmarFinalizacionController(req, res) {
   }
 }
 
+// OAuth
+const MP_APP_ID = process.env.MERCADOPAGO_APP_ID;
+const MP_CLIENT_SECRET = process.env.MERCADOPAGO_CLIENT_SECRET;
+const MP_OAUTH_REDIRECT = `${BACKEND_URL}/api/mercadopago/oauth-callback`;
+
+async function oauthUrlController(req, res) {
+  try {
+    const { prestadorId } = req.query;
+    if (!prestadorId) {
+      return res.status(400).json({ success: false, message: 'Falta prestadorId' });
+    }
+    const url =
+      `https://auth.mercadopago.com.ar/authorization` +
+      `?client_id=${MP_APP_ID}` +
+      `&response_type=code` +
+      `&platform_id=mp` +
+      `&state=${prestadorId}` +
+      `&redirect_uri=${encodeURIComponent(MP_OAUTH_REDIRECT)}`;
+
+    return res.json({ success: true, url });
+  } catch (err) {
+    console.error('oauthUrl error:', err);
+    return res.status(500).json({ success: false, message: err.message });
+  }
+}
+
+async function oauthCallbackController(req, res) {
+  try {
+    const { code, state: prestadorId } = req.query;
+    if (!code || !prestadorId) {
+      return res.status(400).send('Faltan parámetros code o state');
+    }
+
+    const body = new URLSearchParams({
+      client_id: MP_APP_ID,
+      client_secret: MP_CLIENT_SECRET,
+      grant_type: 'authorization_code',
+      code,
+      redirect_uri: MP_OAUTH_REDIRECT,
+    });
+
+    const response = await fetch('https://api.mercadopago.com/oauth/token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: body.toString(),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok || !data.access_token) {
+      console.error('OAuth MP error:', data);
+      return res.status(400).send('Error al obtener tokens de MercadoPago');
+    }
+
+    await prisma.prestador.update({
+      where: { id: BigInt(prestadorId) },
+      data: {
+        mpAccessToken: data.access_token,
+        mpRefreshToken: data.refresh_token || null,
+        mpUserId: String(data.user_id),
+        mpConnectedAt: new Date(),
+      },
+    });
+
+    console.log(`[OAUTH] Prestador ${prestadorId} conectó su cuenta MP (userId: ${data.user_id})`);
+
+    // Redirigir de vuelta a la app
+    return res.redirect(`${APP_URL}oauth/success`);
+  } catch (err) {
+    console.error('oauthCallback error:', err);
+    return res.status(500).send('Error interno al procesar OAuth');
+  }
+}
+
+async function oauthStatusController(req, res) {
+  try {
+    const { prestadorId } = req.query;
+    if (!prestadorId) {
+      return res.status(400).json({ success: false, message: 'Falta prestadorId' });
+    }
+
+    const prestador = await prisma.prestador.findUnique({
+      where: { id: BigInt(prestadorId) },
+      select: { mpUserId: true, mpConnectedAt: true },
+    });
+
+    if (!prestador) {
+      return res.status(404).json({ success: false, message: 'Prestador no encontrado' });
+    }
+
+    return res.json({
+      success: true,
+      connected: !!prestador.mpUserId,
+      mpUserId: prestador.mpUserId || null,
+      mpConnectedAt: prestador.mpConnectedAt || null,
+    });
+  } catch (err) {
+    console.error('oauthStatus error:', err);
+    return res.status(500).json({ success: false, message: err.message });
+  }
+}
+
+async function oauthDisconnectController(req, res) {
+  try {
+    const { prestadorId } = req.body;
+    if (!prestadorId) {
+      return res.status(400).json({ success: false, message: 'Falta prestadorId' });
+    }
+
+    await prisma.prestador.update({
+      where: { id: BigInt(prestadorId) },
+      data: { mpAccessToken: null, mpRefreshToken: null, mpUserId: null, mpConnectedAt: null },
+    });
+
+    return res.json({ success: true, message: 'Cuenta MP desconectada' });
+  } catch (err) {
+    console.error('oauthDisconnect error:', err);
+    return res.status(500).json({ success: false, message: err.message });
+  }
+}
+
 module.exports = {
   createPreferenceController,
   webhookController,
   confirmarFinalizacionController,
+  oauthUrlController,
+  oauthCallbackController,
+  oauthStatusController,
+  oauthDisconnectController,
 };
