@@ -38,10 +38,10 @@ export const ESTADOS_CONEXION_CONFIG = {
     description: 'Esperando confirmación de pago',
   },
   [ESTADOS_CONEXION.SOLICITUD_RECHAZADA]: {
-    label: 'Rechazado',
+    label: 'Cancelada',
     icon: 'close-circle',
     colorType: 'error',
-    description: 'Solicitud rechazada',
+    description: 'Solicitud cancelada',
   },
   [ESTADOS_CONEXION.SERVICIO_FINALIZADO]: {
     label: 'Finalizado',

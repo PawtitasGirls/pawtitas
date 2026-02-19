@@ -82,7 +82,7 @@ export class MisConexionesController {
     const messages = {
       rechazar: {
         type: 'success',
-        text: 'Solicitud rechazada correctamente'
+        text: 'Solicitud cancelada correctamente'
       },
       finalizar: {
         type: 'success',
