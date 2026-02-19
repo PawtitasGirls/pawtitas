@@ -8,4 +8,3 @@ export { MascotasSection as MascotasSection } from './MascotasSection';
 export { LogoutBtn as LogoutBtn } from './LogoutBtn';
 export { MenuConfig } from './MenuConfig';
 export { ContactoService } from './ContactoService';
-export { default as MercadoPagoConnect } from './MercadoPagoConnect';

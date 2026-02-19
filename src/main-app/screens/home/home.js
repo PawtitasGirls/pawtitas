@@ -7,6 +7,7 @@ import { Ionicons } from "@expo/vector-icons"; // librería de íconos
 import { useNavigation } from "@react-navigation/native";
 import { useLocation, useAuth } from '../../contexts';
 import { isRouteAllowed, ROLES } from '../../constants/roles';
+import MercadoPagoConnect from '../perfil/components/MercadoPagoConnect';
 
 // Componentes de categoría de servicios
 const ServiceCategory = ({ emoji, title, description, onPress }) => (
@@ -186,6 +187,7 @@ const HomeScreen = () => {
   const estadoPrestador = String(user?.estadoPrestador || '').toUpperCase();
   const isPrestadorPendiente =
     role === ROLES.PRESTADOR && estadoPrestador === 'PENDIENTE';
+  const isPrestadorActivo = role === ROLES.PRESTADOR && !isPrestadorPendiente;
   const isAdmin = role === ROLES.ADMIN;
 
   // Categorías de servicios
@@ -279,18 +281,19 @@ const HomeScreen = () => {
           ))}
         </View>
 
-        {/* Nuevo container de opciones */}
-        <View style={styles.extraContainer}>
-          {isRouteAllowed(role, "Resenas") && !isPrestadorPendiente && (
-            <TouchableOpacity
-              style={styles.option}
-              onPress={() => navigation.navigate("Resenas")}
-            >
-              <Ionicons name="star" size={18} color="#f9d2ec" />
-              <Text style={styles.backText}>Mis reseñas</Text>
-            </TouchableOpacity>
-          )}
-        </View>
+        {isRouteAllowed(role, "Resenas") && !isPrestadorPendiente && (
+          <TouchableOpacity
+            style={styles.option}
+            onPress={() => navigation.navigate("Resenas")}
+          >
+            <Ionicons name="star" size={18} color="#f9d2ec" />
+            <Text style={styles.backText}>Mis reseñas</Text>
+          </TouchableOpacity>
+        )}
+
+        {isPrestadorActivo && (
+          <MercadoPagoConnect prestadorId={user?.id} compact />
+        )}
       </ScrollView>
 
       {/* Navbar abajo */}

@@ -71,6 +71,38 @@ export const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
   },
+  compactBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    backgroundColor: '#fff',
+    borderRadius: 20,
+    marginBottom: 12,
+    borderWidth: 2,
+    borderColor: '#F0F0F0',
+    gap: 8,
+  },
+  compactTextContainer: {
+    flexShrink: 1,
+  },
+  compactTitle: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#6f0d01ff',
+  },
+  compactSubConnected: {
+    fontSize: 12,
+    color: '#00a650',
+    fontWeight: '500',
+    marginTop: 2,
+  },
+  compactSubDisconnected: {
+    fontSize: 12,
+    color: '#999',
+    marginTop: 2,
+  },
 });
 
 export default styles;
