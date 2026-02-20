@@ -15,6 +15,9 @@
       "autoIncrement": true,
       "env": {
         "EXPO_PUBLIC_API_BASE_URL": "https://pawtitas.up.railway.app"
+      },
+      "android": {
+        "buildType": "apk"
       }
     }
   },
