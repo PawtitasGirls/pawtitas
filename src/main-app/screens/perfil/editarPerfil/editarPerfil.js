@@ -15,6 +15,7 @@ import ROLES from "./roles/types";
 import { useAuth } from "../../../contexts";
 import { getUserProfile, updateUserProfile } from "../../../services";
 import { ensureChatUser } from "../../../services/api/apiChat";
+import { withCacheBuster } from "../../../../shared/utils";
 
 const buildLocation = (user) => {
   if (!user) return "";
@@ -37,7 +38,7 @@ const buildFormDataFromUser = (role, userData) => {
 
   const next = { ...base };
 
-  if ("avatarUri" in next) next.avatarUri = userData.avatar || null;
+  if ("avatarUri" in next) next.avatarUri = withCacheBuster(userData.avatar) ?? null;
   if ("avatarFile" in next) next.avatarFile = null;
   if ("nombreApellido" in next) next.nombreApellido = buildFullName(userData);
   if ("descripcion" in next) next.descripcion = userData.descripcion || next.descripcion;

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { View, Text, FlatList, TouchableOpacity, ActivityIndicator, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';import { ScreenHeader, MenuInferior, Paginador } from '../../components';
@@ -9,6 +9,7 @@ import { colors } from '../../../shared/styles';
 import { styles } from './Chat.styles';
 import { useAuth } from '../../contexts/AuthContext';
 import { ensureChatUser } from '../../services/api/apiChat';
+import { withCacheBuster } from '../../../shared/utils';
 
 
 
@@ -32,8 +33,8 @@ const Chat = () => {
         initializeChat(
             user.id,
             user.nombre || user.name,
-            tokenStream,              
-            user.avatar || user.image,
+            tokenStream,
+            withCacheBuster(user.avatar || user.image) || undefined,
             role
         ).catch(err => console.error("Error initializing chat:", err));
     
@@ -81,6 +82,8 @@ const Chat = () => {
             chatClient.off(handleEvent);
         };
     }, [isReady, chatClient, currentUser]);
+
+    const imageCacheTs = useMemo(() => Date.now(), [channels]);
 
     useEffect(() => {
         if (!targetUser) return;
@@ -166,9 +169,9 @@ const Chat = () => {
 
         return (
             <TouchableOpacity style={styles.channelItem} onPress={() => handleChannelPress(item)}>
-                <Image 
-                    source={{ uri: ChatController.getUserImage(otherUser) }} 
-                    style={styles.avatar} 
+                <Image
+                    source={{ uri: withCacheBuster(ChatController.getUserImage(otherUser), imageCacheTs) || 'https://via.placeholder.com/50' }}
+                    style={styles.avatar}
                 />
                 <View style={styles.channelInfo}>
                     <View style={styles.row}>
@@ -196,9 +199,9 @@ const Chat = () => {
 
     const renderMockUserItem = ({ item }) => (
         <TouchableOpacity style={styles.channelItem} onPress={() => handleMockUserPress(item)}>
-             <Image 
-                source={{ uri: item.image }} 
-                style={styles.avatar} 
+             <Image
+                source={{ uri: withCacheBuster(item.image, imageCacheTs) || 'https://via.placeholder.com/50' }}
+                style={styles.avatar}
             />
             <View style={styles.channelInfo}>
                 <View style={styles.row}>

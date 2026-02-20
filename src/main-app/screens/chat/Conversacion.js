@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useMemo } from 'react';
 import { View, Text, FlatList, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, ActivityIndicator, Alert, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRoute, useNavigation } from '@react-navigation/native';
@@ -8,6 +8,7 @@ import { colors } from '../../../shared/styles';
 import { styles } from './Conversacion.styles';
 import * as ImagePicker from 'expo-image-picker';
 import { uploadChatImage } from '../../services/api/apiChat';
+import { withCacheBuster } from '../../../shared/utils';
 
 const Conversacion = () => {
     const route = useRoute();
@@ -74,6 +75,8 @@ const Conversacion = () => {
 
         initChannel();
     }, [channelId, chatClient]);
+
+    const imageCacheTs = useMemo(() => Date.now(), [activeChannel?.id]);
 
     const sendMessage = async () => {
         if (!ChatController.canSendMessage(inputText, selectedImage) || !activeChannel || sending) return;
@@ -163,7 +166,10 @@ const Conversacion = () => {
     const renderCustomHeader = () => {
         const roleInfo = getUserRoleInfo();
         const userName = ChatController.getUserName(otherUser, activeChannel);
-        const userImage = ChatController.getUserImage(otherUser, 'https://via.placeholder.com/40');
+        const userImage = withCacheBuster(
+            ChatController.getUserImage(otherUser, 'https://via.placeholder.com/40'),
+            imageCacheTs
+        ) || 'https://via.placeholder.com/40';
         
         return (
             <View style={styles.customHeader}>

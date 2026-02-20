@@ -8,10 +8,12 @@ import { styles } from './ResenaFormModal.styles';
 export const SeccionInfoUsuario = ({ usuario, tipoUsuario }) => {
   if (!usuario?.nombre) return null;
 
+  const imageUri = usuario.avatarUrl || usuario.avatar;
+
   return (
     <View style={styles.userInfoContainer}>
-      {usuario.avatar ? (
-        <Image source={{ uri: usuario.avatar }} style={styles.userAvatar} />
+      {imageUri ? (
+        <Image source={{ uri: imageUri }} style={styles.userAvatar} />
       ) : (
         <View style={[styles.userAvatar, { alignItems: 'center', justifyContent: 'center' }]}>
           <Ionicons name="person" size={30} color={colors.primary} />

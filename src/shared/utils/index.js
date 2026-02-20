@@ -22,7 +22,14 @@ export const capitalize = (text) => {
   return text.charAt(0).toUpperCase() + text.slice(1);
 };
 
+export const withCacheBuster = (url, ts = Date.now()) => {
+  if (!url || typeof url !== 'string') return null;
+  const separator = url.includes('?') ? '&' : '?';
+  return `${url}${separator}t=${ts}`;
+};
+
 export default {
   formatDate,
   capitalize,
+  withCacheBuster,
 };

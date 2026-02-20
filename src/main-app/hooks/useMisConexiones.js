@@ -12,6 +12,7 @@ import {
   confirmarFinalizacionServicio,
   cancelarReserva,
 } from '../services';
+import { withCacheBuster } from '../../shared/utils';
 
 const getResenasArray = (reserva) => {
   if (Array.isArray(reserva?.resenas)) return reserva.resenas;
@@ -52,6 +53,7 @@ export const useMisConexiones = () => {
       if (role === ROLES.DUENIO && duenioId) {
         const res = await getReservasByDuenio(duenioId);
         const reservas = res?.reservas || [];
+        const ts = Date.now();
         const list = reservas.map((r) => {
           const p = r.prestador || {};
           const serv = p.servicio || {};
@@ -62,7 +64,7 @@ export const useMisConexiones = () => {
             ? { nombre: mascotaRaw.nombre ?? '', tipo: mascotaRaw.tipo ?? '', raza: mascotaRaw.raza ?? '' }
             : null;
           const rating = getCalificacionPropia(r, 'DUENIO');
-          const avatarUrl = p.profilePhotoUrl || p.avatar || null;
+          const avatarUrl = withCacheBuster(p.profilePhotoUrl || p.avatar || null, ts);
           // #region agent log
           fetch('http://127.0.0.1:7242/ingest/9d78051a-2c08-4bab-97c6-65d27df68b00',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({runId:'mis-conexiones-avatar',hypothesisId:'H2',location:'useMisConexiones.js:refreshConexiones',message:'Avatar prestador mapeado',data:{hasAvatarUrl:Boolean(avatarUrl),avatarUrlPrefix:(avatarUrl || '').slice(0,12)},timestamp:Date.now()})}).catch(()=>{});
           // #endregion
@@ -90,6 +92,7 @@ export const useMisConexiones = () => {
       } else if (role === ROLES.PRESTADOR && prestadorId) {
         const res = await getReservasByPrestador(prestadorId);
         const reservas = res?.reservas || [];
+        const tsPrestador = Date.now();
         const list = reservas.map((r) => {
           const d = r.duenio || {};
           const dom = d.domicilio || {};
@@ -110,7 +113,7 @@ export const useMisConexiones = () => {
             ? (tieneDatosMascota ? `${descripcionDuenio.slice(0, 80)}${descripcionDuenio.length > 80 ? '…' : ''} · Mascota: ${mascota.nombre || '—'}` : descripcionDuenio)
             : (tieneDatosMascota ? `Mascota: ${mascota.nombre || '—'}${mascota.tipo ? ` (${mascota.tipo})` : ''}` : 'Sin descripción');
           const rating = getCalificacionPropia(r, 'PRESTADOR');
-          const avatarUrl = d.avatar || null;
+          const avatarUrl = withCacheBuster(d.avatar || null, tsPrestador);
           // #region agent log
           fetch('http://127.0.0.1:7242/ingest/9d78051a-2c08-4bab-97c6-65d27df68b00',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({runId:'mis-conexiones-avatar',hypothesisId:'H3',location:'useMisConexiones.js:refreshConexiones',message:'Avatar duenio mapeado',data:{hasAvatarUrl:Boolean(avatarUrl),avatarUrlPrefix:(avatarUrl || '').slice(0,12)},timestamp:Date.now()})}).catch(()=>{});
           // #endregion
