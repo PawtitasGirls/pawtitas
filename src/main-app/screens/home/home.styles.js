@@ -58,7 +58,6 @@ export const styles = StyleSheet.create({
     backgroundColor: colors.background,
   },
   scrollContent: {
-    flexGrow: 1,
     paddingBottom: 20,
   },
   categoriesContainer: {
