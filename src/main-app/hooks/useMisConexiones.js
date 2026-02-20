@@ -62,12 +62,17 @@ export const useMisConexiones = () => {
             ? { nombre: mascotaRaw.nombre ?? '', tipo: mascotaRaw.tipo ?? '', raza: mascotaRaw.raza ?? '' }
             : null;
           const rating = getCalificacionPropia(r, 'DUENIO');
+          const avatarUrl = p.profilePhotoUrl || p.avatar || null;
+          // #region agent log
+          fetch('http://127.0.0.1:7242/ingest/9d78051a-2c08-4bab-97c6-65d27df68b00',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({runId:'mis-conexiones-avatar',hypothesisId:'H2',location:'useMisConexiones.js:refreshConexiones',message:'Avatar prestador mapeado',data:{hasAvatarUrl:Boolean(avatarUrl),avatarUrlPrefix:(avatarUrl || '').slice(0,12)},timestamp:Date.now()})}).catch(()=>{});
+          // #endregion
           return {
             id: r.id,
             reservaId: r.id,
             prestadorUsuarioId: p.usuarioId ?? null,
             nombre: p.nombreCompleto || 'Sin nombre',
             descripcion: serv.descripcion || 'Sin descripción',
+            avatarUrl,
             precio: serv.precio != null ? `$${Number(serv.precio).toLocaleString('es-AR')}` : 'A convenir',
             ubicacion: dom.ubicacion || 'No especificado',
             disponibilidad: serv.horarios || 'A convenir',
@@ -105,6 +110,10 @@ export const useMisConexiones = () => {
             ? (tieneDatosMascota ? `${descripcionDuenio.slice(0, 80)}${descripcionDuenio.length > 80 ? '…' : ''} · Mascota: ${mascota.nombre || '—'}` : descripcionDuenio)
             : (tieneDatosMascota ? `Mascota: ${mascota.nombre || '—'}${mascota.tipo ? ` (${mascota.tipo})` : ''}` : 'Sin descripción');
           const rating = getCalificacionPropia(r, 'PRESTADOR');
+          const avatarUrl = d.avatar || null;
+          // #region agent log
+          fetch('http://127.0.0.1:7242/ingest/9d78051a-2c08-4bab-97c6-65d27df68b00',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({runId:'mis-conexiones-avatar',hypothesisId:'H3',location:'useMisConexiones.js:refreshConexiones',message:'Avatar duenio mapeado',data:{hasAvatarUrl:Boolean(avatarUrl),avatarUrlPrefix:(avatarUrl || '').slice(0,12)},timestamp:Date.now()})}).catch(()=>{});
+          // #endregion
           return {
             id: r.id,
             reservaId: r.id,
@@ -113,6 +122,7 @@ export const useMisConexiones = () => {
             descripcion,
             descripcionDuenio: descripcionDuenio || null,
             mascota: tieneDatosMascota ? mascota : null,
+            avatarUrl,
             precio: '',
             ubicacion: dom.ubicacion || 'No especificado',
             disponibilidad: '',
