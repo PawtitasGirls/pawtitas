@@ -292,7 +292,7 @@ const HomeScreen = () => {
         )}
 
         {isPrestadorActivo && (
-          <MercadoPagoConnect prestadorId={user?.id} />
+          <MercadoPagoConnect prestadorId={user?.prestadorId ?? user?.id} />
         )}
       </ScrollView>
 
