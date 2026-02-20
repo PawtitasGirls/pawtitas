@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "start": "expo start",
+    "start": "node src/server.js",
     "start:app": "cross-env EXPO_PUBLIC_APP_TYPE=app expo start",
     "start:landing": "cross-env EXPO_PUBLIC_APP_TYPE=landing expo start",
     "android": "expo start --android",
