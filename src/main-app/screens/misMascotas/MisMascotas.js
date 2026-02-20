@@ -13,6 +13,7 @@ import {
   deleteMascota,
   uploadMascotaPhoto,
 } from '../../services/api/apiMascota';
+import { withCacheBuster } from '../../../shared/utils';
 
 const API_BASE = process.env.EXPO_PUBLIC_API_BASE_URL || '';
 
@@ -71,7 +72,7 @@ const MisMascotas = () => {
           requiereMedicacion: m.condiciones?.includes('Medicamentos') || false,
           cuidadoEspecial: m.condiciones?.includes('Cuidado especial') || false,
           condicionEspecial: m.condiciones,
-          avatarUri: m.photoUrl ? `${API_BASE}${m.photoUrl}?t=${Date.now()}` : null,
+          avatarUri: m.photoUrl ? withCacheBuster(`${API_BASE}${m.photoUrl}`) : null,
         }));
         // #region agent log
         fetch('http://127.0.0.1:7242/ingest/9d78051a-2c08-4bab-97c6-65d27df68b00',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({runId:'mascota-photo-debug',hypothesisId:'H1',location:'MisMascotas.js:loadMascotas',message:'Mapeo avatarUri mascotas',data:{apiBase:API_BASE,hasMascotas:Boolean(response.mascotas?.length),samplePhotoUrl:response.mascotas?.[0]?.photoUrl || null,sampleAvatarUri:mascotasMapeadas?.[0]?.avatarUri || null},timestamp:Date.now()})}).catch(()=>{});

@@ -9,6 +9,7 @@ import { PerfilInfoCard, MascotasSection, LogoutBtn, MenuConfig, ContactoService
 import { useAuth } from '../../contexts';
 import { ROLES } from '../../constants/roles';
 import { clearAuthToken, getUserProfile } from '../../services';
+import { withCacheBuster } from '../../../shared/utils';
 
 const formatDate = (value) => {
   if (!value) return 'Pendiente';
@@ -81,7 +82,7 @@ const PerfilScreen = () => {
 
     return {
       id: user.id,
-      avatarUri: user.avatar || null,
+      avatarUri: withCacheBuster(user.avatar) ?? null,
       name: buildFullName(user),
       email: user.email || '',
       phone: user.celular || user.telefono || '',

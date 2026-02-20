@@ -1,4 +1,5 @@
 import { getPrestadoresPorPerfil } from '../../services';
+import { withCacheBuster } from '../../../shared/utils';
 
 export class PrestadorController {
   static async getPrestadores(perfil, ciudad = null) {
@@ -40,6 +41,7 @@ export class PrestadorController {
       usuarioId: usuarioId?.toString?.() || usuarioId || '',
       servicioId: servicio?.id?.toString?.() || servicio?.id || '',
       nombre: nombreCompleto || 'Sin nombre',
+      avatarUrl: withCacheBuster(prestador.profilePhotoUrl || prestador.avatar),
       rating: Number(avgRating ?? prestador?.rating ?? 0),
       reviewsCount: Number(reviewsCount || 0),
       descripcion: servicio?.descripcion || 'Sin descripción',
