@@ -28,7 +28,7 @@ console.log('[osmService] Fuente:', process.env.EXPO_PUBLIC_ORS_API_KEY ? '.env'
 
 // Headers requeridos por Nominatim
 const NOMINATIM_HEADERS = {
-  'User-Agent': 'Pawtitas/1.0',
+  'User-Agent': 'Pawtitas/1.0 (contact: contacto@pawtitas-ar.com)',
 };
 
 // Timeout y configuración unificada para todas las plataformas
