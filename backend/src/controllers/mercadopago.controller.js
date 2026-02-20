@@ -227,8 +227,7 @@ async function webhookController(req, res) {
 
     console.log('[WEBHOOK] Datos extraídos:', { type, action, dataId });
 
-    // Manejar merchant_order
-    if (type === 'merchant_order') {
+    if (type === 'merchant_order' || type === 'topic_merchant_order_wh') {
       console.log(`[WEBHOOK] Procesando merchant_order ${dataId}...`);
       
       if (!dataId) {
@@ -271,7 +270,7 @@ async function webhookController(req, res) {
 
     // Manejar payment directo
     if (type !== 'payment') {
-      console.log(`[WEBHOOK] Tipo "${type}" ignorado (solo procesamos "payment" y "merchant_order")`);
+      console.log(`[WEBHOOK] Tipo "${type}" ignorado (solo procesamos "payment", "merchant_order" y "topic_merchant_order_wh")`);
       return res.status(200).json({ received: true });
     }
 
