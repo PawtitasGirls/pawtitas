@@ -24,6 +24,7 @@ const MapaScreen = () => {
   const { userLocation, getCurrentLocation, isLoadingLocation, isLocationEnabled } = useLocation();
 
   const [state, setState] = useState(MapaController.getInitialState());
+  const [isMapLoading, setIsMapLoading] = useState(true);
 
   const {
     region,
@@ -293,13 +294,21 @@ const MapaScreen = () => {
   return (
     <TouchableWithoutFeedback onPress={handleDismissKeyboard}>
       <View style={styles.container}>
-        {/* Mapa */}
+        {isMapLoading && (
+          <View style={styles.mapLoadingOverlay}>
+            <ActivityIndicator size="small" color={MAPA_CONFIG.MARKER_COLORS.USER} />
+            <Text style={styles.mapLoadingText}>
+              Cargando el mapa… Esto puede demorar unos minutos en la primera sesión.
+            </Text>
+          </View>
+        )}
         <MapView
           ref={mapRef}
           style={styles.map}
           provider={PROVIDER_DEFAULT}
           region={region}
           showsCompass={false}
+          onMapReady={() => setIsMapLoading(false)}
           onRegionChangeComplete={handleRegionChangeComplete}
           showsUserLocation={MapaController.hasUserLocation(userLocation)}
           showsMyLocationButton={false}

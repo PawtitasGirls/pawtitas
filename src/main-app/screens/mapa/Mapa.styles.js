@@ -11,6 +11,21 @@ export const styles = StyleSheet.create({
     flex: 1,
   },
 
+  mapLoadingOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(255,255,255,0.9)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 24,
+    zIndex: 5,
+  },
+  mapLoadingText: {
+    marginTop: 12,
+    fontSize: 14,
+    color: colors.text.primary,
+    textAlign: 'center',
+  },
+
   // Barra de búsqueda
   topControls: {
     position: 'absolute',
