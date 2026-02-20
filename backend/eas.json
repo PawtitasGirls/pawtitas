@@ -1,6 +1,6 @@
 {
   "cli": {
-    "version": ">= 18.0.1",
+    "version": ">= 16.32.0",
     "appVersionSource": "remote"
   },
   "build": {
@@ -12,10 +12,7 @@
       "distribution": "internal"
     },
     "production": {
-      "autoIncrement": true,
-      "env": {
-        "EXPO_PUBLIC_API_BASE_URL": "https://pawtitas.up.railway.app"
-      }
+      "autoIncrement": true
     }
   },
   "submit": {
