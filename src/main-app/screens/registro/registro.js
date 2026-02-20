@@ -14,6 +14,7 @@ import { MensajeFlotante, CampoSeleccion, CampoFecha } from "../../components";
 import { RegistroController, REGISTRO_CONFIG, ESPECIALIDADES_OPTIONS, PERFIL_OPTIONS, GENERO_OPTIONS } from "../../controller";
 import { registrarUsuario } from "../../services";
 import { styles } from "./registro.styles";
+import { colors } from "../../../shared/styles";
 
 const SUCCESS_MESSAGE_DUEÑO = "¡Bienvenido/a! Tu registro fue exitoso, ya podés usar la app.";
 const SUCCESS_MESSAGE_PRESTADOR = "¡Listo! Tu registro fue exitoso. Revisaremos tus datos y te notificaremos por correo cuando tu cuenta esté habilitada.";
@@ -262,6 +263,7 @@ export default function RegistroScreen({ navigation }) {
 
       <TextInput
         placeholder="Nombre"
+        placeholderTextColor={colors.text.disabled}
         style={[styles.input, errors.nombre && styles.inputError]}
         value={form.nombre}
         onChangeText={(v) => handleInputChange("nombre", v)}
@@ -271,6 +273,7 @@ export default function RegistroScreen({ navigation }) {
 
       <TextInput
         placeholder="Apellido"
+        placeholderTextColor={colors.text.disabled}
         style={[styles.input, errors.apellido && styles.inputError]}
         value={form.apellido}
         onChangeText={(v) => handleInputChange("apellido", v)}
@@ -347,6 +350,7 @@ export default function RegistroScreen({ navigation }) {
 
       <TextInput
         placeholder="Correo Electrónico"
+        placeholderTextColor={colors.text.disabled}
         style={[styles.input, errors.correo && styles.inputError]}
         keyboardType="email-address"
         textContentType="emailAddress"
@@ -358,6 +362,7 @@ export default function RegistroScreen({ navigation }) {
 
       <TextInput
         placeholder="Contraseña"
+        placeholderTextColor={colors.text.disabled}
         style={[styles.input, errors.password && styles.inputError]}
         secureTextEntry={true}
         value={form.password}
@@ -368,6 +373,7 @@ export default function RegistroScreen({ navigation }) {
 
       <TextInput
         placeholder="Número Telefónico"
+        placeholderTextColor={colors.text.disabled}
         style={[styles.input, errors.telefono && styles.inputError]}
         keyboardType="phone-pad"
         value={form.telefono}
@@ -378,6 +384,7 @@ export default function RegistroScreen({ navigation }) {
 
       <TextInput
         placeholder="Calle, Altura, Barrio/Ciudad"
+        placeholderTextColor={colors.text.disabled}
         style={[styles.input, errors.ubicacion && styles.inputError]}
         value={form.ubicacion}
         onChangeText={(v) => handleInputChange("ubicacion", v)}
@@ -387,6 +394,7 @@ export default function RegistroScreen({ navigation }) {
 
       <TextInput
         placeholder="Documento de Identidad"
+        placeholderTextColor={colors.text.disabled}
         style={[styles.input, errors.documento && styles.inputError]}
         keyboardType="numeric"
         value={form.documento}
