@@ -248,12 +248,16 @@ export const useMisConexiones = () => {
         return;
       }
 
-      const url = res.sandboxInitPoint || res.initPoint;
+      const useSandbox = process.env.EXPO_PUBLIC_USE_MP_SANDBOX === 'true';
+      const url = useSandbox && res.sandboxInitPoint
+        ? res.sandboxInitPoint
+        : (res.initPoint || res.sandboxInitPoint);
 
       if (__DEV__) {
         console.log('🧾 [PAGO] URLs recibidas de preferencia:', {
           initPoint: res.initPoint,
           sandboxInitPoint: res.sandboxInitPoint,
+          useSandbox,
           urlSeleccionada: url,
         });
       }
