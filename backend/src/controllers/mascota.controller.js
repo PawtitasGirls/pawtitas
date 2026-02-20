@@ -1,4 +1,5 @@
 const mascotaRepo = require('../repositories/mascota.repo');
+const prisma = require('../config/prisma');
 
 async function getMascotasByDuenioController(req, res) {
   try {
@@ -22,13 +23,31 @@ async function getMascotasByDuenioController(req, res) {
     }
 
     const mascotas = await mascotaRepo.findByDuenioId(id);
+    const mascotaIds = mascotas.map((m) => m.id).filter((mId) => mId != null);
+    const fotos = mascotaIds.length
+      ? await prisma.mascotaFoto.findMany({
+          where: { mascotaId: { in: mascotaIds }, field: 'profilePhoto' },
+          select: { mascotaId: true },
+        })
+      : [];
+    const fotoByMascotaId = fotos.reduce((acc, item) => {
+      const key = item.mascotaId?.toString?.() || String(item.mascotaId);
+      acc[key] = true;
+      return acc;
+    }, {});
 
     // Serializar BigInt a string para JSON
     const mascotasSerializadas = mascotas.map(m => ({
       ...m,
       id: m.id?.toString?.() || m.id,
       duenioId: m.duenioId?.toString?.() || m.duenioId,
+      photoUrl: fotoByMascotaId[m.id?.toString?.() || String(m.id)]
+        ? `/api/mascotas/${m.id?.toString?.() || m.id}/photo`
+        : null,
     }));
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/9d78051a-2c08-4bab-97c6-65d27df68b00',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({runId:'mascota-photo-debug',hypothesisId:'H1',location:'mascota.controller.js:getMascotasByDuenioController',message:'Mascotas serializadas con photoUrl',data:{host:req?.headers?.host || null,protocol:req?.protocol || null,hasMascotas:Boolean(mascotasSerializadas?.length),samplePhotoUrl:mascotasSerializadas?.[0]?.photoUrl || null},timestamp:Date.now()})}).catch(()=>{});
+    // #endregion
 
     return res.json({ 
       success: true, 
@@ -46,6 +65,9 @@ async function getMascotasByDuenioController(req, res) {
 async function createMascotaController(req, res) {
   try {
     const { nombre, tipo, raza, edad, edadUnidad, condiciones, infoAdicional, genero, duenioId } = req.body;
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/9d78051a-2c08-4bab-97c6-65d27df68b00',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({runId:'mascota-photo-debug',hypothesisId:'H1',location:'mascota.controller.js:createMascotaController',message:'Crear mascota: body recibido',data:{hasNombre:Boolean(nombre),hasTipo:Boolean(tipo),hasRaza:Boolean(raza),hasEdad:edad!=null,hasGenero:Boolean(genero),hasDuenioId:Boolean(duenioId)},timestamp:Date.now()})}).catch(()=>{});
+    // #endregion
 
     // Validaciones
     if (!nombre || !tipo || !raza || edad == null || !genero || !duenioId) {
@@ -101,6 +123,9 @@ async function updateMascotaController(req, res) {
   try {
     const { id } = req.params;
     const { nombre, tipo, raza, edad, edadUnidad, condiciones, infoAdicional, genero } = req.body;
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/9d78051a-2c08-4bab-97c6-65d27df68b00',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({runId:'mascota-photo-debug',hypothesisId:'H2',location:'mascota.controller.js:updateMascotaController',message:'Actualizar mascota: body recibido',data:{hasId:Boolean(id),hasNombre: nombre !== undefined,hasTipo: tipo !== undefined,hasRaza: raza !== undefined,hasEdad: edad !== undefined,hasGenero: genero !== undefined},timestamp:Date.now()})}).catch(()=>{});
+    // #endregion
 
     if (!id) {
       return res.status(400).json({ 
@@ -210,9 +235,103 @@ async function deleteMascotaController(req, res) {
   }
 }
 
+async function uploadMascotaPhotoController(req, res) {
+  try {
+    const { id } = req.params;
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/9d78051a-2c08-4bab-97c6-65d27df68b00',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({runId:'mascota-photo-debug',hypothesisId:'H3',location:'mascota.controller.js:uploadMascotaPhotoController',message:'Upload foto mascota: entrada',data:{hasId:Boolean(id),hasFile:Boolean(req?.file?.buffer),mimeType:req?.file?.mimetype || null},timestamp:Date.now()})}).catch(()=>{});
+    // #endregion
+    if (!id) {
+      return res.status(400).json({ success: false, message: 'Falta ID de mascota' });
+    }
+
+    let mascotaId;
+    try {
+      mascotaId = BigInt(id);
+    } catch (error) {
+      return res.status(400).json({ success: false, message: 'ID inválido' });
+    }
+
+    const mascotaExistente = await mascotaRepo.findById(mascotaId);
+    if (!mascotaExistente) {
+      return res.status(404).json({ success: false, message: 'Mascota no encontrada' });
+    }
+
+    const file = req.file;
+    if (!file || !file.buffer) {
+      return res.status(400).json({
+        success: false,
+        message: 'Formato incorrecto, solo puede ser jpg, jpeg o png',
+      });
+    }
+
+    await prisma.mascotaFoto.deleteMany({
+      where: { mascotaId, field: 'profilePhoto' },
+    });
+
+    await prisma.mascotaFoto.create({
+      data: {
+        mascotaId,
+        field: 'profilePhoto',
+        fileName: file.originalname || 'mascota-photo',
+        mimeType: file.mimetype || 'application/octet-stream',
+        size: typeof file.size === 'number' ? file.size : file.buffer.length,
+        data: file.buffer,
+      },
+    });
+
+    return res.json({
+      success: true,
+      data: { downloadUrl: `/api/mascotas/${id}/photo` },
+    });
+  } catch (err) {
+    console.error('Error al subir foto de mascota:', err);
+    return res.status(500).json({ success: false, message: 'Error al guardar foto de mascota' });
+  }
+}
+
+async function getMascotaPhotoController(req, res) {
+  try {
+    const { id } = req.params;
+    if (!id) {
+      return res.status(400).json({ success: false, message: 'Falta ID de mascota' });
+    }
+
+    let mascotaId;
+    try {
+      mascotaId = BigInt(id);
+    } catch (error) {
+      return res.status(400).json({ success: false, message: 'ID inválido' });
+    }
+
+    const foto = await prisma.mascotaFoto.findFirst({
+      where: { mascotaId, field: 'profilePhoto' },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    if (!foto) {
+      return res.status(404).json({
+        success: false,
+        message: 'No hay foto de mascota cargada',
+      });
+    }
+
+    const mimeType = foto.mimeType || 'application/octet-stream';
+    const fileName = foto.fileName || 'mascota-photo';
+    res.setHeader('Content-Type', mimeType);
+    res.setHeader('Content-Disposition', `inline; filename="${fileName}"`);
+    res.send(foto.data);
+  } catch (err) {
+    console.error('Error al descargar foto de mascota:', err);
+    return res.status(500).json({ success: false, message: 'Error al descargar' });
+  }
+}
+
 module.exports = {
   getMascotasByDuenioController,
   createMascotaController,
   updateMascotaController,
   deleteMascotaController,
+  uploadMascotaPhotoController,
+  getMascotaPhotoController,
 };

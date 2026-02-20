@@ -80,6 +80,7 @@ const MEDICAL_CHECKBOXES = [
 
 const getInitialFormData = (mascotaData = null) => ({
   avatarUri: mascotaData?.avatarUri || null,
+  avatarAsset: null,
   nombre: mascotaData?.nombre || '',
   edad: mascotaData?.edad ? String(mascotaData.edad) : '',
   edadUnidad: mascotaData?.edadUnidad || FORM_CONFIG.DEFAULT_AGE_UNIT,
@@ -251,7 +252,10 @@ const MascotaFormModal = ({
                 iconName="paw"
                 size={64}
                 imageUri={formData.avatarUri}
-                onImageSelected={(image) => handleInputChange('avatarUri', image.uri)}
+                onImageSelected={(image) => {
+                  handleInputChange('avatarUri', image.uri);
+                  handleInputChange('avatarAsset', image);
+                }}
               />
             </View>
             <View style={styles.inputGroup}>

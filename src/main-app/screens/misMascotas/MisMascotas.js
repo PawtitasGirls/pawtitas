@@ -6,7 +6,15 @@ import { styles } from './misMascotas.styles';
 import { ScreenHeader, MenuInferior, FloatingAddBtn, MensajeFlotante, ConfirmacionDialogo as ConfirmacionDialogo, useNavbarHeight } from '../../components';
 import { MascotaCard, EmptyMascotasList, MascotaFormModal } from './components';
 import { useAuth } from '../../contexts/AuthContext';
-import { getMascotasByDuenio, createMascota, updateMascota, deleteMascota } from '../../services/api/apiMascota';
+import {
+  getMascotasByDuenio,
+  createMascota,
+  updateMascota,
+  deleteMascota,
+  uploadMascotaPhoto,
+} from '../../services/api/apiMascota';
+
+const API_BASE = process.env.EXPO_PUBLIC_API_BASE_URL || '';
 
 const MisMascotas = () => {
   const navigation = useNavigation();
@@ -63,7 +71,11 @@ const MisMascotas = () => {
           requiereMedicacion: m.condiciones?.includes('Medicamentos') || false,
           cuidadoEspecial: m.condiciones?.includes('Cuidado especial') || false,
           condicionEspecial: m.condiciones,
+          avatarUri: m.photoUrl ? `${API_BASE}${m.photoUrl}?t=${Date.now()}` : null,
         }));
+        // #region agent log
+        fetch('http://127.0.0.1:7242/ingest/9d78051a-2c08-4bab-97c6-65d27df68b00',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({runId:'mascota-photo-debug',hypothesisId:'H1',location:'MisMascotas.js:loadMascotas',message:'Mapeo avatarUri mascotas',data:{apiBase:API_BASE,hasMascotas:Boolean(response.mascotas?.length),samplePhotoUrl:response.mascotas?.[0]?.photoUrl || null,sampleAvatarUri:mascotasMapeadas?.[0]?.avatarUri || null},timestamp:Date.now()})}).catch(()=>{});
+        // #endregion
         setMascotas(mascotasMapeadas);
         updateUser({ petsCount: mascotasMapeadas.length });
       }
@@ -101,6 +113,9 @@ const MisMascotas = () => {
   const handleSaveMascota = async (formData) => {
     try {
       const duenioId = user?.duenioId || user?.id;
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/9d78051a-2c08-4bab-97c6-65d27df68b00',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({runId:'mascota-photo-debug',hypothesisId:'H1',location:'MisMascotas.js:handleSaveMascota',message:'Inicio guardar mascota',data:{hasDuenioId:Boolean(duenioId),isEditing:Boolean(editingMascota?.id),hasAvatarAsset:Boolean(formData?.avatarAsset?.uri)},timestamp:Date.now()})}).catch(()=>{});
+      // #endregion
       
       if (!duenioId) {
         setMessage({ 
@@ -124,10 +139,49 @@ const MisMascotas = () => {
         duenioId: duenioId,
       };
 
+      const resolveMascotaPhotoMimeType = (asset) => {
+        const raw = (asset?.mimeType || '').toLowerCase();
+        if (raw === 'image/jpeg' || raw === 'image/png') return raw;
+        if (raw === 'image/jpg') return 'image/jpeg';
+        const source = (asset?.fileName || asset?.uri || '').toLowerCase();
+        if (source.endsWith('.jpeg') || source.endsWith('.jpg')) return 'image/jpeg';
+        if (source.endsWith('.png')) return 'image/png';
+        return null;
+      };
+
+      const uploadFotoMascotaSiCorresponde = async (mascotaId) => {
+        if (!formData?.avatarAsset?.uri) return;
+        const mimeType = resolveMascotaPhotoMimeType(formData.avatarAsset);
+        if (!mimeType) {
+          setMessage({
+            type: "error",
+            text: "Formato incorrecto, solo puede ser jpg, jpeg o png",
+          });
+          setShowMensajeFlotante(true);
+          return;
+        }
+        const extension = mimeType === 'image/png' ? 'png' : 'jpg';
+        const name = formData.avatarAsset?.fileName || `mascota-photo-${Date.now()}.${extension}`;
+        const uploadData = new FormData();
+        uploadData.append("photo", {
+          uri: formData.avatarAsset.uri,
+          name,
+          type: mimeType,
+        });
+        await uploadMascotaPhoto(mascotaId, uploadData);
+      };
+
       if (editingMascota) {
         const response = await updateMascota(editingMascota.id, mascotaData);
         
         if (response.success) {
+          // #region agent log
+          fetch('http://127.0.0.1:7242/ingest/9d78051a-2c08-4bab-97c6-65d27df68b00',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({runId:'mascota-photo-debug',hypothesisId:'H2',location:'MisMascotas.js:handleSaveMascota',message:'Update mascota OK',data:{hasId:Boolean(editingMascota?.id),hasResponse:Boolean(response?.success)},timestamp:Date.now()})}).catch(()=>{});
+          // #endregion
+          await uploadFotoMascotaSiCorresponde(editingMascota.id);
+          // #region agent log
+          fetch('http://127.0.0.1:7242/ingest/9d78051a-2c08-4bab-97c6-65d27df68b00',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({runId:'mascota-photo-debug',hypothesisId:'H3',location:'MisMascotas.js:handleSaveMascota',message:'Upload foto (edit) completado',data:{hasAvatarAsset:Boolean(formData?.avatarAsset?.uri)},timestamp:Date.now()})}).catch(()=>{});
+          // #endregion
           await loadMascotas();
           
           setMessage({ 
@@ -139,6 +193,16 @@ const MisMascotas = () => {
         const response = await createMascota(mascotaData);
         
         if (response.success) {
+          // #region agent log
+          fetch('http://127.0.0.1:7242/ingest/9d78051a-2c08-4bab-97c6-65d27df68b00',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({runId:'mascota-photo-debug',hypothesisId:'H2',location:'MisMascotas.js:handleSaveMascota',message:'Create mascota OK',data:{hasResponse:Boolean(response?.success),hasMascotaId:Boolean(response?.mascota?.id)},timestamp:Date.now()})}).catch(()=>{});
+          // #endregion
+          const nuevaMascotaId = response?.mascota?.id;
+          if (nuevaMascotaId) {
+            await uploadFotoMascotaSiCorresponde(nuevaMascotaId);
+          }
+          // #region agent log
+          fetch('http://127.0.0.1:7242/ingest/9d78051a-2c08-4bab-97c6-65d27df68b00',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({runId:'mascota-photo-debug',hypothesisId:'H3',location:'MisMascotas.js:handleSaveMascota',message:'Upload foto (create) completado',data:{hasAvatarAsset:Boolean(formData?.avatarAsset?.uri),hasMascotaId:Boolean(response?.mascota?.id)},timestamp:Date.now()})}).catch(()=>{});
+          // #endregion
           await loadMascotas();
           
           setMessage({ 
@@ -152,6 +216,9 @@ const MisMascotas = () => {
       
       handleCloseModal();
     } catch (error) {
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/9d78051a-2c08-4bab-97c6-65d27df68b00',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({runId:'mascota-photo-debug',hypothesisId:'H4',location:'MisMascotas.js:handleSaveMascota',message:'Error al guardar mascota',data:{errorMessage:error?.message || 'sin mensaje'},timestamp:Date.now()})}).catch(()=>{});
+      // #endregion
       console.error('Error al guardar mascota:', error);
       setMessage({ 
         type: "error", 
