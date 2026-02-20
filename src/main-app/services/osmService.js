@@ -6,17 +6,6 @@ import { Platform } from 'react-native';
 const NOMINATIM_BASE = 'https://nominatim.openstreetmap.org';
 // Servidores Overpass alternativos (fallback)
 // Android usa un orden diferente para mejor rendimiento
-const OVERPASS_SERVERS = Platform.OS === 'android' 
-  ? [
-      'https://overpass.kumi.systems/api/interpreter',
-      'https://overpass-api.de/api/interpreter',
-      'https://overpass.openstreetmap.ru/api/interpreter',
-    ]
-  : [
-      'https://overpass-api.de/api/interpreter',
-      'https://overpass.kumi.systems/api/interpreter',
-      'https://overpass.openstreetmap.ru/api/interpreter',
-    ];
 const ORS_BASE = 'https://api.openrouteservice.org/v2';
 
 // OpenRouteService - Lee desde .env con fallback
@@ -33,8 +22,6 @@ const NOMINATIM_HEADERS = {
 
 // Timeout y configuración unificada para todas las plataformas
 const DEFAULT_TIMEOUT = 30000; // 30 segundos para todas las plataformas
-const MAX_RETRIES = 3; // 3 reintentos para todas las plataformas
-const RETRY_DELAY = 1000; // 1 segundo base
 
 const fetchJsonWithTimeout = async (
   url,
@@ -150,41 +137,34 @@ const mapOverpassPOI = (element, baseData) => {
   };
 };
 
-// Búsqueda de direcciones usando Nominatim (forward geocoding)
+// Búsqueda de direcciones usando Nominatim vía proxy del backend
 export const searchAddress = async (query, limit = 5, userLocation = null) => {
   if (!query || query.trim().length < 3) {
     return [];
   }
 
   try {
-    let url = `${NOMINATIM_BASE}/search?format=json&q=${encodeURIComponent(query)}&limit=${limit}&addressdetails=1`;
-    
-    // Restringir búsqueda al área del usuario
-    if (userLocation) {
-      const { latitude, longitude } = userLocation;
-      const delta = 15; // ~1500-1650km aproximadamente (cubre todo el país)
-      
-      const viewbox = [
-        longitude - delta,
-        latitude + delta,
-        longitude + delta,
-        latitude - delta,
-      ].join(',');
-      
-      url += `&viewbox=${viewbox}&bounded=1`;
+    const baseUrl = process.env.EXPO_PUBLIC_API_BASE_URL;
+    if (!baseUrl) {
+      throw new Error('EXPO_PUBLIC_API_BASE_URL no configurada');
     }
-    
+
+    let url = `${baseUrl.replace(/\/$/, '')}/api/nominatim?q=${encodeURIComponent(query)}&limit=${limit}`;
+
+    if (userLocation && userLocation.latitude != null && userLocation.longitude != null) {
+      url += `&latitude=${userLocation.latitude}&longitude=${userLocation.longitude}`;
+    }
+
     const data = await fetchJsonWithTimeout(
       url,
-      { headers: NOMINATIM_HEADERS },
+      { method: 'GET' },
       {
         timeoutMs: DEFAULT_TIMEOUT,
         timeoutMessage: 'Timeout: La búsqueda tardó demasiado',
-        errorPrefix: 'Nominatim',
+        errorPrefix: 'Nominatim proxy',
       }
     );
-    
-    // Mapear a formato consistente
+
     return data.map(item => ({
       id: item.place_id,
       name: item.display_name,
