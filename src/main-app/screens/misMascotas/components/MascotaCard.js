@@ -17,6 +17,9 @@ const MascotaCard = ({ mascota, onPress, onDelete }) => {
     infoAdicional, 
     condicionEspecial
   } = mascota;
+  // #region agent log
+  fetch('http://127.0.0.1:7242/ingest/9d78051a-2c08-4bab-97c6-65d27df68b00',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({runId:'mascota-photo-debug',hypothesisId:'H2',location:'MascotaCard.js:render',message:'Render mascota card',data:{hasAvatarUri:Boolean(avatarUri),avatarUriPrefix:(avatarUri || '').slice(0,12)},timestamp:Date.now()})}).catch(()=>{});
+  // #endregion
 
   // Formateamos el tipo combinando especie y raza
   const tipo = `${especie}${raza ? ' ' + raza : ''}`;

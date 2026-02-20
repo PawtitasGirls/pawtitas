@@ -11,6 +11,8 @@ export const clearAuthToken = () => {
   authToken = null;
 };
 
+export const getAuthToken = () => authToken;
+
 export async function apiUsuario(path, options = {}) {
   const isFormData = typeof FormData !== 'undefined' && options.body instanceof FormData;
   const headers = { ...(options.headers || {}) };

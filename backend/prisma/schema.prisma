@@ -85,9 +85,25 @@ model mascota {
   duenioId      BigInt
   duenio        duenio    @relation(fields: [duenioId], references: [id], map: "Mascota_duenioId_fkey")
   reserva       reserva[]
+  mascotaFoto   mascotaFoto[]
 
   @@index([duenioId], map: "Mascota_duenioId_fkey")
   @@map("Mascota")
+}
+
+model mascotaFoto {
+  id        BigInt   @id @default(autoincrement())
+  mascotaId BigInt
+  field     String
+  fileName  String
+  mimeType  String
+  size      Int
+  data      Bytes
+  createdAt DateTime @default(now())
+  mascota   mascota  @relation(fields: [mascotaId], references: [id], map: "MascotaFoto_mascotaId_fkey")
+
+  @@index([mascotaId], map: "MascotaFoto_mascotaId_fkey")
+  @@map("MascotaFoto")
 }
 
 model mensaje {
