@@ -57,6 +57,11 @@ const appConfigs = {
     },
     android: {
       package: "com.pawtitas.app",
+      config: {
+        googleMaps: {
+          apiKey: process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY,
+        },
+      },
       adaptiveIcon: {
         foregroundImage: "./assets/icon.png",
         backgroundColor: "#FDFDFD"
