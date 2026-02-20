@@ -408,6 +408,8 @@ export default function RegistroScreen({ navigation }) {
         selectedValue={perfil}
         style={styles.picker}
         onValueChange={handlePerfilChange}
+        itemStyle={Platform.OS === 'ios' ? styles.pickerItem : undefined}
+        dropdownIconColor={colors.text.primary}
       >
         {PERFIL_OPTIONS.map((option) => (
           <Picker.Item
@@ -426,6 +428,8 @@ export default function RegistroScreen({ navigation }) {
             selectedValue={especialidad}
             style={styles.picker}
             onValueChange={handleEspecialidadChange}
+            itemStyle={Platform.OS === 'ios' ? styles.pickerItem : undefined}
+            dropdownIconColor={colors.text.primary}
           >
             {ESPECIALIDADES_OPTIONS.map((option) => (
               <Picker.Item

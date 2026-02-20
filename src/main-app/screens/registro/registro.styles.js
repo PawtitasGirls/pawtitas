@@ -64,6 +64,14 @@ export const styles = StyleSheet.create({
       borderRadius: 12,
       marginBottom: 12,
       backgroundColor: colors.surface,
+      color: colors.text.primary,
+      fontSize: 15,
+      fontFamily: typography.fontFamily.body,
+    },
+    pickerItem: {
+      color: colors.text.primary,
+      fontSize: 15,
+      fontFamily: typography.fontFamily.body,
     },
     clipButton: {
       borderWidth: 1.5,
