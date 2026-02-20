@@ -366,6 +366,24 @@ async function updatePerfilController(req, res) {
             where: { id: existingLink.servicioId },
             data: servicioData,
           });
+
+          const precioUnitario = servicioData.precio;
+          const cantidad = 1;
+          const subtotal = Prisma.Decimal.mul(precioUnitario, cantidad);
+          const porcentajeComision = parseFloat(process.env.COMISION_PORCENTAJE || '10');
+          const comision = porcentajeComision > 0
+            ? Prisma.Decimal.div(Prisma.Decimal.mul(subtotal, porcentajeComision), 100)
+            : new Prisma.Decimal(0);
+          const montoTotal = Prisma.Decimal.add(subtotal, comision);
+
+          await tx.reserva.updateMany({
+            where: {
+              prestadorId: prestador.id,
+              servicioId: existingLink.servicioId,
+              estado: 'PENDIENTE_PAGO',
+            },
+            data: { precioUnitario, comision, montoTotal },
+          });
         } else {
           const servicio = await tx.servicio.create({ data: servicioData });
           await tx.prestadorservicio.create({
