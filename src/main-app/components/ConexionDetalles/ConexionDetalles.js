@@ -4,6 +4,7 @@ import {
   Text,
   TouchableOpacity,
   ScrollView,
+  Image,
 } from 'react-native';
 import Modal from 'react-native-modal';
 import { Ionicons } from '@expo/vector-icons';
@@ -79,6 +80,7 @@ const ConexionDetalles = ({
     mascotas,
     estado,
     distance,
+    avatarUrl,
   } = providerInfo;
 
   const tieneDescripcionEstructurada = descripcionDuenio || mascota || (mascotas && mascotas.length > 0);
@@ -97,7 +99,11 @@ const ConexionDetalles = ({
         
         <View style={styles.header}>
           <View style={styles.avatarContainer}>
-            <Ionicons name="person" size={28} color={colors.primary} />
+            {avatarUrl ? (
+              <Image source={{ uri: avatarUrl }} style={styles.avatarImage} />
+            ) : (
+              <Ionicons name="person" size={28} color={colors.primary} />
+            )}
           </View>
           
           <View style={styles.headerInfo}>

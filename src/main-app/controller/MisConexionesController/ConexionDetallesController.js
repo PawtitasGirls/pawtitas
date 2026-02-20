@@ -168,6 +168,7 @@ export class ConexionDetallesController {
       rating: provider.rating || 0,
       tipo: provider.tipo || '',
       distance: provider.distance !== undefined ? provider.distance : null,
+      avatarUrl: provider.avatarUrl || null,
     };
   }
 }

@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { colors } from '../../../shared/styles';
 import EstadosChip from '../EstadosChip';
@@ -24,6 +24,7 @@ const ConexionCard = ({ provider, onPress, providerType, misConexiones = false, 
     tipo,
     distance,
     mascota,
+    avatarUrl,
   } = provider;
   
   const getProviderTypeText = (type) => {
@@ -85,7 +86,11 @@ const ConexionCard = ({ provider, onPress, providerType, misConexiones = false, 
         <View style={styles.headerRow}>
           <View style={styles.userInfo}>
             <View style={styles.avatarContainer}>
-              <Ionicons name="person" size={20} color={colors.primary} />
+              {avatarUrl ? (
+                <Image source={{ uri: avatarUrl }} style={styles.avatarImage} />
+              ) : (
+                <Ionicons name="person" size={20} color={colors.primary} />
+              )}
             </View>
             
             <View style={styles.nameContainer}>

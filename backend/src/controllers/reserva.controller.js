@@ -153,6 +153,19 @@ async function getReservasByDuenioController(req, res) {
     }
 
     const reservas = await reservaRepo.findManyByDuenioId(id);
+    const prestadorIds = reservas
+      .map((r) => r?.prestador?.id)
+      .filter((prestadorId) => prestadorId != null);
+    const prestadorFotoList = prestadorIds.length > 0
+      ? await prisma.attachment.findMany({
+          where: { prestadorId: { in: prestadorIds }, field: 'profilePhoto' },
+          select: { prestadorId: true },
+        })
+      : [];
+    const prestadorFotoSet = prestadorFotoList.reduce((acc, item) => {
+      acc.add(item.prestadorId?.toString?.() ?? String(item.prestadorId));
+      return acc;
+    }, new Set());
 
 const serialized = reservas.map((r) => {
   const base = serializeReserva(r);
@@ -171,16 +184,27 @@ const serialized = reservas.map((r) => {
   const domicilio = usuario?.domicilio;
   const servicio = r.servicio || prestador?.prestadorservicio?.[0]?.servicio;
   const mascota = r.mascota;
+  const prestadorId = prestador?.id != null ? String(prestador.id) : null;
+  const tieneFoto = prestadorId ? prestadorFotoSet.has(prestadorId) : false;
+
+  const profilePhotoUrl = tieneFoto
+    ? buildPublicUrl(req, `/api/prestadores/${prestadorId}/profile-photo`)
+    : null;
+
+  // #region agent log
+  fetch('http://127.0.0.1:7242/ingest/9d78051a-2c08-4bab-97c6-65d27df68b00',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({runId:'mis-conexiones-avatar',hypothesisId:'H1',location:'reserva.controller.js:getReservasByDuenioController',message:'Avatar URLs prestador',data:{prestadorId,hasAvatar:Boolean(usuario?.avatar),hasProfilePhotoUrl:Boolean(profilePhotoUrl),profilePhotoUrlPrefix:(profilePhotoUrl || '').slice(0,12)},timestamp:Date.now()})}).catch(()=>{});
+  // #endregion
 
   return {
     ...base,
     puedeResenar, 
     resenas: resenas.map(serializeResena),
     prestador: prestador && {
-      id: String(prestador.id),
+      id: prestadorId,
       usuarioId: usuario?.id != null ? String(usuario.id) : null,
       nombreCompleto: [usuario?.nombre, usuario?.apellido].filter(Boolean).join(' ') || 'Sin nombre',
       avatar: buildPublicUrl(req, usuario?.avatar || null),
+      profilePhotoUrl,
       domicilio: domicilio && {
         ubicacion: [domicilio.calle, domicilio.numero, domicilio.ciudad].filter(Boolean).join(', '),
         latitude: domicilio.latitude ?? null,
