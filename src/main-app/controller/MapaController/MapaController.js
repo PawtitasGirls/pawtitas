@@ -163,6 +163,23 @@ export class MapaController {
 
       return results;
     } catch (error) {
+      const isTimeout = error?.message?.includes('Timeout');
+      if (isTimeout) {
+        try {
+          const { latitude, longitude } = userLocation;
+          const radius = MAPA_CONFIG.SEARCH_RADIUS;
+          const retryResults = await loader(latitude, longitude, radius);
+          if (retryResults.length === 0) {
+            Alert.alert(
+              'Sin resultados',
+              'No se encontraron lugares cercanos de este tipo. Intentá nuevamente aumentando el área de búsqueda.'
+            );
+          }
+          return retryResults;
+        } catch (retryError) {
+          return this.handlePoiError(retryError);
+        }
+      }
       return this.handlePoiError(error);
     }
   }
@@ -294,7 +311,7 @@ export class MapaController {
     if (error?.message?.includes('Timeout')) {
       Alert.alert(
         'Búsqueda muy lenta',
-        'La búsqueda tardó demasiado. Intenta de nuevo o busca en otra zona.'
+        'La búsqueda tardó demasiado. Intentálo de nuevo'
       );
       return [];
     }
