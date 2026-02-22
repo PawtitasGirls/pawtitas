@@ -244,14 +244,15 @@ const HomeScreen = () => {
 
   return (
     <View style={styles.container}>
-      <ScrollView 
-        style={styles.content} 
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={[
-          styles.scrollContent,
-          Platform.OS === 'android' && { paddingBottom: navbarHeight },
-        ]}
-      >
+      <View style={styles.scrollWrapper}>
+        <ScrollView
+          style={styles.content}
+          showsVerticalScrollIndicator={true}
+          contentContainerStyle={[
+            styles.scrollContent,
+            Platform.OS === 'android' && { paddingBottom: navbarHeight },
+          ]}
+        >
         <HomeHeader hidePendingControls={isPrestadorPendiente} hideForAdmin={isAdmin} />
 
         {isPrestadorPendiente && (
@@ -294,9 +295,9 @@ const HomeScreen = () => {
         {isPrestadorActivo && (
           <MercadoPagoConnect prestadorId={user?.prestadorId ?? user?.id} />
         )}
-      </ScrollView>
+        </ScrollView>
+      </View>
 
-      {/* Navbar abajo */}
       <MenuInferior />
     </View>
   );
