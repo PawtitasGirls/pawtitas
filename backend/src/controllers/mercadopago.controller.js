@@ -108,17 +108,17 @@ async function createPreferenceController(req, res) {
       return res.status(404).json({ success: false, message: 'Reserva no encontrada' });
     }
 
-    if (reserva.estado !== 'PENDIENTE_PAGO') {
+    if (reserva.estado !== 'PENDIENTE_PAGO' && reserva.estado !== 'FINALIZADO') {
       return res.status(400).json({
         success: false,
-        message: 'La reserva no está pendiente de pago',
+        message: 'La reserva no está pendiente de pago o finalizada',
       });
     }
 
     const pagoExistente = reserva.pago;
 
     if (pagoExistente) {
-      if (pagoExistente.estadoPago === 'PAGADO' || pagoExistente.estadoPago === 'LIBERADO') {
+      if (pagoExistente.estadoPago === 'PAGADO') {
         return res.status(400).json({
           success: false,
           message: 'Esta reserva ya fue pagada',
