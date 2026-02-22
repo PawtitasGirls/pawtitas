@@ -10,7 +10,7 @@ const MercadoPagoWebView = ({ visible, paymentUrl, onClose }) => {
     const openBrowser = async () => {
       openedRef.current = true;
       try {
-        await WebBrowser.openBrowserAsync(paymentUrl);
+        await Linking.openURL(paymentUrl);
       } catch (e) {
       } finally {
         onClose?.();
