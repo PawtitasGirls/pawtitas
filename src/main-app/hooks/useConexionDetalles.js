@@ -1,5 +1,6 @@
 import { useRef, useMemo, useState, useCallback } from 'react';
 import { ConexionDetallesController } from '../controller';
+import { ESTADOS_CONEXION } from '../constants/estadosConexion';
 
 export const useConexionDetalles = (provider, misConexiones, visible = true, onClose, esVistaPrestador = false, onModalHide, isAdmin = false) => {
   const scrollViewRef = useRef(null);
@@ -46,44 +47,53 @@ export const useConexionDetalles = (provider, misConexiones, visible = true, onC
   const getMenuItems = (actionHandlers) =>
     ConexionDetallesController.getMenuItems(provider?.estado, misConexiones, actionHandlers);
 
- const buttonConfig = useMemo(() => {
-  if (provider?.puedeResenar) {
-    return {
-      primary: {
-        label: 'Agregar reseña',
-        action: 'handleAgregarResena',
-        variant: 'primary',
-      },
-      secondary: null,
-    };
-  }
+  const buttonConfig = useMemo(() => {
+    const esFinalizado = provider?.estado === ESTADOS_CONEXION.SERVICIO_FINALIZADO;
 
-  if (misConexiones && provider?.estado === 'finalizado' && provider?.puedeResenar === false) {
-    return {
-      primary: {
-        label: 'Chat',
-        action: 'handleChat',
-        variant: 'primary',
-      },
-      secondary: null,
-    };
-  }
+    if (misConexiones && esFinalizado) {
+      return {
+        primary: {
+          label: 'Nueva \nreserva',
+          action: 'handlePago',
+          variant: 'primary',
+        },
+        secondary: {
+          label: 'Chat',
+          action: 'handleChat',
+          showCancel: true,
+        },
+        tertiary: {
+          label: 'Agregar\nreseña',
+          action: 'handleAgregarResena',
+          variant: 'secondary',
+        },
+      };
+    }
 
- 
-  return ConexionDetallesController.getButtonConfig(
+    if (provider?.puedeResenar) {
+      return {
+        primary: {
+          label: 'Agregar reseña',
+          action: 'handleAgregarResena',
+          variant: 'primary',
+        },
+        secondary: null,
+      };
+    }
+
+    return ConexionDetallesController.getButtonConfig(
+      provider?.estado,
+      misConexiones,
+      esVistaPrestador,
+      isAdmin
+    );
+  }, [
     provider?.estado,
+    provider?.puedeResenar,
     misConexiones,
     esVistaPrestador,
-    isAdmin
-  );
-
-}, [
-  provider?.estado,
-  provider?.puedeResenar,   
-  misConexiones,
-  esVistaPrestador,
-  isAdmin
-]);
+    isAdmin,
+  ]);
 
 
   const ratingStars = useMemo(() =>
