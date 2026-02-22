@@ -1,5 +1,5 @@
-import React, { useEffect, useRef } from 'react';
-import * as WebBrowser from 'expo-web-browser';
+import { useEffect, useRef } from 'react';
+import { Linking } from 'react-native';
 
 const MercadoPagoWebView = ({ visible, paymentUrl, onClose }) => {
   const openedRef = useRef(false);

@@ -5,6 +5,7 @@ import {
   TouchableOpacity,
   ScrollView,
   Image,
+  ActivityIndicator,
 } from 'react-native';
 import Modal from 'react-native-modal';
 import { Ionicons } from '@expo/vector-icons';
@@ -236,18 +237,64 @@ const ConexionDetalles = ({
         </ScrollView>
 
         <View style={styles.actionsContainer}>
-          <GuardarCancelarBtn
-            label={buttonConfig.primary.label}
-            onPress={() => {
-              const fn = actionHandlers[buttonConfig.primary.action];
-              if (typeof fn === 'function') fn();
-            }}
-            loading={loadingPrimary}
-            variant={buttonConfig.primary.variant}
-            showCancel={buttonConfig.secondary?.showCancel || false}
-            cancelLabel={buttonConfig.secondary?.label}
-            onCancel={buttonConfig.secondary ? actionHandlers[buttonConfig.secondary.action] : undefined}
-          />
+          {buttonConfig.tertiary ? (
+            <View style={styles.actionsRow}>
+              <TouchableOpacity
+                style={[styles.actionBtn, styles.actionBtnSecondary, styles.actionBtnChat]}
+                onPress={() => {
+                  const fn = actionHandlers[buttonConfig.secondary.action];
+                  if (typeof fn === 'function') fn();
+                }}
+                activeOpacity={0.7}
+              >
+                <Text style={[styles.actionBtnTextSecondary, styles.actionBtnTextCentered]}>
+                  {buttonConfig.secondary?.label}
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.actionBtn, styles.actionBtnSecondary]}
+                onPress={() => {
+                  const fn = actionHandlers[buttonConfig.tertiary.action];
+                  if (typeof fn === 'function') fn();
+                }}
+                activeOpacity={0.7}
+              >
+                <Text style={[styles.actionBtnTextSecondary, styles.actionBtnTextCentered]}>
+                  {buttonConfig.tertiary.label}
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.actionBtn, styles.actionBtnPrimary]}
+                onPress={() => {
+                  const fn = actionHandlers[buttonConfig.primary.action];
+                  if (typeof fn === 'function') fn();
+                }}
+                activeOpacity={0.7}
+                disabled={loadingPrimary}
+              >
+                {loadingPrimary ? (
+                  <ActivityIndicator size="small" color={colors.text.inverse} />
+                ) : (
+                  <Text style={[styles.actionBtnTextPrimary, styles.actionBtnTextCentered]}>
+                    {buttonConfig.primary.label}
+                  </Text>
+                )}
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <GuardarCancelarBtn
+              label={buttonConfig.primary.label}
+              onPress={() => {
+                const fn = actionHandlers[buttonConfig.primary.action];
+                if (typeof fn === 'function') fn();
+              }}
+              loading={loadingPrimary}
+              variant={buttonConfig.primary.variant}
+              showCancel={buttonConfig.secondary?.showCancel || false}
+              cancelLabel={buttonConfig.secondary?.label}
+              onCancel={buttonConfig.secondary ? actionHandlers[buttonConfig.secondary.action] : undefined}
+            />
+          )}
         </View>
       </View>
     </Modal>
