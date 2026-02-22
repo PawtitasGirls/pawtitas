@@ -211,8 +211,8 @@ const HomeScreen = () => {
     {
       id: "3",
       emoji: "🚑",
-      title: "Salud y Bienestar",
-      description: "Veterinarios y clínicas cercanas.",
+      title: "Veterinarias",
+      description: "Clínicas y profesionales.",
       route: "Salud",
       onPress: () => navigation.navigate("Salud"),
     },
