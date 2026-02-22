@@ -428,7 +428,17 @@ async function confirmarFinalizacionController(req, res) {
       return res.status(404).json({ success: false, message: 'Reserva no encontrada' });
     }
 
-    if (reserva.estado !== 'PAGADO' && reserva.estado !== 'EN_PROGRESO') {
+    const ESTADO_RESPUESTA = {
+      FINALIZADO: { status: 200, body: { success: true, pagoLiberado: false, message: 'La reserva ya estaba finalizada.' } },
+      PENDIENTE_PAGO: { status: 400, body: { success: false, message: 'El pago aún se está procesando. Esperá unos segundos y volvé a intentar.' } },
+    };
+    const ESTADOS_VALIDOS = new Set(['PAGADO', 'EN_PROGRESO']);
+
+    if (ESTADO_RESPUESTA[reserva.estado]) {
+      const { status, body } = ESTADO_RESPUESTA[reserva.estado];
+      return res.status(status).json(body);
+    }
+    if (!ESTADOS_VALIDOS.has(reserva.estado)) {
       return res.status(400).json({
         success: false,
         message: 'La reserva no está en estado pagado o en progreso',
