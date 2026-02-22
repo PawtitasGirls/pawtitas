@@ -204,7 +204,8 @@ export const useMisConexiones = () => {
       showDetalles: false, 
       selectedProvider: null 
     }));
-  }, []);
+    refreshConexiones();
+  }, [refreshConexiones]);
 
   const handlePago = useCallback((provider) => {
     paymentProviderRef.current = provider;
@@ -314,7 +315,8 @@ export const useMisConexiones = () => {
         text: '¡Pago realizado! El dinero queda retenido hasta que ambos confirmen la finalización del servicio.',
       },
     }));
-  }, [state.selectedProvider]);
+    setTimeout(() => refreshConexiones(), 2000);
+  }, [state.selectedProvider, refreshConexiones]);
 
   const handlePaymentFailure = useCallback(() => {
     setState(prev => ({
@@ -366,7 +368,10 @@ export const useMisConexiones = () => {
       showMensajeFlotante: true,
       mensajeFlotante,
     }));
-  }, []);
+    if (result === 'success' || result === 'pending') {
+      setTimeout(() => refreshConexiones(), 2000);
+    }
+  }, [refreshConexiones]);
 
   // Listener de deep link: volver de MercadoPago. En Android el custom tab se cierra solo; en iOS hay que cerrar Safari View Controller.
   useEffect(() => {
@@ -624,6 +629,7 @@ export const useMisConexiones = () => {
     state,
     providers: filteredProviders,
     loadingConexiones,
+    refreshConexiones,
     isPrestadorView,
     role,
     handleSearch,
