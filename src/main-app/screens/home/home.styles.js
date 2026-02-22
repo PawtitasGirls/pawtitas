@@ -49,6 +49,10 @@ export const styles = StyleSheet.create({
     ...typography.styles.h3,
     color: colors.text.primary,
   },
+  scrollWrapper: {
+    flex: 1,
+    width: '100%',
+  },
   content: {
     flex: 1,
     paddingTop: 15,
