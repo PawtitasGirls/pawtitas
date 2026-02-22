@@ -210,3 +210,14 @@ export const styles = StyleSheet.create({
     },
 });
 
+const ANDROID_INPUT_PADDING_KEYBOARD_CLOSED = 20;
+const ANDROID_INPUT_PADDING_KEYBOARD_OPEN = 10;
+
+export const getInputContainerStyle = (bottomInset, isKeyboardVisible = false) => {
+    if (Platform.OS !== 'android') return {};
+    return {
+        paddingBottom: isKeyboardVisible
+            ? ANDROID_INPUT_PADDING_KEYBOARD_OPEN
+            : bottomInset + ANDROID_INPUT_PADDING_KEYBOARD_CLOSED,
+    };
+};

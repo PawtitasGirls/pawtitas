@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { ScrollView, View, Text, ActivityIndicator, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { ROLES } from '../../constants/roles';
 import ScreenHeader from '../../components/ScreenHeader';
 import MenuInferior, { useNavbarHeight } from '../../components/MenuInferior';
@@ -27,6 +27,7 @@ const MisConexiones = () => {
     state,
     providers,
     loadingConexiones,
+    refreshConexiones,
     isPrestadorView,
     role,
     handleSearch,
@@ -77,6 +78,12 @@ const MisConexiones = () => {
   useEffect(() => {
     reiniciarPagina();
   }, [state.searchQuery, state.selectedFilter]);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      refreshConexiones();
+    }, [refreshConexiones])
+  );
 
   return (
     <SafeAreaView style={styles.container}>
