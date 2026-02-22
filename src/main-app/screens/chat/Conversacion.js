@@ -1,11 +1,11 @@
 import React, { useEffect, useState, useRef, useMemo } from 'react';
-import { View, Text, FlatList, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, ActivityIndicator, Alert, Image } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { View, Text, FlatList, TextInput, TouchableOpacity, KeyboardAvoidingView, Keyboard, Platform, ActivityIndicator, Alert, Image } from 'react-native';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { useStreamChat } from '../../contexts';
 import { ChatController } from '../../controller';
 import { colors } from '../../../shared/styles';
-import { styles } from './Conversacion.styles';
+import { styles, getInputContainerStyle } from './Conversacion.styles';
 import * as ImagePicker from 'expo-image-picker';
 import { uploadChatImage } from '../../services/api/apiChat';
 import { withCacheBuster } from '../../../shared/utils';
@@ -13,6 +13,7 @@ import { withCacheBuster } from '../../../shared/utils';
 const Conversacion = () => {
     const route = useRoute();
     const navigation = useNavigation();
+    const insets = useSafeAreaInsets();
     const { channel } = route.params || {};
     const { chatClient, currentUser } = useStreamChat();
     const channelId = channel?.id || route.params?.channelId;
@@ -24,7 +25,17 @@ const Conversacion = () => {
     const [loading, setLoading] = useState(!channel);
     const [sending, setSending] = useState(false);
     const [otherUser, setOtherUser] = useState(null);
+    const [isKeyboardVisible, setKeyboardVisible] = useState(false);
     const flatListRef = useRef(null);
+
+    useEffect(() => {
+        const show = Keyboard.addListener(Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow', () => setKeyboardVisible(true));
+        const hide = Keyboard.addListener(Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide', () => setKeyboardVisible(false));
+        return () => {
+            show.remove();
+            hide.remove();
+        };
+    }, []);
 
     useEffect(() => {
         const initChannel = async () => {
@@ -228,7 +239,7 @@ const Conversacion = () => {
                     }
                 />
 
-                <View style={styles.inputContainer}>
+                <View style={[styles.inputContainer, getInputContainerStyle(insets.bottom, isKeyboardVisible)]}>
                     <TouchableOpacity
                         onPress={handlePickImage}
                         style={styles.attachButton}
