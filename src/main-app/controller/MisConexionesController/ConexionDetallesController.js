@@ -128,8 +128,8 @@ export class ConexionDetallesController {
       warningItems: [
         'El pago será procesado con Mercado Pago de manera segura.',
         'Al completar el pago, la solicitud pasará a estado "Confirmado" y el servicio quedará validado.',
-        'El pago se libera al prestador únicamente cuando ambas partes (el cliente y el prestador) marquen el servicio como "Finalizado".',
-        'Si tenés dudas o querés coordinar algo, podés comunicarte con el usuario a través del chat cuando el estado esté "Pendiente" o "Confirmado".',
+        'El pago se libera al prestador únicamente cuando ambas partes (el cliente y el prestador) marquen el servicio como "Finalizado", y el mismo impactará en un lapso de 15 días.',
+        'Si tenés dudas o querés coordinar algo, podés comunicarte con el usuario a través del chat.',
         '* Pawtitas aplica un 12% de comisión sobre el servicio para seguir mejorando.',
       ]
     };

@@ -38,7 +38,7 @@ const TERMINOS_PAGINAS = [
   {
     titulo: "4. Transparencia en los servicios y relaciones entre usuarios",
     contenido:
-      "Los prestadores deben describir sus servicios de forma clara, honesta y completa. Los dueños de mascotas deben proporcionar informacion veraz sobre las necesidades y condiciones de sus animales. Las reservas, pagos y cancelaciones deben gestionarse con responsabilidad promoviendo acuerdos justos para ambas partes. Aceptar los términos y condiciones implica aceptar pagar un 12% de comision por parte de los dueños.",
+      "Los prestadores deben describir sus servicios de forma clara, honesta y completa. Los dueños de mascotas deben proporcionar informacion veraz sobre las necesidades y condiciones de sus animales. Las reservas, pagos y cancelaciones deben gestionarse con responsabilidad promoviendo acuerdos justos para ambas partes. Aceptar los términos y condiciones implica aceptar pagar un 12% de comision por parte de los dueños. El pago de los servicios será retenido por Pawtitas y liberado a los prestadores en un lapso de 15 días.",
   },
   {
     titulo: "5. Privacidad, seguridad y uso de datos",
