@@ -22,6 +22,7 @@ const NOMINATIM_HEADERS = {
 
 // Timeout y configuración unificada para todas las plataformas
 const DEFAULT_TIMEOUT = 30000; // 30 segundos para todas las plataformas
+const POI_REQUEST_TIMEOUT = 50000; // 50 s para carga de POIs (backend puede reintentar hasta 3 servidores)
 
 const fetchJsonWithTimeout = async (
   url,
@@ -112,7 +113,7 @@ const runOverpassQuery = async (query) => {
     url,
     { method: 'GET' },
     {
-      timeoutMs: DEFAULT_TIMEOUT,
+      timeoutMs: POI_REQUEST_TIMEOUT,
       timeoutMessage: 'Timeout: La búsqueda tardó demasiado',
       errorPrefix: 'Overpass proxy',
     }
