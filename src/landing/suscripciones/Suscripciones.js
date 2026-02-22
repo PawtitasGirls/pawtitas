@@ -5,15 +5,16 @@ import styles from "./Suscripciones.styles";
 const prestadorPlans = [
   {
     name: "Plan Básico",
-    price: "$8.000",
+    price: "$6.000",
     period: "/mes",
-    recommended: false,
+    recommended: true,
   },
   {
     name: "Plan Premium",
-    price: "$10.000",
+    price: "$8.000",
     period: "/mes",
-    recommended: true,
+    recommended: false,
+    comingSoon: true,
   },
 ];
 
@@ -82,6 +83,10 @@ export default function Suscripciones({ scrollToSection }) {
                     <View style={styles.recommendedBadgePrestador}>
                       <Text style={styles.recommendedText}>Recomendado</Text>
                     </View>
+                  )}
+                  
+                   {plan.comingSoon && (
+                    <Text style={styles.comingSoonText}>Próximamente...</Text>
                   )}
 
                   <View style={styles.planHeader}>

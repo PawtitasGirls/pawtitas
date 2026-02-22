@@ -12,7 +12,7 @@ export const styles = StyleSheet.create({
     flexDirection: 'column',
     alignItems: 'center',
     width: '100%',
-    paddingTop: 25,
+    paddingTop: 20,
     paddingBottom: 0,
     backgroundColor: colors.background,
   },
@@ -70,7 +70,7 @@ export const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: 20,
     paddingTop: 15,
-    paddingBottom: 20,
+    paddingBottom: 15,
     alignItems: 'center',
   },
   pendingBanner: {

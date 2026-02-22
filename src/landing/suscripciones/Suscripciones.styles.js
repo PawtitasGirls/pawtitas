@@ -202,6 +202,14 @@ const styles = StyleSheet.create({
     textTransform: "uppercase",
     letterSpacing: 0.6,
   },
+  comingSoonText: {
+    color: colors.brand.lightBlue,
+    fontSize: 10,
+    fontWeight: "700",
+    textTransform: "uppercase",
+    letterSpacing: 0.6,
+    paddingBottom:10
+  },
   planHeader: {
     alignItems: "center",
     marginBottom: 20,
