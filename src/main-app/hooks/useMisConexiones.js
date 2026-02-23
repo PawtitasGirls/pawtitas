@@ -503,10 +503,16 @@ export const useMisConexiones = () => {
         setState(prev => ({
           ...prev,
           showMensajeFlotante: true,
-          mensajeFlotante: {
-            type: 'info',
-            text: res.message || 'Tu confirmación fue registrada. Esperando la otra parte.',
-          },
+          mensajeFlotante: isPrestadorView
+            ? {
+                type: 'info',
+                text:
+                  'Confirmación registrada. Cuando ambas partes confirmen, Mercado Pago retendrá el pago por hasta 15 días y luego se liberará en tu cuenta.',
+              }
+            : {
+                type: 'info',
+                text: res.message || 'Tu confirmación fue registrada. Esperando la otra parte.',
+              },
         }));
       }
     } catch (err) {
