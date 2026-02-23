@@ -104,13 +104,6 @@ async function createPreferenceController(req, res) {
       },
     });
 
-    console.log('Datos de reserva para crear preferencia:', {
-      reservaId: reserva.id?.toString?.() ?? reserva.id,
-      prestadorId: reserva.prestadorId?.toString?.() ?? reserva.prestadorId,
-      prestadorTieneMpUserId: Boolean(reserva.prestador?.mpUserId),
-      mpUserId: reserva.prestador?.mpUserId ?? null,
-    });
-
     if (!reserva) {
       return res.status(404).json({ success: false, message: 'Reserva no encontrada' });
     }
@@ -121,11 +114,6 @@ async function createPreferenceController(req, res) {
         message: 'No es posible completar el pago porque el prestador aún no vinculó su cuenta de Mercado Pago. Podés contactarlo o elegir otro prestador.',
       });
     }
-
-    console.log('Validación de cuenta MP del prestador superada. Continuando con creación de preferencia.', {
-      reservaId: reserva.id?.toString?.() ?? reserva.id,
-      mpUserId: reserva.prestador?.mpUserId,
-    });
 
     if (reserva.estado !== 'PENDIENTE_PAGO' && reserva.estado !== 'FINALIZADO') {
       return res.status(400).json({
