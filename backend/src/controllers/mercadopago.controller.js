@@ -122,6 +122,15 @@ async function createPreferenceController(req, res) {
       });
     }
 
+  const montoTotal = Number(reserva.montoTotal ?? 0);
+
+  if (!Number.isFinite(montoTotal) || montoTotal <= 0) {
+    return res.status(400).json({
+      success: false,
+      message: 'No podemos procesar el pago porque el monto de la reserva es $0. Revisá el detalle de la reserva o contactá al prestador si creés que es un error.',
+    });
+  }
+
     const pagoExistente = reserva.pago;
 
     if (pagoExistente) {
