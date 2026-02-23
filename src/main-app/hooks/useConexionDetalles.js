@@ -50,7 +50,7 @@ export const useConexionDetalles = (provider, misConexiones, visible = true, onC
   const buttonConfig = useMemo(() => {
     const esFinalizado = provider?.estado === ESTADOS_CONEXION.SERVICIO_FINALIZADO;
 
-    if (misConexiones && esFinalizado) {
+    if (misConexiones && esFinalizado && !esVistaPrestador) {
       return {
         primary: {
           label: 'Nueva \nreserva',
