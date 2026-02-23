@@ -487,19 +487,32 @@ export const useMisConexiones = () => {
           showDetalles: false,
           selectedProvider: null,
           showMensajeFlotante: true,
-          mensajeFlotante: {
-            type: 'success',
-            text: '¡Servicio finalizado! El pago fue liberado al prestador.',
-          },
+          mensajeFlotante: isPrestadorView
+            ? {
+                type: 'success',
+                text:
+                  '¡Servicio finalizado!' +
+                  ' Para cuidar tu dinero, Mercado Pago retendrá tu pago por hasta 15 días y luego se liberará en tu cuenta.',
+              }
+            : {
+                type: 'success',
+                text: '¡Servicio finalizado! Tu pago fue liberado.',
+              },
         }));
       } else {
         setState(prev => ({
           ...prev,
           showMensajeFlotante: true,
-          mensajeFlotante: {
-            type: 'info',
-            text: res.message || 'Tu confirmación fue registrada. Esperando la otra parte.',
-          },
+          mensajeFlotante: isPrestadorView
+            ? {
+                type: 'info',
+                text:
+                  'Confirmación registrada. Cuando ambas partes confirmen, Mercado Pago retendrá el pago por hasta 15 días y luego se liberará en tu cuenta.',
+              }
+            : {
+                type: 'info',
+                text: res.message || 'Tu confirmación fue registrada. Esperando la otra parte.',
+              },
         }));
       }
     } catch (err) {
