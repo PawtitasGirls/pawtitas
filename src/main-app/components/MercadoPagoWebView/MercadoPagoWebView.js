@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { Linking } from 'react-native';
+import * as WebBrowser from 'expo-web-browser';
 
 const MercadoPagoWebView = ({ visible, paymentUrl, onClose }) => {
   const openedRef = useRef(false);
@@ -10,7 +10,7 @@ const MercadoPagoWebView = ({ visible, paymentUrl, onClose }) => {
     const openBrowser = async () => {
       openedRef.current = true;
       try {
-        await Linking.openURL(paymentUrl);
+        await WebBrowser.openBrowserAsync(paymentUrl);
       } catch (e) {
       } finally {
         onClose?.();
