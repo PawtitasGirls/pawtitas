@@ -8,6 +8,7 @@ import { ROLES } from '../constants/roles';
 import {
   getReservasByDuenio,
   getReservasByPrestador,
+  createReserva,
   createPaymentPreference,
   confirmarFinalizacionServicio,
   cancelarReserva,
@@ -34,7 +35,7 @@ export const useMisConexiones = () => {
     ...MisConexionesController.getInitialState(),
     showCalendarioModal: false,
     selectedDates: [],
-    showPaymentWebView: false,
+    showPaymentCheckout: false,
     paymentUrl: null,
     pendingResenaProvider: null,
     pendingCalendarioProvider: null,
@@ -71,6 +72,10 @@ export const useMisConexiones = () => {
           return {
             id: r.id,
             reservaId: r.id,
+            prestadorId: r.prestadorId ?? p.id ?? null,
+            duenioId: r.duenioId ?? null,
+            servicioId: r.servicioId ?? null,
+            mascotaId: r.mascotaId ?? null,
             prestadorUsuarioId: p.usuarioId ?? null,
             nombre: p.nombreCompleto || 'Sin nombre',
             descripcion: serv.descripcion || 'Sin descripción',
@@ -207,7 +212,47 @@ export const useMisConexiones = () => {
     refreshConexiones();
   }, [refreshConexiones]);
 
+  const handleReservarNuevamente = useCallback(async (provider) => {
+    const tieneDatos = provider?.prestadorId && provider?.duenioId && provider?.mascotaId && provider?.servicioId && user?.email;
+    const setError = (text) => setState(prev => ({ ...prev, showMensajeFlotante: true, mensajeFlotante: { type: 'error', text } }));
+    if (!tieneDatos) {
+      setError('Faltan datos para crear la reserva.');
+      return;
+    }
+    setState(prev => ({ ...prev, showDetalles: false, showMensajeFlotante: true, mensajeFlotante: { type: 'info', text: 'Estamos creando tu nueva reserva. En unos segundos te redirigimos.' } }));
+    try {
+      const createRes = await createReserva({
+        duenioId: provider.duenioId,
+        prestadorId: provider.prestadorId,
+        mascotaId: provider.mascotaId,
+        servicioId: provider.servicioId,
+      });
+      if (createRes?.success && createRes?.reserva?.id) {
+        const id = createRes.reserva.id;
+        const newProvider = { ...provider, id, reservaId: id, estado: ESTADOS_CONEXION.PENDIENTE_DE_PAGO, puedeResenar: false };
+        paymentProviderRef.current = newProvider;
+        setState(prev => ({
+          ...prev,
+          selectedProvider: newProvider,
+          showDetalles: true,
+          showMensajeFlotante: false,
+        }));
+        refreshConexiones();
+      } else {
+        setError(createRes?.message || 'No se pudo crear la reserva.');
+      }
+    } catch (err) {
+      setError(err?.message || 'Error al reservar nuevamente.');
+    }
+  }, [user?.email, refreshConexiones]);
+
   const handlePago = useCallback((provider) => {
+    const esFinalizado = provider?.estado === ESTADOS_CONEXION.SERVICIO_FINALIZADO;
+    const puedeRereservar = provider?.prestadorId && provider?.duenioId && provider?.mascotaId && provider?.servicioId;
+    if (esFinalizado && puedeRereservar) {
+      handleReservarNuevamente(provider);
+      return;
+    }
     paymentProviderRef.current = provider;
     setState(prev => ({
       ...prev,
@@ -216,11 +261,19 @@ export const useMisConexiones = () => {
       pendingCalendarioProvider: provider,
       showCalendarioModal: false,
     }));
-  }, []);
+  }, [handleReservarNuevamente]);
 
   const handleConfirmarPago = useCallback(async () => {
-    const provider = state.selectedProvider || paymentProviderRef.current;
+    const provider = paymentProviderRef.current || state.selectedProvider;
     if (!provider || !user?.email) {
+      return;
+    }
+    if (provider.estado === ESTADOS_CONEXION.SERVICIO_FINALIZADO) {
+      setState(prev => ({
+        ...prev,
+        showMensajeFlotante: true,
+        mensajeFlotante: { type: 'error', text: 'Usá el botón "Reservar nuevamente" para una nueva reserva.' },
+      }));
       return;
     }
 
@@ -258,7 +311,7 @@ export const useMisConexiones = () => {
         : (res.initPoint || res.sandboxInitPoint);
 
       if (__DEV__) {
-        console.log('🧾 [PAGO] URLs recibidas de preferencia:', {
+        console.log('[PAGO] URLs recibidas de preferencia:', {
           initPoint: res.initPoint,
           sandboxInitPoint: res.sandboxInitPoint,
           useSandbox,
@@ -267,7 +320,7 @@ export const useMisConexiones = () => {
       }
 
       if (url) {
-        setState(prev => ({ ...prev, paymentUrl: url, showPaymentWebView: true }));
+        setState(prev => ({ ...prev, paymentUrl: url, showPaymentCheckout: true }));
       } else {
         setState(prev => ({
           ...prev,
@@ -306,7 +359,7 @@ export const useMisConexiones = () => {
     }
     setState(prev => ({
       ...prev,
-      showPaymentWebView: false,
+      showPaymentCheckout: false,
       paymentUrl: null,
       selectedProvider: null,
       showMensajeFlotante: true,
@@ -321,7 +374,7 @@ export const useMisConexiones = () => {
   const handlePaymentFailure = useCallback(() => {
     setState(prev => ({
       ...prev,
-      showPaymentWebView: false,
+      showPaymentCheckout: false,
       paymentUrl: null,
       selectedProvider: null,
       showMensajeFlotante: true,
@@ -329,9 +382,9 @@ export const useMisConexiones = () => {
     }));
   }, []);
 
-  const handleClosePaymentWebView = useCallback(() => {
+  const handleClosePaymentCheckout = useCallback(() => {
     paymentProviderRef.current = null;
-    setState(prev => ({ ...prev, showPaymentWebView: false, paymentUrl: null, selectedProvider: null }));
+    setState(prev => ({ ...prev, showPaymentCheckout: false, paymentUrl: null, selectedProvider: null }));
     
     // Refrescar desde BD para sincronizar con webhook de MercadoPago
     // Delay para dar tiempo al webhook a procesar
@@ -362,7 +415,7 @@ export const useMisConexiones = () => {
 
     setState(prev => ({
       ...prev,
-      showPaymentWebView: false,
+      showPaymentCheckout: false,
       paymentUrl: null,
       selectedProvider: null,
       showMensajeFlotante: true,
@@ -434,19 +487,32 @@ export const useMisConexiones = () => {
           showDetalles: false,
           selectedProvider: null,
           showMensajeFlotante: true,
-          mensajeFlotante: {
-            type: 'success',
-            text: '¡Servicio finalizado! El pago fue liberado al prestador.',
-          },
+          mensajeFlotante: isPrestadorView
+            ? {
+                type: 'success',
+                text:
+                  '¡Servicio finalizado!' +
+                  ' Para cuidar tu dinero, Mercado Pago retendrá tu pago por hasta 15 días y luego se liberará en tu cuenta.',
+              }
+            : {
+                type: 'success',
+                text: '¡Servicio finalizado! Tu pago fue liberado.',
+              },
         }));
       } else {
         setState(prev => ({
           ...prev,
           showMensajeFlotante: true,
-          mensajeFlotante: {
-            type: 'info',
-            text: res.message || 'Tu confirmación fue registrada. Esperando la otra parte.',
-          },
+          mensajeFlotante: isPrestadorView
+            ? {
+                type: 'info',
+                text:
+                  'Confirmación registrada. Cuando ambas partes confirmen, Mercado Pago retendrá el pago por hasta 15 días y luego se liberará en tu cuenta.',
+              }
+            : {
+                type: 'info',
+                text: res.message || 'Tu confirmación fue registrada. Esperando la otra parte.',
+              },
         }));
       }
     } catch (err) {
@@ -641,7 +707,7 @@ export const useMisConexiones = () => {
     handleCancelarCalendario,
     handlePaymentSuccess,
     handlePaymentFailure,
-    handleClosePaymentWebView,
+    handleClosePaymentCheckout,
     handleFinalizarServicio,
     handleCancelar,
     handleConfirmarCancelar,

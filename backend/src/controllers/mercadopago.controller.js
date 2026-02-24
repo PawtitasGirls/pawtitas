@@ -108,17 +108,33 @@ async function createPreferenceController(req, res) {
       return res.status(404).json({ success: false, message: 'Reserva no encontrada' });
     }
 
-    if (reserva.estado !== 'PENDIENTE_PAGO') {
+    if (!reserva.prestador?.mpUserId) {
       return res.status(400).json({
         success: false,
-        message: 'La reserva no está pendiente de pago',
+        message: 'No es posible completar el pago porque el prestador aún no vinculó su cuenta de Mercado Pago. Podés contactarlo o elegir otro prestador.',
       });
     }
+
+    if (reserva.estado !== 'PENDIENTE_PAGO' && reserva.estado !== 'FINALIZADO') {
+      return res.status(400).json({
+        success: false,
+        message: 'La reserva no está pendiente de pago o finalizada',
+      });
+    }
+
+  const montoTotal = Number(reserva.montoTotal ?? 0);
+
+  if (!Number.isFinite(montoTotal) || montoTotal <= 0) {
+    return res.status(400).json({
+      success: false,
+      message: 'No podemos procesar el pago porque el monto de la reserva es $0. Revisá el detalle de la reserva o contactá al prestador si creés que es un error.',
+    });
+  }
 
     const pagoExistente = reserva.pago;
 
     if (pagoExistente) {
-      if (pagoExistente.estadoPago === 'PAGADO' || pagoExistente.estadoPago === 'LIBERADO') {
+      if (pagoExistente.estadoPago === 'PAGADO') {
         return res.status(400).json({
           success: false,
           message: 'Esta reserva ya fue pagada',

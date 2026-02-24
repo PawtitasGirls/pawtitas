@@ -9,7 +9,7 @@ export class ConexionDetallesController {
         icon: 'close-circle-outline',
         iconColor: colors.error,
         textStyle: { color: colors.error },
-        onPress: actionHandlers?.handleCancelar
+        onPress: actionHandlers?.handleCancelar,
       }];
     }
     return [];
