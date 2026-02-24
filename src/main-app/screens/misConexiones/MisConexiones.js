@@ -12,7 +12,7 @@ import ConexionCard from '../../components/ConexionCard/ConexionCard';
 import ConexionDetalles from '../../components/ConexionDetalles/ConexionDetalles';
 import ConfirmacionDialogo from '../../components/ConfirmacionDialogo';
 import CalendarioPagoModal from '../../components/CalendarioPagoModal';
-import MercadoPagoWebView from '../../components/MercadoPagoWebView';
+import MercadoPagoCheckout from '../../components/MercadoPagoCheckout';
 import Paginador from '../../components/Paginador';
 import { MensajeFlotante } from '../../components';
 import { useMisConexiones } from '../../hooks/useMisConexiones';
@@ -39,7 +39,7 @@ const MisConexiones = () => {
     handleCancelarCalendario,
     handlePaymentSuccess,
     handlePaymentFailure,
-    handleClosePaymentWebView,
+    handleClosePaymentCheckout,
     handleFinalizarServicio,
     handleCancelar,
     handleConfirmarCancelar,
@@ -185,10 +185,10 @@ const MisConexiones = () => {
         onConfirm={handleConfirmarPago}
       />
 
-      <MercadoPagoWebView
-        visible={state.showPaymentWebView}
+      <MercadoPagoCheckout
+        visible={state.showPaymentCheckout}
         paymentUrl={state.paymentUrl}
-        onClose={handleClosePaymentWebView}
+        onClose={handleClosePaymentCheckout}
       />
 
       <ConfirmacionDialogo

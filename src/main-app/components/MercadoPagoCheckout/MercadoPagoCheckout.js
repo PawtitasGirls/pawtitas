@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import * as WebBrowser from 'expo-web-browser';
 
-const MercadoPagoWebView = ({ visible, paymentUrl, onClose }) => {
+const MercadoPagoCheckout = ({ visible, paymentUrl, onClose }) => {
   const openedRef = useRef(false);
 
   useEffect(() => {
@@ -24,4 +24,4 @@ const MercadoPagoWebView = ({ visible, paymentUrl, onClose }) => {
   return null;
 };
 
-export default MercadoPagoWebView;
+export default MercadoPagoCheckout;
