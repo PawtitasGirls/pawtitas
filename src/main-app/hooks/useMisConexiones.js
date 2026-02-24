@@ -35,7 +35,7 @@ export const useMisConexiones = () => {
     ...MisConexionesController.getInitialState(),
     showCalendarioModal: false,
     selectedDates: [],
-    showPaymentWebView: false,
+    showPaymentCheckout: false,
     paymentUrl: null,
     pendingResenaProvider: null,
     pendingCalendarioProvider: null,
@@ -320,7 +320,7 @@ export const useMisConexiones = () => {
       }
 
       if (url) {
-        setState(prev => ({ ...prev, paymentUrl: url, showPaymentWebView: true }));
+        setState(prev => ({ ...prev, paymentUrl: url, showPaymentCheckout: true }));
       } else {
         setState(prev => ({
           ...prev,
@@ -359,7 +359,7 @@ export const useMisConexiones = () => {
     }
     setState(prev => ({
       ...prev,
-      showPaymentWebView: false,
+      showPaymentCheckout: false,
       paymentUrl: null,
       selectedProvider: null,
       showMensajeFlotante: true,
@@ -374,7 +374,7 @@ export const useMisConexiones = () => {
   const handlePaymentFailure = useCallback(() => {
     setState(prev => ({
       ...prev,
-      showPaymentWebView: false,
+      showPaymentCheckout: false,
       paymentUrl: null,
       selectedProvider: null,
       showMensajeFlotante: true,
@@ -382,9 +382,9 @@ export const useMisConexiones = () => {
     }));
   }, []);
 
-  const handleClosePaymentWebView = useCallback(() => {
+  const handleClosePaymentCheckout = useCallback(() => {
     paymentProviderRef.current = null;
-    setState(prev => ({ ...prev, showPaymentWebView: false, paymentUrl: null, selectedProvider: null }));
+    setState(prev => ({ ...prev, showPaymentCheckout: false, paymentUrl: null, selectedProvider: null }));
     
     // Refrescar desde BD para sincronizar con webhook de MercadoPago
     // Delay para dar tiempo al webhook a procesar
@@ -415,7 +415,7 @@ export const useMisConexiones = () => {
 
     setState(prev => ({
       ...prev,
-      showPaymentWebView: false,
+      showPaymentCheckout: false,
       paymentUrl: null,
       selectedProvider: null,
       showMensajeFlotante: true,
@@ -707,7 +707,7 @@ export const useMisConexiones = () => {
     handleCancelarCalendario,
     handlePaymentSuccess,
     handlePaymentFailure,
-    handleClosePaymentWebView,
+    handleClosePaymentCheckout,
     handleFinalizarServicio,
     handleCancelar,
     handleConfirmarCancelar,
