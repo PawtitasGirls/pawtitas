@@ -527,6 +527,16 @@ async function listPrestadoresController(req, res) {
       return acc;
     }, {});
 
+    const prestadorFotoList = prestadorIds.length > 0
+      ? await prisma.attachment.findMany({
+          where: { prestadorId: { in: prestadorIds }, field: 'profilePhoto' },
+          select: { prestadorId: true },
+        })
+      : [];
+    const prestadorFotoSet = new Set(
+      prestadorFotoList.map((item) => item.prestadorId?.toString?.() ?? String(item.prestadorId))
+    );
+
     const result = prestadores.map((p) => {
       const { usuario, perfil, fechaIngreso, prestadorservicio = [] } = p;
       const { domicilio } = usuario ?? {};
@@ -534,9 +544,11 @@ async function listPrestadoresController(req, res) {
       const avgRating = ratingData.count > 0 ? ratingData.total / ratingData.count : 0;
 
       const servicioMain = prestadorservicio[0]?.servicio;
+      const prestadorIdStr = String(p.id);
+      const tieneProfilePhoto = prestadorFotoSet.has(prestadorIdStr);
 
       return {
-        id: String(p.id),
+        id: prestadorIdStr,
         usuarioId: usuario?.id ? String(usuario.id) : null,
 
         nombre: usuario?.nombre ?? '',
@@ -545,6 +557,7 @@ async function listPrestadoresController(req, res) {
           [usuario?.nombre, usuario?.apellido].filter(Boolean).join(' ') || 'Sin nombre',
 
         avatar: buildPublicUrl(req, usuario?.avatar || null),
+        profilePhotoUrl: tieneProfilePhoto ? `/api/prestadores/${prestadorIdStr}/profile-photo` : null,
         email: usuario?.email ?? '',
         celular: usuario?.celular ?? '',
         perfil: perfil ?? '',

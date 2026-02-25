@@ -187,9 +187,7 @@ const serialized = reservas.map((r) => {
   const prestadorId = prestador?.id != null ? String(prestador.id) : null;
   const tieneFoto = prestadorId ? prestadorFotoSet.has(prestadorId) : false;
 
-  const profilePhotoUrl = tieneFoto
-    ? buildPublicUrl(req, `/api/prestadores/${prestadorId}/profile-photo`)
-    : null;
+  const profilePhotoUrl = tieneFoto ? `/api/prestadores/${prestadorId}/profile-photo` : null;
 
   // #region agent log
   fetch('http://127.0.0.1:7242/ingest/9d78051a-2c08-4bab-97c6-65d27df68b00',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({runId:'mis-conexiones-avatar',hypothesisId:'H1',location:'reserva.controller.js:getReservasByDuenioController',message:'Avatar URLs prestador',data:{prestadorId,hasAvatar:Boolean(usuario?.avatar),hasProfilePhotoUrl:Boolean(profilePhotoUrl),profilePhotoUrlPrefix:(profilePhotoUrl || '').slice(0,12)},timestamp:Date.now()})}).catch(()=>{});

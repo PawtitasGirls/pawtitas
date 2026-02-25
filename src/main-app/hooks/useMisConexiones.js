@@ -15,6 +15,8 @@ import {
 } from '../services';
 import { withCacheBuster } from '../../shared/utils';
 
+const API_BASE = process.env.EXPO_PUBLIC_API_BASE_URL || '';
+
 const getResenasArray = (reserva) => {
   if (Array.isArray(reserva?.resenas)) return reserva.resenas;
   if (Array.isArray(reserva?.resena)) return reserva.resena;
@@ -65,7 +67,9 @@ export const useMisConexiones = () => {
             ? { nombre: mascotaRaw.nombre ?? '', tipo: mascotaRaw.tipo ?? '', raza: mascotaRaw.raza ?? '' }
             : null;
           const rating = getCalificacionPropia(r, 'DUENIO');
-          const avatarUrl = withCacheBuster(p.profilePhotoUrl || p.avatar || null, ts);
+          const avatarUrl = p.profilePhotoUrl
+            ? withCacheBuster(API_BASE + p.profilePhotoUrl, ts)
+            : withCacheBuster(p.avatar || null, ts);
           // #region agent log
           fetch('http://127.0.0.1:7242/ingest/9d78051a-2c08-4bab-97c6-65d27df68b00',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({runId:'mis-conexiones-avatar',hypothesisId:'H2',location:'useMisConexiones.js:refreshConexiones',message:'Avatar prestador mapeado',data:{hasAvatarUrl:Boolean(avatarUrl),avatarUrlPrefix:(avatarUrl || '').slice(0,12)},timestamp:Date.now()})}).catch(()=>{});
           // #endregion
