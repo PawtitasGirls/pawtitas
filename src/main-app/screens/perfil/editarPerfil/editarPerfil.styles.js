@@ -1,4 +1,4 @@
-import { StyleSheet } from "react-native";
+import { StyleSheet, Platform } from "react-native";
 import { colors, typography } from "../../../../shared/styles";
 
 export const styles = StyleSheet.create({
@@ -170,5 +170,14 @@ export const styles = StyleSheet.create({
     fontStyle: "italic",
   },
 });
+
+const ANDROID_BUTTON_PADDING_KEYBOARD_OPEN = 16;
+
+export const getButtonContainerStyle = (navbarHeight, isKeyboardVisible = false) => {
+  if (Platform.OS !== "android") return {};
+  return {
+    paddingBottom: isKeyboardVisible ? ANDROID_BUTTON_PADDING_KEYBOARD_OPEN : navbarHeight,
+  };
+};
 
 export default styles;

@@ -1,8 +1,8 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { View, FlatList, Text, ActivityIndicator } from 'react-native';
+import { View, FlatList, Text, ActivityIndicator, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
-import { ScreenHeader, MenuInferior, BarraBuscador, Filtros, Paginador } from '../../components';
+import { ScreenHeader, MenuInferior, BarraBuscador, Filtros, Paginador, useNavbarHeight } from '../../components';
 import { UsuarioCard } from './components';
 import { ESTADOS_USUARIO } from '../../constants/estadosUsuario';
 import { usePaginacion } from '../../hooks/usePaginacion';
@@ -12,7 +12,8 @@ import ValidarUsuario from './ValidarUsuario';
 
 const PanelAdmin = () => {
   const navigation = useNavigation();
-  
+  const navbarHeight = useNavbarHeight();
+
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedFilter, setSelectedFilter] = useState('todos');
   const [showFilters, setShowFilters] = useState(false);
@@ -248,6 +249,7 @@ const PanelAdmin = () => {
             ItemSeparatorComponent={renderSeparator}
             showsVerticalScrollIndicator={false}
             bounces={true}
+            contentContainerStyle={Platform.OS === 'android' ? { paddingBottom: navbarHeight } : undefined}
             ListFooterComponent={() => (
               <Paginador
                 paginaActual={paginaActual}

@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { View, Text, FlatList, TouchableOpacity, ActivityIndicator, Image } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, ActivityIndicator, Image, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useNavigation, useRoute } from '@react-navigation/native';import { ScreenHeader, MenuInferior, Paginador } from '../../components';
+import { useNavigation, useRoute } from '@react-navigation/native';import { ScreenHeader, MenuInferior, Paginador, useNavbarHeight } from '../../components';
 import { useStreamChat } from '../../contexts';
 import { ChatController } from '../../controller';
 import { usePaginacion } from '../../hooks/usePaginacion';
@@ -18,6 +18,7 @@ const Chat = () => {
     const route = useRoute();
     const targetUser = route?.params?.targetUser ?? null;
     const navigation = useNavigation();
+    const navbarHeight = useNavbarHeight();
     const { chatClient, isReady, currentUser, createOrGetChannel, initializeChat } = useStreamChat();
     const [channels, setChannels] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -265,6 +266,7 @@ const Chat = () => {
                         data={canalesActuales}
                         keyExtractor={(item) => item.id}
                         renderItem={renderChannelItem}
+                        contentContainerStyle={Platform.OS === 'android' ? { paddingBottom: navbarHeight } : undefined}
                         ListFooterComponent={() => (
                         <Paginador
                             paginaActual={paginaActual}
