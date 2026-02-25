@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
-import { ScrollView, View, Text, Modal, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
+import { ScrollView, View, Text, Modal, TouchableOpacity, Alert, ActivityIndicator, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { colors } from '../../../shared/styles';
@@ -7,7 +7,7 @@ import { ROLES } from '../../constants/roles';
 import ScreenHeader from '../ScreenHeader';
 import BarraBuscador from '../BarraBuscador/BarraBuscador';
 import Filtros from '../Filtros/Filtros';
-import MenuInferior from '../MenuInferior/MenuInferior';
+import MenuInferior, { useNavbarHeight } from '../MenuInferior';
 import ConexionCard from '../ConexionCard';
 import ConexionDetalles from '../ConexionDetalles';
 import Paginador from '../Paginador';
@@ -37,7 +37,8 @@ const PrestadorServiciosScreen = ({
 }) => {
   const { userLocation, getDistanceFromUser, isLocationEnabled } = useLocation();
   const { user, role } = useAuth();
-  
+  const navbarHeight = useNavbarHeight();
+
   // Filtro por defecto: 'cercania' si hay ubicación activada, sino 'mejor-calificacion'
   const defaultFilter = isLocationEnabled && userLocation ? 'cercania' : 'mejor-calificacion';
   
@@ -328,6 +329,7 @@ const PrestadorServiciosScreen = ({
       <ScrollView
         style={styles.content}
         showsVerticalScrollIndicator={false}
+        contentContainerStyle={Platform.OS === 'android' ? { paddingBottom: navbarHeight } : undefined}
       >
         {showEmptyState ? (
           <View style={styles.emptyState}>

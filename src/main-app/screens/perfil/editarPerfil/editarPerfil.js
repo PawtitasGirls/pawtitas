@@ -5,11 +5,12 @@ import {
   ScrollView,
   ActivityIndicator,
   KeyboardAvoidingView,
-  Platform
+  Keyboard,
+  Platform,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ScreenHeader, GuardarCancelarBtn, MensajeFlotante, MenuInferior, useNavbarHeight } from "../../../components";
-import { styles } from "./editarPerfil.styles";
+import { styles, getButtonContainerStyle } from "./editarPerfil.styles";
 import PerfilFactory from "./roles/PerfilFactory";
 import ROLES from "./roles/types";
 import { useAuth } from "../../../contexts";
@@ -122,6 +123,22 @@ export default function EditarPerfil({ navigation, route }) {
   const [errors, setErrors] = useState({});
   const [message, setMessage] = useState({ type: "", text: "" });
   const [showMensajeFlotante, setShowMensajeFlotante] = useState(false);
+  const [isKeyboardVisible, setKeyboardVisible] = useState(false);
+
+  useEffect(() => {
+    const show = Keyboard.addListener(
+      Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow",
+      () => setKeyboardVisible(true)
+    );
+    const hide = Keyboard.addListener(
+      Platform.OS === "ios" ? "keyboardWillHide" : "keyboardDidHide",
+      () => setKeyboardVisible(false)
+    );
+    return () => {
+      show.remove();
+      hide.remove();
+    };
+  }, []);
 
   useEffect(() => {
     loadProfileData();
@@ -306,12 +323,7 @@ export default function EditarPerfil({ navigation, route }) {
           {PerfilFactory.createProfileForm(userRole, { formData, handleInputChange, errors })}
         </ScrollView>
 
-        <View
-          style={[
-            styles.buttonContainer,
-            Platform.OS === 'android' && { paddingBottom: navbarHeight },
-          ]}
-        >
+        <View style={[styles.buttonContainer, getButtonContainerStyle(navbarHeight, isKeyboardVisible)]}>
           <GuardarCancelarBtn
             label="Guardar"
             onPress={handleSave}
