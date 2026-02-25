@@ -195,7 +195,7 @@ export default function PrestadorServicioPerfilForm({ formData, handleInputChang
           label="Duración"
           value={formData.duracion}
           onChangeText={(value) => handleInputChange("duracion", value)}
-          placeholder="hh:mm"
+          placeholder="Tiempo del servicio"
           error={errors.duracion}
           required={true}
         />
