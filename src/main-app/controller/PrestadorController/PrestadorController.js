@@ -1,6 +1,8 @@
 import { getPrestadoresPorPerfil } from '../../services';
 import { withCacheBuster } from '../../../shared/utils';
 
+const API_BASE = process.env.EXPO_PUBLIC_API_BASE_URL || '';
+
 export class PrestadorController {
   static async getPrestadores(perfil, ciudad = null) {
     try {
@@ -41,7 +43,9 @@ export class PrestadorController {
       usuarioId: usuarioId?.toString?.() || usuarioId || '',
       servicioId: servicio?.id?.toString?.() || servicio?.id || '',
       nombre: nombreCompleto || 'Sin nombre',
-      avatarUrl: withCacheBuster(prestador.profilePhotoUrl || prestador.avatar),
+      avatarUrl: prestador.profilePhotoUrl
+        ? withCacheBuster(API_BASE + prestador.profilePhotoUrl)
+        : withCacheBuster(prestador.avatar),
       rating: Number(avgRating ?? prestador?.rating ?? 0),
       reviewsCount: Number(reviewsCount || 0),
       descripcion: servicio?.descripcion || 'Sin descripción',

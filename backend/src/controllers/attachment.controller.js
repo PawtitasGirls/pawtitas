@@ -89,6 +89,7 @@ async function getProfilePhoto(req, res) {
     const fileName = attachment.fileName || 'profile-photo';
     res.setHeader('Content-Type', mimeType);
     res.setHeader('Content-Disposition', `inline; filename="${fileName}"`);
+    res.setHeader('Cache-Control', 'no-cache');
     res.send(attachment.data);
   } catch (err) {
     console.error('getProfilePhoto error', err);

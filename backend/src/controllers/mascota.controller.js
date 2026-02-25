@@ -320,6 +320,7 @@ async function getMascotaPhotoController(req, res) {
     const fileName = foto.fileName || 'mascota-photo';
     res.setHeader('Content-Type', mimeType);
     res.setHeader('Content-Disposition', `inline; filename="${fileName}"`);
+    res.setHeader('Cache-Control', 'no-cache');
     res.send(foto.data);
   } catch (err) {
     console.error('Error al descargar foto de mascota:', err);
