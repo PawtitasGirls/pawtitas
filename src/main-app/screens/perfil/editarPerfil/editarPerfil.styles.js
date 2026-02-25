@@ -25,6 +25,7 @@ export const styles = StyleSheet.create({
   buttonContainer: {
     paddingVertical: 20,
     paddingBottom: 60,
+    backgroundColor: colors.background,
   },
   loadingContainer: {
     flex: 1,
