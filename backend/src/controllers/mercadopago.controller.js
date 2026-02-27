@@ -55,7 +55,7 @@ function validateWebhookSignature(req) {
 }
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
-const APP_URL = process.env.APP_URL || 'pawtitas://';
+const APP_URL = process.env.APP_URL;
 
 function buildPreferenceBody(reserva, userEmail) {
   const montoTotal = Number(reserva.montoTotal);
@@ -73,9 +73,9 @@ function buildPreferenceBody(reserva, userEmail) {
     ],
     payer: {},
     back_urls: {
-      success: `${APP_URL}payment/success?reserva_id=${reserva.id}`,
-      failure: `${APP_URL}payment/failure?reserva_id=${reserva.id}`,
-      pending: `${APP_URL}payment/pending?reserva_id=${reserva.id}`,
+      success: `${BACKEND_URL}/payment/success?reserva_id=${reserva.id}`,
+      failure: `${BACKEND_URL}/payment/failure?reserva_id=${reserva.id}`,
+      pending: `${BACKEND_URL}/payment/pending?reserva_id=${reserva.id}`,
     },
     auto_return: 'approved',
     external_reference: externalRef,
