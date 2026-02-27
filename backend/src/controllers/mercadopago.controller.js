@@ -55,7 +55,7 @@ function validateWebhookSignature(req) {
 }
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
-const APP_URL = process.env.APP_URL;
+const APP_URL = process.env.APP_URL || 'pawtitas://';
 
 function buildPreferenceBody(reserva, userEmail) {
   const montoTotal = Number(reserva.montoTotal);
