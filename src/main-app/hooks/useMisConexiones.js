@@ -419,6 +419,7 @@ export const useMisConexiones = () => {
 
     setState(prev => ({
       ...prev,
+      showDetalles: false,
       showPaymentCheckout: false,
       paymentUrl: null,
       selectedProvider: null,
