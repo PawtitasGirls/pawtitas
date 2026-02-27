@@ -73,9 +73,9 @@ function buildPreferenceBody(reserva, userEmail) {
     ],
     payer: {},
     back_urls: {
-      success: `${APP_URL}/payment/success?reserva_id=${reserva.id}`,
-      failure: `${APP_URL}/payment/failure?reserva_id=${reserva.id}`,
-      pending: `${APP_URL}/payment/pending?reserva_id=${reserva.id}`,
+      success: `${BACKEND_URL}/payment/success?reserva_id=${reserva.id}`,
+      failure: `${BACKEND_URL}/payment/failure?reserva_id=${reserva.id}`,
+      pending: `${BACKEND_URL}/payment/pending?reserva_id=${reserva.id}`,
     },
     auto_return: 'approved',
     external_reference: externalRef,
