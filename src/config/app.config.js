@@ -10,12 +10,15 @@ const baseConfig = {
   slug: "pawtitas",
   version: "1.0.0",
   runtimeVersion: {
-    policy: "nativeVersion"
+    policy: "appVersion"
   },
   orientation: "portrait",
   icon: "./assets/icon.png",
   userInterfaceStyle: "light",
   scheme: "pawtitas",
+  updates: {
+    url: "https://u.expo.dev/8ff1fced-a870-4126-8137-6f3c13bc2f93"
+  },
   splash: {
     backgroundColor: "#ffffff",
     resizeMode: "contain"
