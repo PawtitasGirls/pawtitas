@@ -17,7 +17,7 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 40,
     paddingVertical: 60,
   },
-  emptyText: {
+  title: {
     ...typography.styles.body,
     color: colors.text.secondary,
     textAlign: 'center',

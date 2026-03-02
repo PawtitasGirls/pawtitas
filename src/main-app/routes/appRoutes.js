@@ -20,6 +20,8 @@ import ChatScreen from "../screens/chat/Chat";
 import Conversacion from "../screens/chat/Conversacion";
 import MapaScreen from "../screens/mapa/Mapa";
 import EstadoCuentaScreen from "../screens/estadoCuenta/EstadoCuenta";
+import Recordatorio from "../screens/recordatorio/recordatorio";
+
 
 export const publicScreens = [
   { name: "Splash", component: SplashScreen },
@@ -33,6 +35,8 @@ export const publicScreens = [
   { name: "EditarPerfil", component: EditarPerfil },
   { name: "MisMascotas", component: MisMascotasScreen },
   { name: "EstadoCuenta", component: EstadoCuentaScreen },
+  { name: "Recordatorio", component: Recordatorio },
+  
 ];
 
 export const guardedScreens = [
