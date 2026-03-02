@@ -4,10 +4,25 @@ import { colors, typography } from '../../../shared/styles';
 // Estilos para la pantalla Home
 export const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: colors.background,
-    alignItems: 'center',
-  },
+  flex: 1,
+  backgroundColor: colors.background,
+},
+
+headerRow: {
+  width: "100%",
+  alignItems: "center",
+  justifyContent: "center",
+  marginTop: 12,
+},
+
+locationButton: {
+  flexDirection: "row",
+  alignItems: "center",
+  backgroundColor: "#fff",
+  paddingHorizontal: 14,
+  paddingVertical: 8,
+  borderRadius: 20,
+},
   header: {
     flexDirection: 'column',
     alignItems: 'center',
@@ -117,12 +132,12 @@ export const styles = StyleSheet.create({
     color: colors.text.secondary,
     textAlign: 'center',
   },
-  topRow: {
+topRow: {
   flexDirection: "row",
   alignItems: "center",
   justifyContent: "space-between",
-  paddingHorizontal: 15,
-  marginBottom: 10,
+  paddingHorizontal: 20,
+  marginTop: 3,
 },
 searchContainer: {
   flex: 1,
@@ -142,8 +157,9 @@ searchInput: {
   height: 40,
 },
 notificationButton: {
-  position: "relative",
-  marginTop:50
+  position: "absolute",
+  right:-40,
+  marginTop:20,
 },
 badge: {
   position: "absolute",

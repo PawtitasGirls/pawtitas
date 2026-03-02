@@ -22,6 +22,7 @@ const ServiceCategory = ({ emoji, title, description, onPress }) => (
 
 // Componente para el encabezado de la pantalla Home
 const HomeHeader = ({ hidePendingControls, hideForAdmin }) => {
+  const navigation = useNavigation();
   const [locationModalVisible, setLocationModalVisible] = useState(false);
   const { 
     userLocation, 
@@ -59,33 +60,47 @@ const HomeHeader = ({ hidePendingControls, hideForAdmin }) => {
 
   return (
   <>
-    {/* Primer bloque: buscador, notificaciones, modal */}
+    {/* Primer bloque:  reminder, modal */}
     <View style={styles.header}>
-      {/* Fila superior */}
-     
+<View style={styles.header}>
+  {!hidePendingControls && !hideForAdmin && (
+    <View style={styles.topRow}>
 
-      {/* Fila inferior - Botón de ubicación */}
-      {!hidePendingControls && !hideForAdmin && (
-        <TouchableOpacity
-          style={[
-            styles.locationButton,
-            userLocation && styles.locationButtonActive
-          ]}
-          onPress={() => setLocationModalVisible(true)}
-        >
-          <Ionicons 
-            name={userLocation ? "location" : "location-outline"} 
-            size={18} 
-            color={userLocation ? "#f5a3c1ff" : "#4f0d01ff"} 
-          />
-          <Text style={[
-            styles.backText,
-            userLocation && styles.locationActiveText
-          ]}>
-            {getLocationButtonText()}
-          </Text>
-        </TouchableOpacity>
-      )}
+      {/* Ubicación (reemplaza al buscador) */}
+      <TouchableOpacity
+        style={[
+          styles.locationButton,
+          userLocation && styles.locationButtonActive
+        ]}
+        onPress={() => setLocationModalVisible(true)}
+      >
+        <Ionicons 
+          name={userLocation ? "location" : "location-outline"} 
+          size={18} 
+          color={userLocation ? "#f5a3c1ff" : "#4f0d01ff"} 
+        />
+        <Text style={[
+          styles.backText,
+          userLocation && styles.locationActiveText
+        ]}>
+          {getLocationButtonText()}
+        </Text>
+      </TouchableOpacity>
+
+      
+      <TouchableOpacity 
+  style={styles.notificationButton}
+ onPress={() => navigation.navigate("Recordatorio")}
+>
+  <Ionicons name="notifications-outline" size={24} color="#333" />
+  <View style={styles.badge}>
+    <Text style={styles.badgeText}>3</Text>
+  </View>
+</TouchableOpacity>
+
+    </View>
+  )}
+</View>
 
       {/* Modal de ubicación */}
       {!hidePendingControls && !hideForAdmin && (

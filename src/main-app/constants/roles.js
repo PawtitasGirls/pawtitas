@@ -16,6 +16,7 @@ export const ROLE_BLOCKED_ROUTES = {
     'Paseadores',
     'Salud',
     'Mapa',
+    'recordatorio',
   ],
   [ROLES.ADMIN]: [
     'Mapa', 
