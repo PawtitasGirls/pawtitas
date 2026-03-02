@@ -5,8 +5,10 @@ import { useNavigation } from '@react-navigation/native';
 import ScreenHeader from '../../components/ScreenHeader';
 import MenuInferior, { useNavbarHeight } from '../../components/MenuInferior';
 import { styles } from './recordatorio.styles';
+import { useRecordatorios } from '../../hooks/useRecordatorios';
 
 const Recordatorio = () => {
+//const { recordatorios, loading } = useRecordatorios();
   const navigation = useNavigation();
   const navbarHeight = useNavbarHeight();
 
@@ -14,7 +16,6 @@ const Recordatorio = () => {
     navigation.goBack();
   };
 
-  // ⚠️ Datos mockeados solo para UI
   const mockRecordatorios = [
     {
       id: 1,
@@ -22,7 +23,16 @@ const Recordatorio = () => {
       fecha: '25 de marzo'
     }
   ];
+  
+const formatFecha = (fecha) => {
+  const date = new Date(fecha);
 
+  return date.toLocaleDateString('es-AR', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric'
+  });
+};
   return (
     <SafeAreaView style={styles.container}>
       <ScreenHeader
@@ -66,6 +76,7 @@ const Recordatorio = () => {
           ))}
         </ScrollView>
       )}
+      
 
       <MenuInferior />
     </SafeAreaView>
