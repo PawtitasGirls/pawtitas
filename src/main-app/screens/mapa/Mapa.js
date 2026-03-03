@@ -13,7 +13,7 @@ import {
 import MapView, { Marker, Polyline, PROVIDER_DEFAULT } from 'react-native-maps';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useLocation } from '../../contexts';
+import { useLocation, useChatBadgeSync } from '../../contexts';
 import MenuInferior from '../../components/MenuInferior';
 import { MapaController, MAPA_CONFIG } from '../../controller';
 import { styles, getAttributionStyle } from './Mapa.styles';
@@ -22,6 +22,7 @@ const MapaScreen = () => {
   const mapRef = useRef(null);
   const insets = useSafeAreaInsets();
   const { userLocation, getCurrentLocation, isLoadingLocation, isLocationEnabled } = useLocation();
+  useChatBadgeSync();
 
   const [state, setState] = useState(MapaController.getInitialState());
   const [isMapLoading, setIsMapLoading] = useState(true);

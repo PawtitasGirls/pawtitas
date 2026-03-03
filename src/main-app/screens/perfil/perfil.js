@@ -6,7 +6,7 @@ import { styles } from './perfil.styles';
 import { colors } from '../../../shared/styles';
 import { PerfilHeader, MenuInferior, useNavbarHeight } from '../../components';
 import { PerfilInfoCard, MascotasSection, LogoutBtn, MenuConfig, ContactoService } from './components';
-import { useAuth } from '../../contexts';
+import { useAuth, useChatBadgeSync } from '../../contexts';
 import { ROLES } from '../../constants/roles';
 import { clearAuthToken, getUserProfile } from '../../services';
 import { withCacheBuster } from '../../../shared/utils';
@@ -47,6 +47,7 @@ const PerfilScreen = () => {
   const navigation = useNavigation();
   const navbarHeight = useNavbarHeight();
   const { user, role, clearAuth, updateUser } = useAuth();
+  useChatBadgeSync();
 
   useEffect(() => {
     const loadProfileStats = async () => {

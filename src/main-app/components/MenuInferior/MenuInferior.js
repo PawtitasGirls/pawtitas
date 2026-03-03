@@ -18,7 +18,9 @@ const MenuInferior = () => {
   const route = useRoute();
   const insets = useSafeAreaInsets();
   const { role, user } = useAuth();
-  const { totalUnreadCount = 0 } = useStreamChat();
+  const { totalUnreadCount = 0, getChatLastSeen } = useStreamChat();
+  const userId = user?.id != null ? String(user.id) : '';
+  const chatLastSeen = getChatLastSeen(userId);
   const estadoPrestador = String(user?.estadoPrestador || '').toUpperCase();
   const isPrestadorPendiente =
     role === ROLES.PRESTADOR && estadoPrestador === 'PENDIENTE';
@@ -50,8 +52,9 @@ const MenuInferior = () => {
         {visibleItems.map((item) => {
           const isActive = route.name === item.route;
           const isChat = item.route === 'Chat';
-          const showBadge = isChat && totalUnreadCount > 0 && !isActive;
-          const badgeLabel = totalUnreadCount > 99 ? '99+' : String(totalUnreadCount);
+          const showBadge = isChat && totalUnreadCount > chatLastSeen && !isActive;
+          const badgeCount = totalUnreadCount - chatLastSeen;
+          const badgeLabel = badgeCount > 99 ? '99+' : String(badgeCount);
           return (
             <TouchableOpacity
               key={item.name}

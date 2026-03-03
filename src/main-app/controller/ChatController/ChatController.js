@@ -115,6 +115,14 @@ export class ChatController {
     return CHAT_CONFIG.NEW_MESSAGE_EVENTS.includes(event.type);
   }
 
+  // Cantidad de no leídos en un canal (para resaltar en la lista).
+  static getChannelUnreadCount(channel, currentUserId) {
+    if (!channel?.state?.read || currentUserId == null) return 0;
+    const key = String(currentUserId);
+    const n = channel.state.read[key]?.unread_messages;
+    return typeof n === 'number' ? n : 0;
+  }
+
   // Obtener el último mensaje de un canal
   static getLastMessage(channel) {
     const messages = channel?.state?.messages || [];

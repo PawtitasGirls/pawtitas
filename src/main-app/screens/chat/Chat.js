@@ -2,7 +2,7 @@ import React, { useEffect, useState, useMemo } from 'react';
 import { View, Text, FlatList, TouchableOpacity, ActivityIndicator, Image, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';import { ScreenHeader, MenuInferior, Paginador, useNavbarHeight } from '../../components';
-import { useStreamChat } from '../../contexts';
+import { useStreamChat, useChatBadgeSync } from '../../contexts';
 import { ChatController } from '../../controller';
 import { usePaginacion } from '../../hooks/usePaginacion';
 import { colors } from '../../../shared/styles';
@@ -20,6 +20,7 @@ const Chat = () => {
     const navigation = useNavigation();
     const navbarHeight = useNavbarHeight();
     const { chatClient, isReady, currentUser, createOrGetChannel, initializeChat } = useStreamChat();
+    useChatBadgeSync();
     const [channels, setChannels] = useState([]);
     const [loading, setLoading] = useState(true);
     const [mockUsersVisible, setMockUsersVisible] = useState(true);
@@ -57,10 +58,6 @@ const Chat = () => {
                 if (isMounted) {
                     setChannels(fetchedChannels);
                     setLoading(false);
-                    // Marcar todos los canales como leídos al ver la lista (actualiza el badge)
-                    fetchedChannels.forEach((ch) => {
-                      if (ch?.markRead) ch.markRead().catch(() => {});
-                    });
                 }
             } catch (error) {
                 console.error("Error fetching channels:", error);
@@ -167,9 +164,13 @@ const Chat = () => {
         const previewText = lastMessage
           ? (lastMessage.text || (hasImageAttachment ? 'Imagen adjunta' : ''))
           : 'Haz clic para iniciar la conversación';
+        const hasUnread = ChatController.getChannelUnreadCount(item, currentUser?.id) > 0;
 
         return (
-            <TouchableOpacity style={styles.channelItem} onPress={() => handleChannelPress(item)}>
+            <TouchableOpacity
+                style={[styles.channelItem, hasUnread && styles.channelItemUnread]}
+                onPress={() => handleChannelPress(item)}
+            >
                 <Image
                     source={{ uri: withCacheBuster(ChatController.getUserImage(otherUser), imageCacheTs) || 'https://via.placeholder.com/50' }}
                     style={styles.avatar}

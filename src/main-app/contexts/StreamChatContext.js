@@ -1,5 +1,7 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
 import { StreamChat } from 'stream-chat';
+import { useAuth } from './AuthContext';
 
 const StreamChatContext = createContext();
 
@@ -8,7 +10,15 @@ export const StreamChatProvider = ({ children }) => {
   const [isReady, setIsReady] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
   const [totalUnreadCount, setTotalUnreadCount] = useState(0);
+  const [chatLastSeenByUser, setChatLastSeenByUser] = useState({});
+  const [wentToChat, setWentToChat] = useState(false);
   const apiKey = process.env.EXPO_PUBLIC_STREAM_API_KEY;
+
+  const setChatLastSeen = useCallback((userId, count) => {
+    setChatLastSeenByUser((prev) => ({ ...prev, [userId]: count }));
+  }, []);
+
+  const getChatLastSeen = useCallback((userId) => chatLastSeenByUser[userId] ?? 0, [chatLastSeenByUser]);
 
   const initializeChat = async (userId, userName, userToken, userImage = null, userRole = null) => {
     try {
@@ -106,6 +116,7 @@ export const StreamChatProvider = ({ children }) => {
         setChatClient(null);
         setCurrentUser(null);
         setTotalUnreadCount(0);
+        setChatLastSeenByUser({});
         setIsReady(false);
       } catch (error) {
         console.error('❌ Error al desconectar:', error);
@@ -140,6 +151,10 @@ export const StreamChatProvider = ({ children }) => {
     isReady,
     currentUser,
     totalUnreadCount,
+    getChatLastSeen,
+    setChatLastSeen,
+    wentToChat,
+    setWentToChat,
     initializeChat,
     disconnectChat,
     createOrGetChannel,
@@ -158,5 +173,20 @@ export const useStreamChat = () => {
     throw new Error('useStreamChat debe usarse dentro de StreamChatProvider');
   }
   return context;
+};
+
+// Actualiza lastSeen al volver de Chat
+export const useChatBadgeSync = () => {
+  const { setChatLastSeen, setWentToChat, wentToChat, totalUnreadCount } = useStreamChat();
+  const { user } = useAuth();
+  const userId = user?.id != null ? String(user.id) : '';
+  useFocusEffect(
+    useCallback(() => {
+      if (wentToChat && userId) {
+        setChatLastSeen(userId, totalUnreadCount);
+        setWentToChat(false);
+      }
+    }, [wentToChat, userId, totalUnreadCount, setChatLastSeen, setWentToChat])
+  );
 };
 

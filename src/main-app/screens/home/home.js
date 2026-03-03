@@ -5,7 +5,7 @@ import React, { useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, Modal, ScrollView, Image, ActivityIndicator, Platform } from "react-native";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons"; // librería de íconos
-import { useLocation, useAuth } from '../../contexts';
+import { useLocation, useAuth, useChatBadgeSync } from '../../contexts';
 import { isRouteAllowed, ROLES } from '../../constants/roles';
 import { useRecordatorios } from '../../hooks/useRecordatorios';
 import MercadoPagoConnect from '../perfil/components/MercadoPagoConnect';
@@ -207,6 +207,7 @@ const HomeScreen = () => {
   const { role, user } = useAuth();
   const { recordatorios } = useRecordatorios();
   const [wentToRecordatorio, setWentToRecordatorio] = useState(false);
+  useChatBadgeSync();
 
   const userId = user?.id != null ? String(user.id) : '';
   const lastSeenCount = recordatoriosLastSeenByUser[userId] ?? 0;
