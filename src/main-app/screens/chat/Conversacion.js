@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef, useMemo } from 'react';
 import { View, Text, FlatList, TextInput, TouchableOpacity, KeyboardAvoidingView, Keyboard, Platform, ActivityIndicator, Alert, Image } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useRoute, useNavigation } from '@react-navigation/native';
+import { useRoute, useNavigation, useFocusEffect } from '@react-navigation/native';
 import { useStreamChat } from '../../contexts';
 import { ChatController } from '../../controller';
 import { colors } from '../../../shared/styles';
@@ -15,7 +15,7 @@ const Conversacion = () => {
     const navigation = useNavigation();
     const insets = useSafeAreaInsets();
     const { channel } = route.params || {};
-    const { chatClient, currentUser } = useStreamChat();
+    const { chatClient, currentUser, setWentToChat } = useStreamChat();
     const channelId = channel?.id || route.params?.channelId;
     
     const [activeChannel, setActiveChannel] = useState(channel || null);
@@ -27,6 +27,13 @@ const Conversacion = () => {
     const [otherUser, setOtherUser] = useState(null);
     const [isKeyboardVisible, setKeyboardVisible] = useState(false);
     const flatListRef = useRef(null);
+
+    // Marcar que entró a una conversación 1:1 para que al salir se actualice el badge
+    useFocusEffect(
+        React.useCallback(() => {
+            setWentToChat?.(true);
+        }, [setWentToChat])
+    );
 
     useEffect(() => {
         const show = Keyboard.addListener(Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow', () => setKeyboardVisible(true));

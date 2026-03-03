@@ -19,6 +19,11 @@ export const styles = StyleSheet.create({
         alignItems: 'center',
         backgroundColor: colors.surface || '#fff',
     },
+    channelItemUnread: {
+        backgroundColor: `${colors.brand?.accent || '#f5a3c1'}20`,
+        borderLeftWidth: 18,
+        borderLeftColor: colors.brand?.accent || '#f5a3c1',
+    },
     avatar: {
         width: 50,
         height: 50,
