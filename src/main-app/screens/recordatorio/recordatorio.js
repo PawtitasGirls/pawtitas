@@ -1,5 +1,5 @@
 import React from 'react';
-import { ScrollView, View, Text, Platform } from 'react-native';
+import { ScrollView, View, Text, Platform, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import ScreenHeader from '../../components/ScreenHeader';
@@ -10,31 +10,13 @@ import { useRecordatorios } from '../../hooks/useRecordatorios';
 //logica: si el 'estado' de la reserva es 'PAGADO' entonces mostrarla en recordatorios, cualquier otro 'estado' no mostrar.
 //las notificaciones estan hardcodeadas con un '3' en 'home.js', modificar para que muestre según la cantidad de tarjetas de reminders que haya.
 const Recordatorio = () => {
-//const { recordatorios, loading } = useRecordatorios();
+  const { recordatorios, loading } = useRecordatorios();
   const navigation = useNavigation();
   const navbarHeight = useNavbarHeight();
 
   const handleBackPress = () => {
     navigation.goBack();
   };
-
-  const mockRecordatorios = [
-    {
-      id: 1,
-      usuario: 'María López',
-      fecha: '25 de marzo'
-    }
-  ];
-  
-const formatFecha = (fecha) => {
-  const date = new Date(fecha);
-
-  return date.toLocaleDateString('es-AR', {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric'
-  });
-};
   return (
     <SafeAreaView style={styles.container}>
       <ScreenHeader
@@ -44,7 +26,14 @@ const formatFecha = (fecha) => {
         showBackButton={true}
       />
 
-      {mockRecordatorios.length === 0 ? (
+      {loading ? (
+        <View style={styles.emptyContainer}>
+          <ActivityIndicator size="large" color="#f5a3c1ff" />
+          <Text style={styles.emptySubtitle}>
+            Cargando tus recordatorios
+          </Text>
+        </View>
+      ) : recordatorios.length === 0 ? (
         <View style={styles.emptyContainer}>
           <Text style={styles.emptyTitle}>
             No tenés recordatorios
@@ -62,18 +51,24 @@ const formatFecha = (fecha) => {
             Platform.OS === 'android' && { paddingBottom: navbarHeight },
           ]}
         >
-          {mockRecordatorios.map((item) => (
+          {recordatorios.map((item) => (
             <View key={item.id} style={styles.card}>
               <Text style={styles.cardTitle}>
                 Tenés una reserva confirmada
               </Text>
 
-              <Text style={styles.cardText}>
-                {`Tenés una reserva realizada por `}
-                <Text style={styles.bold}>{item.usuario}</Text>
-                {` para el `}
-                <Text style={styles.bold}>{item.fecha}</Text>
-              </Text>
+              {item.tieneFecha ? (
+                <Text style={styles.cardText}>
+                  {`Tenés una reserva realizada por `}
+                  <Text style={styles.bold}>{item.usuario}</Text>
+                  {` para el `}
+                  <Text style={styles.bold}>{item.fechaLabel}</Text>
+                </Text>
+              ) : (
+                <Text style={styles.cardText}>
+                  No pudimos guardar la fecha de este servicio. Volvé a intentarlo.
+                </Text>
+              )}
             </View>
           ))}
         </ScrollView>

@@ -3,11 +3,15 @@ import MenuInferior, { useNavbarHeight } from '../../components/MenuInferior';
 import iconImage from '../../assets/icon.png';
 import React, { useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, Modal, ScrollView, Image, ActivityIndicator, Platform } from "react-native";
+import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons"; // librería de íconos
-import { useNavigation } from "@react-navigation/native";
 import { useLocation, useAuth } from '../../contexts';
 import { isRouteAllowed, ROLES } from '../../constants/roles';
+import { useRecordatorios } from '../../hooks/useRecordatorios';
 import MercadoPagoConnect from '../perfil/components/MercadoPagoConnect';
+
+// Persiste "último count visto" por usuario para que el badge no reaparezca al volver de otra pantalla
+const recordatoriosLastSeenByUser = {};
 
 // Componentes de categoría de servicios
 const ServiceCategory = ({ emoji, title, description, onPress }) => (
@@ -21,13 +25,13 @@ const ServiceCategory = ({ emoji, title, description, onPress }) => (
 );
 
 // Componente para el encabezado de la pantalla Home
-const HomeHeader = ({ hidePendingControls, hideForAdmin }) => {
+const HomeHeader = ({ hidePendingControls, hideForAdmin, showRecordatoriosBadge = false, recordatoriosCount = 0, onGoToRecordatorio }) => {
   const navigation = useNavigation();
   const [locationModalVisible, setLocationModalVisible] = useState(false);
-  const { 
-    userLocation, 
-    isLoadingLocation, 
-    locationError, 
+  const {
+    userLocation,
+    isLoadingLocation,
+    locationError,
     getCurrentLocation,
     clearLocation,
   } = useLocation();
@@ -88,15 +92,17 @@ const HomeHeader = ({ hidePendingControls, hideForAdmin }) => {
       </TouchableOpacity>
 
       
-      <TouchableOpacity 
-  style={styles.notificationButton}
- onPress={() => navigation.navigate("Recordatorio")}
->
-  <Ionicons name="notifications-outline" size={24} color="#333" />
-  <View style={styles.badge}>
-    <Text style={styles.badgeText}>3</Text>
-  </View>
-</TouchableOpacity>
+      <TouchableOpacity
+        style={styles.notificationButton}
+        onPress={onGoToRecordatorio || (() => navigation.navigate("Recordatorio"))}
+      >
+        <Ionicons name="notifications-outline" size={24} color="#333" />
+        {showRecordatoriosBadge && recordatoriosCount > 0 && (
+          <View style={styles.badge}>
+            <Text style={styles.badgeText}>{recordatoriosCount}</Text>
+          </View>
+        )}
+      </TouchableOpacity>
 
     </View>
   )}
@@ -199,11 +205,32 @@ const HomeScreen = () => {
   const navigation = useNavigation();
   const navbarHeight = useNavbarHeight();
   const { role, user } = useAuth();
+  const { recordatorios } = useRecordatorios();
+  const [wentToRecordatorio, setWentToRecordatorio] = useState(false);
+
+  const userId = user?.id != null ? String(user.id) : '';
+  const lastSeenCount = recordatoriosLastSeenByUser[userId] ?? 0;
+
+  useFocusEffect(
+    React.useCallback(() => {
+      if (wentToRecordatorio && userId) {
+        recordatoriosLastSeenByUser[userId] = recordatorios.length;
+        setWentToRecordatorio(false);
+      }
+    }, [wentToRecordatorio, userId, recordatorios.length])
+  );
+
+  const handleGoToRecordatorio = () => {
+    setWentToRecordatorio(true);
+    navigation.navigate('Recordatorio');
+  };
+
   const estadoPrestador = String(user?.estadoPrestador || '').toUpperCase();
   const isPrestadorPendiente =
     role === ROLES.PRESTADOR && estadoPrestador === 'PENDIENTE';
   const isPrestadorActivo = role === ROLES.PRESTADOR && !isPrestadorPendiente;
   const isAdmin = role === ROLES.ADMIN;
+  const showRecordatoriosBadge = recordatorios.length > lastSeenCount;
 
   // Categorías de servicios
   const serviceCategories = [
@@ -268,7 +295,13 @@ const HomeScreen = () => {
             Platform.OS === 'android' && { paddingBottom: navbarHeight },
           ]}
         >
-        <HomeHeader hidePendingControls={isPrestadorPendiente} hideForAdmin={isAdmin} />
+        <HomeHeader
+          hidePendingControls={isPrestadorPendiente}
+          hideForAdmin={isAdmin}
+          showRecordatoriosBadge={showRecordatoriosBadge}
+          recordatoriosCount={recordatorios.length}
+          onGoToRecordatorio={handleGoToRecordatorio}
+        />
 
         {isPrestadorPendiente && (
           <View style={styles.pendingBanner}>

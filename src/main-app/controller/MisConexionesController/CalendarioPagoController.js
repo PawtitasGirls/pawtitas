@@ -32,17 +32,10 @@ export class CalendarioPagoController {
 
   // Selección de fecha
   static toggleDateSelection(currentDates, dateString) {
-    const newSelectedDates = { ...currentDates };
-
-    if (newSelectedDates[dateString]) {
-      // Removemos fecha seleccionada
-      delete newSelectedDates[dateString];
-    } else {
-      // Agregamos fecha seleccionada
-      newSelectedDates[dateString] = this.createSelectedDateObject();
+    if (currentDates[dateString]) {
+      return {};
     }
-
-    return newSelectedDates;
+    return { [dateString]: this.createSelectedDateObject() };
   }
 
   // Fechas seleccionadas
