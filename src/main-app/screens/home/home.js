@@ -1,7 +1,7 @@
 import { styles } from './home.styles';
 import MenuInferior, { useNavbarHeight } from '../../components/MenuInferior';
 import iconImage from '../../assets/icon.png';
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, Modal, ScrollView, Image, ActivityIndicator, Platform } from "react-native";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons"; // librería de íconos
@@ -9,6 +9,9 @@ import { useLocation, useAuth } from '../../contexts';
 import { isRouteAllowed, ROLES } from '../../constants/roles';
 import { useRecordatorios } from '../../hooks/useRecordatorios';
 import MercadoPagoConnect from '../perfil/components/MercadoPagoConnect';
+
+// Persiste "último count visto" por usuario para que el badge no reaparezca al volver de otra pantalla
+const recordatoriosLastSeenByUser = {};
 
 // Componentes de categoría de servicios
 const ServiceCategory = ({ emoji, title, description, onPress }) => (
@@ -203,25 +206,19 @@ const HomeScreen = () => {
   const navbarHeight = useNavbarHeight();
   const { role, user } = useAuth();
   const { recordatorios } = useRecordatorios();
-  const [recordatoriosVistos, setRecordatoriosVistos] = useState(false);
   const [wentToRecordatorio, setWentToRecordatorio] = useState(false);
-  const prevRecordatoriosCount = useRef(recordatorios.length);
+
+  const userId = user?.id != null ? String(user.id) : '';
+  const lastSeenCount = recordatoriosLastSeenByUser[userId] ?? 0;
 
   useFocusEffect(
     React.useCallback(() => {
-      if (wentToRecordatorio) {
-        setRecordatoriosVistos(true);
+      if (wentToRecordatorio && userId) {
+        recordatoriosLastSeenByUser[userId] = recordatorios.length;
         setWentToRecordatorio(false);
       }
-    }, [wentToRecordatorio])
+    }, [wentToRecordatorio, userId, recordatorios.length])
   );
-
-  useEffect(() => {
-    if (recordatorios.length > prevRecordatoriosCount.current) {
-      setRecordatoriosVistos(false);
-    }
-    prevRecordatoriosCount.current = recordatorios.length;
-  }, [recordatorios.length]);
 
   const handleGoToRecordatorio = () => {
     setWentToRecordatorio(true);
@@ -233,7 +230,7 @@ const HomeScreen = () => {
     role === ROLES.PRESTADOR && estadoPrestador === 'PENDIENTE';
   const isPrestadorActivo = role === ROLES.PRESTADOR && !isPrestadorPendiente;
   const isAdmin = role === ROLES.ADMIN;
-  const showRecordatoriosBadge = recordatorios.length > 0 && !recordatoriosVistos;
+  const showRecordatoriosBadge = recordatorios.length > lastSeenCount;
 
   // Categorías de servicios
   const serviceCategories = [
