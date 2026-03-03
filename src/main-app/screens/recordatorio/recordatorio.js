@@ -57,7 +57,7 @@ const Recordatorio = () => {
 
               {item.tieneFecha ? (
                 <Text style={styles.cardText}>
-                  {`Tenés una reserva realizada por `}
+                  {`Tenés una reserva con `}
                   <Text style={styles.bold}>{item.usuario}</Text>
                   {` para el `}
                   <Text style={styles.bold}>{item.fechaLabel}</Text>
