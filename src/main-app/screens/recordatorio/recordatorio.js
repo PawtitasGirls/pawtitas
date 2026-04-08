@@ -7,6 +7,8 @@ import MenuInferior, { useNavbarHeight } from '../../components/MenuInferior';
 import { styles } from './recordatorio.styles';
 import { useRecordatorios } from '../../hooks/useRecordatorios';
 
+//logica: si el 'estado' de la reserva es 'PAGADO' entonces mostrarla en recordatorios, cualquier otro 'estado' no mostrar.
+//las notificaciones estan hardcodeadas con un '3' en 'home.js', modificar para que muestre según la cantidad de tarjetas de reminders que haya.
 const Recordatorio = () => {
   const { recordatorios, loading } = useRecordatorios();
   const navigation = useNavigation();
